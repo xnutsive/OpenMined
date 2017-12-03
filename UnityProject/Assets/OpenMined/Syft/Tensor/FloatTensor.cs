@@ -422,9 +422,9 @@ namespace OpenMined.Syft.Tensor
 					this.Sub_(float.Parse( msgObj.tensorIndexParams[0]));
 					return this.id + "";
 				}
-				case "sum_dim":
+				case "sum":
 				{
-					Debug.LogFormat("sum_dim");
+					Debug.LogFormat("sum");
 					FloatTensor result = this.Sum(int.Parse( msgObj.tensorIndexParams[0]));
 					return ctrl.addTensor (result) + "";
 				}

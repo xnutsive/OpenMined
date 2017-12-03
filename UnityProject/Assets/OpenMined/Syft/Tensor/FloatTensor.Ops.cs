@@ -331,35 +331,93 @@ namespace OpenMined.Syft.Tensor
 
 		public FloatTensor Sum(int dim)
 		{
-			int[] result_shape = new int[shape.Length - 1];
-			int j = 0;
-			for (var i = 0; i < shape.Length; i++) {
-				if (i != dim) {
-					result_shape [j] = shape [i];
-					j += 1;
+
+			int n_dims = this.shape.Length;
+
+			if (dim == 1 && n_dims == 3) {
+
+				int[] final_shape = new int[2];
+				final_shape [0] = this.shape [0];
+				final_shape [1] = this.shape [2];
+
+				FloatTensor result = new FloatTensor (shape, this.shader, false);
+
+				if (dataOnGpu) {
+					// not implemented yet
+				} else {
+
+					for (int i = 0; i < shape [0]; i++) {
+						for (int j = 0; j < shape [2]; j++) {
+							for (int k = 0; k < dim; k++) {
+								result.data[i * shape[2] + j] += this.data[(i * shape[2] * dim) + (j * dim) + k];
+							}
+						}
+					}
+
 				}
-			}
 
-			var result = new FloatTensor(result_shape, this.shader, false);
-
-
-			if (dataOnGpu) {
-				// TODO: write GPU kernel for summing over a dimension
-//				result.Gpu ();
+				return result;
 
 			} else {
 
+				// make sure dim is passed in correctly
+				if (dim >= n_dims || dim < 0) {
+					throw new InvalidOperationException ("Dim does not exist.");
+				}
+
+				// for this method, to make the code easy, i'm going to view
+				// the tensor as one with 3 dimensions, that way the kernel
+				// can be built to only ever sum across the middle dimension
+				// as opposed to building a kernel for every size of matrix
+				// .... which would be quite.... silly..... quite silly indeed.
+
+				int[] temp_viewed_shape = new int[3];
+
+				// start by assuming that the size of the first and last dimensions are 1
+				temp_viewed_shape [0] = 1;
+				temp_viewed_shape [1] = this.shape [dim];
+				temp_viewed_shape [2] = 1;
 
 
-				// TODO: write parallel.for for summing over a dimension
-//				var nCpu = SystemInfo.processorCount;
-//				Parallel.For (0, nCpu, workerId => {
-//					var max = size * (workerId + 1) / nCpu;
-//					for (var i = size * workerId / nCpu; i < max; i++)
-//						result.Data [i] = value - Data [i];
-//				});
+				// if we're not summing over the first dimension
+				if (dim > 0) {
+					for (int i = 0; i < dim; i++) {
+						temp_viewed_shape [0] *= this.shape [i];
+					}
+				}
+				
+				// if we're not summing over the last dimension
+				if (dim < n_dims - 1) {
+					for (int i = dim + 1; i < n_dims; i++) {
+						temp_viewed_shape [1] *= this.shape [i];
+					}
+				}
+
+				// re-view self as a 3d tensor
+				FloatTensor viewed_self = this.View (temp_viewed_shape);
+
+				// sum over the first dimension - result is incorectly shaped (3 dims)
+				FloatTensor result = viewed_self.Sum (1);
+
+				int[] final_shape = new int[n_dims-1];
+
+				int j = 0;
+				for(int i=0; i<n_dims; i++) {
+					if(i != dim) {
+						final_shape[j] = shape[i];
+						j += 1;
+					}
+				}
+
+				// reshape result to correct dimensions
+				result.View_(final_shape);
+
+				return result;
 			}
-			return result;
+
+			throw new InvalidOperationException ("Something went wrong...");
+			return this;
+
 		}
 
         public FloatTensor Tanh()
@@ -522,14 +580,14 @@ namespace OpenMined.Syft.Tensor
 			if (new_size == size) {
 				shape = new_shape;
 
-
 				if (dataOnGpu) {
 					return new FloatTensor (dataBuffer, new_shape, size, this.shader);
 				} else {
 					// public FloatTensor(float[] _data, int[] _shape, ComputeShader _shader, bool _initOnGpu = false)
-					var result = new FloatTensor(data,new_shape,shader);
-					return result;
+					return new FloatTensor (data, new_shape, shader);;
 				}
+			} else {
+				throw new InvalidOperationException("New shape is not the same size as the old shape.");
 			}
 			return this;
 		
