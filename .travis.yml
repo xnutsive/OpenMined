@@ -22,5 +22,9 @@ install:
   - sudo /usr/local/bin/python2 scripts/install-unity.py 2017.2
 
 # run the script for unit tests and builds
-script:
-  - sh scripts/test.sh
+jobs:
+  include:
+    - stage: integration
+      script: sh scripts/integration.sh
+    - stage: unit
+      script: sh scripts/test.sh
