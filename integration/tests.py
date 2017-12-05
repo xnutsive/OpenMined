@@ -23,7 +23,7 @@ def test_abs():
 
 def test_abs_():
     data = np.array([-1., -2., 3., 4., 5., -6.])
-    expected = np.array([1., 2., 3., 4., 5., 6.])
+    expected = np.array([2., 2., 3., 4., 5., 6.])
     a = pytest.sc.FloatTensor(data)
     a.abs_()
 

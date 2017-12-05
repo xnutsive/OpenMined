@@ -28,11 +28,13 @@ echo "Running playing in background"
 -batchmode \
 &
 
-echo "Player began to run"
-echo "Running integration tests"
-
 # Player process ID so we can kill later
 PLAYER_PID=$!
 
+echo "Player began to run"
+echo "Running integration tests"
+
 # Run the tests themselves
 pytest integration/*
+
+kill -9 PLAYER_PID
