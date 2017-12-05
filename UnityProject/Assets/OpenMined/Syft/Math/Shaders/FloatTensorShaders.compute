@@ -372,6 +372,15 @@ void Negate (uint3 id: SV_DispatchThreadID) {
 	NegateResult[id.x] = -NegateData[id.x];
 }
 
+#pragma kernel Rsqrt
+
+RWStructuredBuffer<float> RsqrtData;
+RWStructuredBuffer<float> RsqrtResult;
+[numthreads(4,1,1)]
+void Rsqrt (uint3 id: SV_DispatchThreadID) {
+	RsqrtResult[id.x] = rsqrt(RsqrtData[id.x]);
+}
+
 #pragma kernel Sigmoid_
 
 RWStructuredBuffer<float> SigmoidData_;

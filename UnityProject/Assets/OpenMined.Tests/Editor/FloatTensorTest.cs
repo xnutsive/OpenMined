@@ -673,6 +673,23 @@ public void Neg()
 		Assert.AreEqual (result.Data[i], tensorNeg.Data[i]);
 	}
 }
+  
+[Test]
+public void Rsqrt()
+{
+    float[] data1 = { 1, 2, 3, 4 };
+    int[] shape1 = { 4 };
+    float[] correct = { 1, (float)0.7071068, (float)0.5773503, (float)0.5};
+    var tensor1 = new FloatTensor(data1, shape1);
+
+    var result = tensor1.Rsqrt();
+
+    for (int i = 2; i < correct.Length; i++)
+    {
+        Assert.AreEqual (Math.Round(correct[i], 3), Math.Round(result.Data[i], 3));
+    }
+
+}
 
 [Test]
 public void Sigmoid_()

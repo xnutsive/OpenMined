@@ -576,6 +576,23 @@ public FloatTensor Neg ()
 			});
 	return result;
 }
+  
+public FloatTensor Rsqrt ()
+{
+  if (dataOnGpu) {
+    return RsqrtGPU ();
+  }
+
+  var result = new FloatTensor(shape, this.shader, dataOnGpu);
+  var nCpu = SystemInfo.processorCount;
+  Parallel.For(0, nCpu, workerId => {
+    var max = data.Length * (workerId + 1) / nCpu;
+    for (var i = data.Length * workerId / nCpu; i < max; i++)
+      result.data[i] = 1/(float)Math.Sqrt(data[i]);
+  });
+  return result;
+}
+
 
 public FloatTensor Sign ()
 {
@@ -827,13 +844,14 @@ public FloatTensor Transpose (int dimension1, int dimension2)
 	return result;
 }
 
+
 public void Triu_ (int k)
 {
 	if (shape.Length != 2) {
 		throw new InvalidOperationException (String.Format ("Matrix multiply not possible: Num. Dimensions {0} != 2.", shape.Length));
 	}
 	if (dataOnGpu) {
-		UnityEngine.Debug.Log ("Entra");
+		//UnityEngine.Debug.Log ("Entra");
 		TriuGPU_ (k);
 		return;
 	}

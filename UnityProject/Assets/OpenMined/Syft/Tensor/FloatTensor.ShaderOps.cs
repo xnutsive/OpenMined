@@ -2,6 +2,7 @@
 
 namespace OpenMined.Syft.Tensor
 {
+
 public partial class FloatTensor
 {
 private ComputeShader shader;
@@ -76,6 +77,8 @@ private static int PowScalarKernel;
 private static int PowElemKernel;
 [SerializeField]
 private static int NegateKernel;
+[SerializeField]
+private static int RsqrtKernel;
 [SerializeField]
 private static int SigmoidKernel;
 [SerializeField]
@@ -152,6 +155,7 @@ public void initShaderKernels ()
 		PowScalarKernel = shader.FindKernel ("PowScalar");
 		PowElemKernel = shader.FindKernel ("PowElem");
 		NegateKernel = shader.FindKernel ("Negate");
+    RsqrtKernel = shader.FindKernel ("Rsqrt");
 		// PowKernel = shader.FindKernel ("Pow");
 		// PowKernel_ = shader.FindKernel ("Pow_");
 		SigmoidKernel = shader.FindKernel ("Sigmoid");
@@ -574,11 +578,11 @@ public FloatTensor PowScalarGPU (float value, FloatTensor result)
 		shader.SetBuffer (PowScalarKernel, "PowScalarData", dataBuffer);
 		shader.SetBuffer (PowScalarKernel, "PowScalarResult", result.dataBuffer);
 		shader.Dispatch (PowScalarKernel, this.size, 1, 1);
-
 		valBuffer.Release ();
 	}
 	return result;
 }
+
 
 public FloatTensor PowElemGPU (FloatTensor tensor, FloatTensor result)
 {
@@ -606,6 +610,20 @@ public FloatTensor NegateGPU ()
 	}
 
 	return this;
+}
+  
+public FloatTensor RsqrtGPU()
+{
+    if (dataOnGpu)
+    {
+var result = new FloatTensor(shape, this.shader, dataOnGpu);
+shader.SetBuffer(RsqrtKernel, "RsqrtData", dataBuffer);
+shader.SetBuffer(RsqrtKernel, "RsqrtResult", result.dataBuffer);
+shader.Dispatch(RsqrtKernel, 1, 1, 1);
+        return result;
+    }
+
+    return this;
 }
 
 // public FloatTensor PowGPU(float value, FloatTensor result)

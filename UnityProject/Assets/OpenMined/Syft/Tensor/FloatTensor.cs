@@ -486,6 +486,12 @@ public string ProcessMessage (Command msgObj, SyftController ctrl)
 		ctrl.addTensor (result);
 		return result.Id.ToString ();
 	}
+  case "rsqrt":
+  {
+     var result = Rsqrt();
+     ctrl.addTensor(result);
+     return result.Id.ToString();
+  }
 	case "print":
 	{
 		bool dataOriginallyOnGpu = dataOnGpu;
@@ -499,7 +505,6 @@ public string ProcessMessage (Command msgObj, SyftController ctrl)
 		if (dataOriginallyOnGpu) {
 			Gpu ();
 		}
-
 		return data;
 	}
 	case "sign":
@@ -626,7 +631,6 @@ public string ProcessMessage (Command msgObj, SyftController ctrl)
 
 	case "view_":
 	{
-
 		int[] new_dims = new int[msgObj.tensorIndexParams.Length];
 		for (int i = 0; i < msgObj.tensorIndexParams.Length; i++) {
 			new_dims [i] = int.Parse (msgObj.tensorIndexParams [i]);
