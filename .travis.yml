@@ -1,6 +1,3 @@
-# do not install anything extra onto the image
-language: generic
-
 # use a Mac OSX image
 os: osx
 # only run builds on pushes to the master branch
@@ -26,6 +23,8 @@ install:
 jobs:
   include:
     - stage: integration
+      language: python
       script: sh scripts/integration.sh
     - stage: unit
       script: sh scripts/test.sh
+      language: generic
