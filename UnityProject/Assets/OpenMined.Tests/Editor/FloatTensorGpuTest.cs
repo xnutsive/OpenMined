@@ -144,5 +144,153 @@ public void AddScalar_()
 	AssertEqualTensorsData(expectedTensor, tensor1);
 }
 
+[Test]
+public void Add()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	int[] shape1 = {2, 5};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
+	int[] shape2 = {2, 5};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	float[] data3 = { 4, 4, 9, 13, 15, 7, 11, 16, 14, 17 };
+	int[] shape3 = {2, 5};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	expectedTensor.Gpu(shader);
+
+	var tensorSum = tensor1.Add (tensor2);
+
+	AssertEqualTensorsData(expectedTensor, tensorSum);
+}
+
+[Test]
+public void AddUnequalSizes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Add(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalDimensions()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Add(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalShapes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor1.Gpu(shader);
+
+	Assert.That(() => tensor1.Add(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void Add_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	int[] shape1 = {2, 5};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
+	int[] shape2 = {2, 5};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	float[] data3 = { 4, 4, 9, 13, 15, 7, 11, 16, 14, 17 };
+	int[] shape3 = {2, 5};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	expectedTensor.Gpu(shader);
+
+	tensor1.Add (tensor2, inline: true);
+
+	AssertEqualTensorsData(expectedTensor, tensor1);
+}
+
+[Test]
+public void AddUnequalSizes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Add(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalDimensions_()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Add(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalShapes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Add(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+
+
 }
 }
