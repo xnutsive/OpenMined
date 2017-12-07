@@ -692,7 +692,6 @@ public void Rsqrt()
 	{
 		Assert.AreEqual (Math.Round(correct[i], 3), Math.Round(result.Data[i], 3));
 	}
-
 }
 
 [Test]
@@ -739,6 +738,7 @@ public void Sigmoid()
 		Assert.AreEqual(sum.Data[i], 1.0f);
 	}
 }
+
 [Test]
 public void Sign()
 {
@@ -748,13 +748,13 @@ public void Sign()
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-	var tensorSign = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
 
 	var result1 = tensor1.Sign();
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (result1.Data[i], tensorSign.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], result1.Data[i]);
 	}
 }
 
@@ -767,13 +767,13 @@ public void Sign_()
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-	var tensorSign_ = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
 
 	tensor1.Sign (inline: true);
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (tensor1.Data[i], tensorSign_.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
 	}
 }
 

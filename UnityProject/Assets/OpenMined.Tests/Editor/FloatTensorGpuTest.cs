@@ -341,6 +341,40 @@ public void Neg()
 	AssertEqualTensorsData(expectedTensor, result);
 }
 
+[Test]
+public void Sign()
+{
+	float[] data1 = {float.MinValue, -100.0f, -1.0f, -0.0001f, -0.0f, +0.0f, 0.0001f, 1.0f, 10.0f, float.MaxValue};
+	int[] shape1 = { 1, 10 };
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
+	expectedTensor.Gpu(shader);
+	var result1 = tensor1.Sign();
+
+	AssertEqualTensorsData(expectedTensor, result1);
+}
+
+[Test]
+public void Sign_()
+{
+	float[] data1 = {float.MinValue, -100.0f, -1.0f, -0.0001f, -0.0f, +0.0f, 0.0001f, 1.0f, 10.0f, float.MaxValue};
+	int[] shape1 = { 1, 10 };
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
+	expectedTensor.Gpu(shader);
+
+	tensor1.Sign (inline: true);
+
+	AssertEqualTensorsData(expectedTensor, tensor1);
+}
 
 }
 }
