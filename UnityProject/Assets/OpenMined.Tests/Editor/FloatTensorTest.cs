@@ -668,13 +668,13 @@ public void Neg()
 
 	float[] data2 = { 1, 0, -1, -float.MaxValue, -float.MinValue };
 	int[] shape2 = { 5 };
-	var tensorNeg = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
 	var result = tensor1.Neg ();
 
-	for (int i = 0; i < tensor1.Size; i++)
+	for (int i = 0; i < result.Size; i++)
 	{
-		Assert.AreEqual (result.Data[i], tensorNeg.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], result.Data[i]);
 	}
 }
 

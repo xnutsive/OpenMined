@@ -324,6 +324,22 @@ public void Abs_()
 	AssertEqualTensorsData(expectedTensor, tensor1);
 }
 
+[Test]
+public void Neg()
+{
+	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+	float[] data2 = { 1, 0, -1, -float.MaxValue, -float.MinValue };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	var result = tensor1.Neg ();
+
+	AssertEqualTensorsData(expectedTensor, result);
+}
 
 
 }

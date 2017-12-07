@@ -614,10 +614,10 @@ public FloatTensor PowElemGPU (FloatTensor tensor, FloatTensor result)
 public FloatTensor NegateGPU ()
 {
 	if (dataOnGpu) {
-		var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
+		var result = this.emptyTensorCopy();
 		shader.SetBuffer (NegateKernel, "NegateData", dataBuffer);
 		shader.SetBuffer (NegateKernel, "NegateResult", result.dataBuffer);
-		shader.Dispatch (NegateKernel, 1, 1, 1);
+		shader.Dispatch (NegateKernel, this.size, 1, 1);
 		return result;
 	}
 
