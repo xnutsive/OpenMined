@@ -1,5 +1,4 @@
 # use a Mac OSX image
-os: osx
 # only run builds on pushes to the master branch
 branches:
   only:
@@ -17,14 +16,20 @@ install:
   - brew upgrade openssl
   - brew link --force openssl
   - sudo /usr/local/bin/python2 scripts/install-unity.py 2017.2
-  - pip install -U pytest
 
 # run the script for unit tests and builds
 jobs:
   include:
     - stage: integration
-      language: python
+      language: generic
       script: sh scripts/integration.sh
+      os: osx
+      before_install:
+        - brew update
+        - brew install python3
+        - virtualenv env -p python3
+        - source env/bin/activate
     - stage: unit
       script: sh scripts/test.sh
       language: generic
+      os: osx
