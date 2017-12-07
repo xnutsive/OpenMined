@@ -786,13 +786,13 @@ public void Zero_()
 
 	float[] data2 = { 0, 0, 0, 0, 0 };
 	int[] shape2 = { 5 };
-	var tensorZero = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
 	tensor1.Zero_ ();
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (tensor1.Data[i], tensorZero.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
 	}
 }
 

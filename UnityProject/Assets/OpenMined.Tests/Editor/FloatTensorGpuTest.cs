@@ -376,5 +376,23 @@ public void Sign_()
 	AssertEqualTensorsData(expectedTensor, tensor1);
 }
 
+[Test]
+public void Zero_()
+{
+	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 0, 0, 0, 0, 0 };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	tensor1.Zero_ ();
+
+	AssertEqualTensorsData(expectedTensor, tensor1);
+}
+
 }
 }
