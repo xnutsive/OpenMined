@@ -337,7 +337,6 @@ public FloatTensor CosGPU ()
 
 public void CosGPU_ ()
 {
-	UnityEngine.Debug.Log("ENTRA");
 	shader.SetBuffer (CosKernel_, "CosData_", dataBuffer);
 	shader.Dispatch (CosKernel_, this.size, 1, 1);
 }
