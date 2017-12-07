@@ -88,5 +88,24 @@ public void Cos()
 
 	AssertEqualTensorsData(expectedCosTensor, actualCosTensor);
 }
+
+[Test]
+public void Cos_()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor.Gpu(shader);
+	tensor.Cos (inline: true);
+
+	float[] data2 = {  0.92106099f,  0.87758256f,  0.95533649f,  0.99500417f };
+	int[] shape2 = { 4 };
+	var expectedCosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedCosTensor.Gpu(shader);
+
+	AssertEqualTensorsData(tensor, expectedCosTensor);
+}
+
+
 }
 }

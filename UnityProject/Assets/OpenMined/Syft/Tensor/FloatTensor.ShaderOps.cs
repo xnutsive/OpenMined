@@ -208,7 +208,7 @@ public void AbsGPU_ ()
 
 public FloatTensor AcosGPU ()
 {
-	var result = new FloatTensor (ctrl, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+	var result = new FloatTensor (ctrl, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
 	shader.SetBuffer (AcosKernel, "AcosData", dataBuffer);
 	shader.SetBuffer (AcosKernel, "AcosResult", result.DataBuffer);
 	shader.Dispatch (AcosKernel, this.size, 1, 1);
@@ -337,8 +337,9 @@ public FloatTensor CosGPU ()
 
 public void CosGPU_ ()
 {
+	UnityEngine.Debug.Log("ENTRA");
 	shader.SetBuffer (CosKernel_, "CosData_", dataBuffer);
-	shader.Dispatch (CosKernel, this.size, 1, 1);
+	shader.Dispatch (CosKernel_, this.size, 1, 1);
 }
 
 public FloatTensor CoshGPU ()
@@ -614,7 +615,7 @@ public FloatTensor PowElemGPU (FloatTensor tensor, FloatTensor result)
 public FloatTensor NegateGPU ()
 {
 	if (dataOnGpu) {
-		var result = new FloatTensor (_ctrl: null, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+		var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
 		shader.SetBuffer (NegateKernel, "NegateData", dataBuffer);
 		shader.SetBuffer (NegateKernel, "NegateResult", result.dataBuffer);
 		shader.Dispatch (NegateKernel, 1, 1, 1);
@@ -628,7 +629,7 @@ public FloatTensor RsqrtGPU()
 {
 	if (dataOnGpu)
 	{
-		var result = new FloatTensor (_ctrl: null, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+		var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
 		shader.SetBuffer(RsqrtKernel, "RsqrtData", dataBuffer);
 		shader.SetBuffer(RsqrtKernel, "RsqrtResult", result.dataBuffer);
 		shader.Dispatch(RsqrtKernel, 1, 1, 1);
@@ -674,7 +675,7 @@ private FloatTensor SqrtGPU()
 {
 	if (!dataOnGpu) return this;
 
-	var result = new FloatTensor (_ctrl: null, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+	var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
 	shader.SetBuffer(SqrtKernel, "SqrtData", dataBuffer);
 	shader.SetBuffer(SqrtKernel, "SqrtResult", result.dataBuffer);
 	shader.Dispatch(SqrtKernel, size, 1, 1);
@@ -820,7 +821,7 @@ public void TanGPU_ ()
 
 public FloatTensor TanhGPU ()
 {
-	var result = new FloatTensor (_ctrl: ctrl, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+	var result = new FloatTensor (_ctrl: ctrl, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
 	shader.SetBuffer (TanhKernel, "TanhData", dataBuffer);
 	shader.SetBuffer (TanhKernel, "TanhResult", result.DataBuffer);
 	shader.Dispatch (TanhKernel, this.size, 1, 1);
@@ -862,7 +863,7 @@ public void TriuGPU_ (int k)
 
 public FloatTensor TruncGPU ()
 {
-	var result = new FloatTensor (_ctrl: ctrl, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+	var result = new FloatTensor (_ctrl: ctrl, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
 	shader.SetBuffer (TruncKernel, "TruncData", dataBuffer);
 	shader.SetBuffer (TruncKernel, "TruncResult", result.DataBuffer);
 	shader.Dispatch (TruncKernel, this.size, 1, 1);
