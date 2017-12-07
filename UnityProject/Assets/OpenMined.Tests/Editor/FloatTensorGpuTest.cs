@@ -70,7 +70,23 @@ public void Copy()
 	AssertEqualTensorsData(tensor, copy);
 }
 
-// TODO: AddMatrixMultiplyTests when implemented on CPU
-// TODO: MultiplyDerivative when implemented on CPU
+
+[Test]
+public void Cos()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor.Gpu(shader);
+
+	float[] data2 = { 0.92106099f,  0.87758256f,  0.95533649f,  0.99500417f };
+	int[] shape2 = { 4 };
+	var expectedCosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedCosTensor.Gpu(shader);
+	var actualCosTensor = tensor.Cos();
+	actualCosTensor.Gpu(shader);
+
+	AssertEqualTensorsData(expectedCosTensor, actualCosTensor);
+}
 }
 }
