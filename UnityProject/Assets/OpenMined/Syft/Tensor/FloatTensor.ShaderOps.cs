@@ -850,7 +850,7 @@ public void TriuGPU_ (int k)
 
 public FloatTensor TruncGPU ()
 {
-	var result = new FloatTensor (_ctrl: ctrl, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
+	var result = this.emptyTensorCopy();
 	shader.SetBuffer (TruncKernel, "TruncData", dataBuffer);
 	shader.SetBuffer (TruncKernel, "TruncResult", result.DataBuffer);
 	shader.Dispatch (TruncKernel, this.size, 1, 1);

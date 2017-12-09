@@ -1081,5 +1081,24 @@ public void AddMatrixVectorProductTest()
 	AssertEqualTensorsData(expectedVector, baseVector);
 }
 
+[Test]
+public void Trunc()
+{
+	float[] data = { -0.323232f, 0.323893f, 0.99999f, 1.2323389f };
+	int[] shape = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+	tensor.Gpu(shader);
+
+	float[] truncatedData = { -0f, 0f, 0f, 1f };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: truncatedData, _shape: shape);
+	expectedTensor.Gpu(shader);
+
+	var truncatedTensor = tensor.Trunc();
+
+	AssertEqualTensorsData(expectedTensor, truncatedTensor);
+}
+
+
+
 }
 }

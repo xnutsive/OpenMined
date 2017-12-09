@@ -1729,6 +1729,7 @@ public void Trunc()
 		Assert.AreEqual (expectedTensor.Data[i], truncatedTensor.Data[i]);
 	}
 }
+
 public void Triu_()
 {
 	int k = 0;
