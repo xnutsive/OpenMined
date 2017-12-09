@@ -250,13 +250,13 @@ public void Cosh()
 {
 	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {  1.08107237f,  1.12762597f,  1.04533851f,  1.00500417f };
 	int[] shape2 = { 4 };
 	var expectedCoshTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualCoshTensor = tensor.Cosh();
+	var actualCoshTensor = tensor1.Cosh();
 
 	for (int i = 2; i < actualCoshTensor.Size; i++)
 	{
@@ -269,19 +269,20 @@ public void Cosh_()
 {
 	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {  1.08107237f,  1.12762597f,  1.04533851f,  1.00500417f };
 	int[] shape2 = { 4 };
 	var expectedCoshTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	tensor.Cosh (inline: true);
+	tensor1.Cosh (inline: true);
 
-	for (int i = 2; i < tensor.Size; i++)
+	for (int i = 2; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedCoshTensor.Data[i], tensor.Data[i]);
+		Assert.AreEqual (expectedCoshTensor.Data[i], tensor1.Data[i]);
 	}
 }
+
 [Test]
 public void Create1DTensor()
 {

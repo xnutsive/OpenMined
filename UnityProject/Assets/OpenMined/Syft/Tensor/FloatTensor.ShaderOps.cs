@@ -353,7 +353,7 @@ public FloatTensor CoshGPU ()
 public void CoshGPU_ ()
 {
 	shader.SetBuffer (CoshKernel_, "CoshData_", dataBuffer);
-	shader.Dispatch (CoshKernel, this.size, 1, 1);
+	shader.Dispatch (CoshKernel_, this.size, 1, 1);
 }
 
 public void DivScalarGPU_ (float value)

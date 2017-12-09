@@ -1340,5 +1340,41 @@ public void Sin_()
 	AssertApproximatelyEqualTensorsData(expectedSinTensor, tensor1);
 }
 
+[Test]
+public void Cosh()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {  1.08107237f,  1.12762597f,  1.04533851f,  1.00500417f };
+	int[] shape2 = { 4 };
+	var expectedCoshTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedCoshTensor.Gpu(shader);
+
+	var actualCoshTensor = tensor1.Cosh();
+
+	AssertApproximatelyEqualTensorsData(expectedCoshTensor, actualCoshTensor);
+}
+
+[Test]
+public void Cosh_()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {  1.08107237f,  1.12762597f,  1.04533851f,  1.00500417f };
+	int[] shape2 = { 4 };
+	var expectedCoshTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedCoshTensor.Gpu(shader);
+
+	tensor1.Cosh (inline: true);
+
+	AssertApproximatelyEqualTensorsData(expectedCoshTensor, tensor1);
+}
+
 }
 }
