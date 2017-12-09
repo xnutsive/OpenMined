@@ -950,5 +950,43 @@ public void SubtractElementwiseUnequalShapes_()
 	            Throws.TypeOf<InvalidOperationException>());
 }
 
+[Test]
+public void SubtractScalar()
+{
+	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = {3, 2};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
+	int[] shape2 = {3, 2};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	float scalar = 100;
+	var tensor3 = tensor1.Sub (scalar);
+
+	AssertEqualTensorsData(expectedTensor, tensor3);
+}
+
+[Test]
+public void SubtractScalar_()
+{
+	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = {3, 2};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
+	int[] shape2 = {3, 2};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	float scalar = 100;
+	tensor1.Sub (scalar, inline: true);
+
+	AssertEqualTensorsData(expectedTensor, tensor1);
+}
+
 }
 }

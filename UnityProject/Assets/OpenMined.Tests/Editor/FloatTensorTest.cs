@@ -1391,26 +1391,29 @@ public void SubtractScalar()
 	int[] shape1 = {3, 2};
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
+	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
+	int[] shape2 = {3, 2};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
 	float scalar = 100;
+	var tensor3 = tensor1.Sub (scalar);
 
-	var tensorSub = tensor1.Sub (scalar);
-
-	for (int i = 0; i < tensorSub.Size; i++)
+	for (int i = 0; i < tensor3.Size; i++)
 	{
-		Assert.AreEqual (tensor1.Data [i] - scalar, tensorSub.Data [i]);
+		Assert.AreEqual (expectedTensor.Data [i], tensor3.Data [i]);
 	}
 }
 
 [Test]
 public void SubtractScalar_()
 {
-	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
 	int[] shape1 = {5, 1};
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	float[] data2 = { -101, -100, -99, float.MaxValue-100, float.MinValue-100 };
+	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
 	int[] shape2 = {5, 1};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
 	float scalar = 100;
 
@@ -1418,7 +1421,7 @@ public void SubtractScalar_()
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (tensor1.Data[i], tensor2.Data [i]);
+		Assert.AreEqual (expectedTensor.Data [i], tensor1.Data [i]);
 	}
 }
 
