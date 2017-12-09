@@ -58,9 +58,13 @@ private static int DivScalarKernel;
 [SerializeField]
 private static int DivElemKernel;
 [SerializeField]
+private static int ExpKernel;
+[SerializeField]
 private static int FloorKernel_;
 [SerializeField]
 private static int FloorKernel;
+[SerializeField]
+private static int RoundKernel;
 [SerializeField]
 private static int MulScalarKernel_;
 [SerializeField]
@@ -110,6 +114,10 @@ private static int TanKernel_;
 [SerializeField]
 private static int TanhKernel;
 [SerializeField]
+private static int DiagonalKernel;
+[SerializeField]
+private static int Reduce1DSumKernel;
+[SerializeField]
 private static int SinhKernel;
 [SerializeField]
 private static int SinhKernel_;
@@ -149,8 +157,10 @@ public void initShaderKernels ()
 		DivElemKernel_ = shader.FindKernel ("DivElem_");
 		DivScalarKernel = shader.FindKernel ("DivScalar");
 		DivElemKernel = shader.FindKernel ("DivElem");
+		ExpKernel = shader.FindKernel ("Exp");
 		FloorKernel_ = shader.FindKernel ("Floor_");
 		FloorKernel = shader.FindKernel ("Floor");
+		RoundKernel = shader.FindKernel ("Round");
 		MulScalarKernel_ = shader.FindKernel ("MulScalar_");
 		MulElemKernel_ = shader.FindKernel ("MulElem_");
 		MulScalarKernel = shader.FindKernel ("MulScalar");
@@ -177,13 +187,14 @@ public void initShaderKernels ()
 		TanKernel = shader.FindKernel ("Tan");
 		TanKernel_ = shader.FindKernel ("Tan_");
 		TanhKernel = shader.FindKernel ("Tanh");
+		DiagonalKernel = shader.FindKernel ("Diagonal");
+		Reduce1DSumKernel = shader.FindKernel ("Reduce1DSum");
 		SinhKernel = shader.FindKernel ("Sinh");
 		SinhKernel_ = shader.FindKernel ("Sinh_");
 		TriuKernel_ = shader.FindKernel ("Triu_");
 		TruncKernel = shader.FindKernel ("Trunc");
 		ZeroKernel_ = shader.FindKernel ("Zero_");
 	}
-
 }
 
 public FloatTensor AbsGPU (FloatTensor result)
@@ -458,6 +469,18 @@ public void CeilGPU_()
 	shader.Dispatch(CeilKernel_, this.Size, 1, 1);
 }
 
+private FloatTensor ExpGPU()
+{
+	if (!dataOnGpu) return this;
+
+	var result = new FloatTensor (_ctrl: null, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+	shader.SetBuffer(SqrtKernel, "ExptData", dataBuffer);
+	shader.SetBuffer(SqrtKernel, "ExpResult", result.dataBuffer);
+	shader.Dispatch(SqrtKernel, size, 1, 1);
+
+	return result;
+}
+
 public void FloorGPU_()
 {
 	Debug.LogFormat("<color=blue>FloatTensor.floor_ dataOnGpu: {0}</color>", dataOnGpu);
@@ -476,6 +499,18 @@ public FloatTensor FloorGPU(FloatTensor result)
 		shader.SetBuffer(FloorKernel, "FloorResult", result.dataBuffer);
 		shader.Dispatch(FloorKernel, this.Size, 1, 1);
 	}
+	return result;
+}
+
+public FloatTensor RoundGPU()
+{
+	if (!dataOnGpu) return this;
+
+	var result = new FloatTensor (_ctrl: null, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+	shader.SetBuffer(RoundKernel, "RoundData", dataBuffer);
+	shader.SetBuffer(RoundKernel, "RoundResult", result.dataBuffer);
+	shader.Dispatch(RoundKernel, this.Size, 1, 1);
+	
 	return result;
 }
 
@@ -770,7 +805,6 @@ public FloatTensor SubScalarGPU (float value, FloatTensor result)
 
 public FloatTensor SubElemGPU (FloatTensor tensor, FloatTensor result)
 {
-
 	Debug.LogFormat ("<color=blue>FloatTensor.SubElemGPU dataOnGpu: {0}</color>", dataOnGpu);
 
 	if (dataOnGpu) {
@@ -813,6 +847,47 @@ public FloatTensor TanhGPU ()
 	shader.SetBuffer (TanhKernel, "TanhResult", result.DataBuffer);
 	shader.Dispatch (TanhKernel, this.size, 1, 1);
 	return result;
+}
+
+public float TraceGPU ()
+{
+    // Note: only works for square matrices (as PyTorch does).
+    // Overview:
+    // 1. copy diagonal using DiagonalKernel
+    // 2. reduce (+) per group using Reduce1DSumKernel
+    // 3. sum over groups on cpu
+
+    int numcolumns = this.shape[1];
+    int groupsize = 8; // should match kernel group size (hardcoded)
+    int numgroups = (int)System.Math.Ceiling((double)numcolumns / groupsize);
+
+    // 1. copy diagonal to diagonalBuffer
+	var diagonalBuffer = new ComputeBuffer(1, numcolumns*sizeof(float));
+    var numcolumnsBuffer = SendIntToGpu (DiagonalKernel, numcolumns, "DiagonalNumcolumns");
+	shader.SetBuffer (DiagonalKernel, "DiagonalData", dataBuffer);
+	shader.SetBuffer (DiagonalKernel, "DiagonalResult", diagonalBuffer);
+	shader.Dispatch (DiagonalKernel, numgroups, 1, 1);
+
+    // 2. standard Reduce1D w/ op = +
+    var resultPerGroupBuffer = new ComputeBuffer (1, numgroups*sizeof(float)); // will hold each group's sum
+    shader.SetBuffer (Reduce1DSumKernel, "Reduce1DSumData", diagonalBuffer);
+    shader.SetBuffer (Reduce1DSumKernel, "Reduce1DSumResult", resultPerGroupBuffer);
+    shader.Dispatch  (Reduce1DSumKernel, numgroups, 1, 1);
+
+	// 3. copy to cpu and sum over groups -> trace
+	float[] resultPerGroup = new float[numgroups];
+	resultPerGroupBuffer.GetData(resultPerGroup);
+
+	float sum = 0;
+	foreach (var item in resultPerGroup) {
+		sum += item;
+	}
+
+    resultPerGroupBuffer.Release();
+	numcolumnsBuffer.Release();
+	diagonalBuffer.Release();
+
+	return sum;
 }
 
 public FloatTensor SinhGPU ()

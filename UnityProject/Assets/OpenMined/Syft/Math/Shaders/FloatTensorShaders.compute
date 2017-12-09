@@ -230,6 +230,21 @@ void Cosh_ (uint3 id: SV_DispatchThreadID) {
     CoshData_[id.x] = cosh(CoshData_[id.x]);
 }
 
+#pragma kernel Diagonal
+
+RWStructuredBuffer<int> DiagonalNumcolumns;
+RWStructuredBuffer<float> DiagonalData;
+RWStructuredBuffer<float> DiagonalResult;
+
+[numthreads(8,1,1)]
+void Diagonal (uint3 id: SV_DispatchThreadID) {
+    int columns = DiagonalNumcolumns[0];
+
+    int indexIn  = id.x * (columns + 1);  // access diagonal elements
+    int indexOut = id.x;
+    DiagonalResult[indexOut] = DiagonalData[indexIn];
+}
+
 #pragma kernel DivScalar_
 
 RWStructuredBuffer<float> DivScalarData_;
@@ -272,6 +287,16 @@ void DivElem (uint3 id: SV_DispatchThreadID) {
 	DivElemDataResult[id.x] = DivElemDataA[id.x] / DivElemDataB[id.x];
 }
 
+#pragma kernel Exp
+
+RWStructuredBuffer<float> ExpData;
+RWStructuredBuffer<float> ExpResult;
+
+[numthreads(4,1,1)]
+void Exp (uint3 id: SV_DispatchThreadID) {
+	ExpResult[id.x] = exp(ExpData[id.x]);
+}
+
 #pragma kernel Floor_
 
 RWStructuredBuffer<float> FloorData_;
@@ -289,6 +314,16 @@ RWStructuredBuffer<float> FloorResult;
 [numthreads(4,1,1)]
 void Floor (uint3 id: SV_DispatchThreadID) {
 		FloorResult[id.x] = floor(FloorData[id.x]);
+}
+
+#pragma kernel Round
+
+RWStructuredBuffer<float> RoundData;
+RWStructuredBuffer<float> RoundResult;
+
+[numthreads(4,1,1)]
+void Round (uint3 id: SV_DispatchThreadID) {
+	RoundResult[id.x] = round(RoundData[id.x]);
 }
 
 #pragma kernel MulScalar_
@@ -384,6 +419,33 @@ void Negate (uint3 id: SV_DispatchThreadID) {
 	NegateResult[id.x] = -NegateData[id.x];
 }
 
+#pragma kernel Reduce1DSum
+#define REDUCE1D_NUMTHREADS 8
+
+RWStructuredBuffer<float> Reduce1DSumData;
+RWStructuredBuffer<float> Reduce1DSumResult;
+
+groupshared float sharedMem[REDUCE1D_NUMTHREADS * 1 * 1];
+
+[numthreads(REDUCE1D_NUMTHREADS, 1, 1)]
+void Reduce1DSum (uint3 Gid: SV_GroupID, uint3 id: SV_DispatchThreadID, uint GI: SV_GroupIndex) {
+    sharedMem[GI] = Reduce1DSumData[id.x];
+
+    [unroll(REDUCE1D_NUMTHREADS / 2)]
+    for (uint s = REDUCE1D_NUMTHREADS / 2; s > 0; s >>= 1)
+    {
+        if (GI < s)
+            sharedMem[GI] += sharedMem[GI + s];
+        GroupMemoryBarrierWithGroupSync();
+    }
+
+    // Have the 1st thread write out to the output
+    if (GI == 0)
+    {
+        Reduce1DSumResult[Gid.x] = sharedMem[0];
+    }
+}
+
 #pragma kernel Rsqrt
 
 RWStructuredBuffer<float> RsqrtData;
@@ -399,7 +461,12 @@ RWStructuredBuffer<float> SigmoidData_;
 
 [numthreads(1,1,1)]
 void Sigmoid_ (uint3 id : SV_DispatchThreadID) {
-	SigmoidData_[id.x] = 1 / (1 + exp(-SigmoidData_[id.x]));
+	if (SigmoidData_[id.x] >= 0) {
+		SigmoidData_[id.x] = 1 / (1 + exp(-SigmoidData_[id.x]));
+	} else {
+		float tmp = exp(SigmoidData_[id.x]);
+		SigmoidData_[id.x] = tmp / (1 + tmp);
+	}
 }
 
 #pragma kernel Sigmoid
@@ -409,7 +476,12 @@ RWStructuredBuffer<float> SigmoidResult;
 
 [numthreads(1,1,1)]
 void Sigmoid (uint3 id : SV_DispatchThreadID) {
-	SigmoidResult[id.x] = 1 / (1 + exp(-SigmoidData[id.x]));
+	if (SigmoidData_[id.x] >= 0) {
+		SigmoidResult[id.x] = 1 / (1 + exp(-SigmoidData_[id.x]));
+	} else {
+		float tmp = exp(SigmoidData_[id.x]);
+		SigmoidResult[id.x] = tmp / (1 + tmp);
+	}
 }
 
 #pragma kernel Sign
