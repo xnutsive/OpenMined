@@ -827,7 +827,7 @@ public FloatTensor SinhGPU ()
 public void SinhGPU_ ()
 {
 	shader.SetBuffer (SinhKernel_, "SinhData_", dataBuffer);
-	shader.Dispatch (SinhKernel, this.size, 1, 1);
+	shader.Dispatch (SinhKernel_, this.size, 1, 1);
 }
 
 public void TriuGPU_ (int k)

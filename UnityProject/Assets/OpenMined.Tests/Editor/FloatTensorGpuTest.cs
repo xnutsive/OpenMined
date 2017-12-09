@@ -1534,5 +1534,41 @@ public void Sqrt()
 	AssertApproximatelyEqualTensorsData(expectedTensor, actualTensor);
 }
 
+[Test]
+public void Sinh()
+{
+	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
+	int[] shape2 = { 4 };
+	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedSinhTensor.Gpu(shader);
+
+	var actualSinhTensor = tensor1.Sinh();
+
+	AssertApproximatelyEqualTensorsData(expectedSinhTensor, actualSinhTensor);
+}
+
+[Test]
+public void Sinh_()
+{
+	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
+	int[] shape2 = { 4 };
+	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedSinhTensor.Gpu(shader);
+
+	tensor1.Sinh(inline: true);
+
+	AssertApproximatelyEqualTensorsData(expectedSinhTensor, tensor1);
+}
+
 }
 }

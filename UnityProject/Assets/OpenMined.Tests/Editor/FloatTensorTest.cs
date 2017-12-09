@@ -1644,7 +1644,7 @@ public void Sqrt()
 
 	var actualTensor = tensor1.Sqrt();
 
-	for (int i = 20 i < expectedTensor.Size; i++)
+	for (int i = 0; i < expectedTensor.Size; i++)
 	{
 		Assert.AreEqual (Math.Round(expectedTensor.Data[i], 3), Math.Round(actualTensor.Data[i], 3));
 	}
@@ -1655,15 +1655,15 @@ public void Sinh()
 {
 	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
 	int[] shape2 = { 4 };
 	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualSinhTensor = tensor.Sinh();
+	var actualSinhTensor = tensor1.Sinh();
 
-	for (int i = 2; i < actualSinhTensor.Size; i++)
+	for (int i = 0; i < actualSinhTensor.Size; i++)
 	{
 		var rounded = Decimal.Round((Decimal)actualSinhTensor.Data[i], 5);
 		Assert.AreEqual (expectedSinhTensor.Data[i], rounded);
@@ -1675,17 +1675,17 @@ public void Sinh_()
 {
 	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
 	int[] shape2 = { 4 };
 	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	tensor.Sinh (inline: true);
+	tensor1.Sinh (inline: true);
 
-	for (int i = 2; i < tensor.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
-		var rounded = Decimal.Round((Decimal)tensor.Data[i], 5);
+		var rounded = Decimal.Round((Decimal)tensor1.Data[i], 5);
 		Assert.AreEqual (expectedSinhTensor.Data[i], rounded);
 	}
 }
