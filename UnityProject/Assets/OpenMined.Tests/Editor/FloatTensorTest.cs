@@ -1259,12 +1259,15 @@ public void SubtractElementwise()
 	int[] shape2 = {2, 4};
 	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var tensor = tensor1.Sub (tensor2);
+	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
+	int[] shape3 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
 
-	for (int i = 0; i < tensor.Size; i++)
+	var result = tensor1.Sub (tensor2);
+
+	for (int i = 0; i < result.Size; i++)
 	{
-		float current = tensor1.Data [i] - tensor2.Data [i];
-		Assert.AreEqual (current, tensor.Data [i]);
+		Assert.AreEqual (expectedTensor.Data [i], result.Data [i]);
 	}
 }
 
@@ -1324,15 +1327,15 @@ public void SubtractElementwise_()
 	int[] shape2 = {2, 4};
 	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.MaxValue - float.MinValue };
+	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
 	int[] shape3 = {2, 4};
-	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
 
 	tensor1.Sub (tensor2, inline: true);
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (tensor3.Data [i], tensor1.Data [i]);
+		Assert.AreEqual (expectedTensor.Data [i], tensor1.Data [i]);
 	}
 }
 

@@ -802,7 +802,153 @@ public void Floor_()
 	AssertEqualTensorsData(expectedTensor, tensor1);
 }
 
+[Test]
+public void SubtractElementwise()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
 
+	float[] data2 = { float.MaxValue, 10, 1.5f, 0, -1.5f, -10, -20, float.MinValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
+	int[] shape3 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	expectedTensor.Gpu(shader);
+
+	var result = tensor1.Sub (tensor2);
+
+	AssertEqualTensorsData(expectedTensor, result);
+}
+
+[Test]
+public void SubtractElementwiseUnequalSizes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Sub(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalDimensions()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Sub(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalShapes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Sub(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwise_()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { float.MaxValue, 10, 1.5f, 0, -1.5f, -10, -20, float.MinValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
+	int[] shape3 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	expectedTensor.Gpu(shader);
+
+	tensor1.Sub (tensor2, inline: true);
+
+	AssertEqualTensorsData(expectedTensor, tensor1);
+}
+
+[Test]
+public void SubtractElementwiseUnequalSizes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Sub(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalDimensions_()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Sub(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalShapes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Sub(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
 
 }
 }
