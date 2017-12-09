@@ -419,22 +419,15 @@ public FloatTensor DivElemGPU (FloatTensor tensor, FloatTensor result)
 
 public void AddMatrixMultiplyGPU (FloatTensor tensor_1, FloatTensor tensor_2)
 {
-	//Debug.LogFormat("<color=blue>FloatTensor.add_matrix_multiply dataOnGpu: {0}</color>", dataOnGpu);
-	shader.SetBuffer (AddMMKernel_, "AddmmDataA", dataBuffer);
-	shader.SetBuffer (AddMMKernel_, "AddmmDataB", tensor_1.DataBuffer);                 //d
-	shader.SetBuffer (AddMMKernel_, "AddmmDataC", tensor_2.DataBuffer);
+	Debug.LogFormat("<color=blue>FloatTensor.add_matrix_multiply dataOnGpu: {0}</color>", dataOnGpu);
+
+	// Tensor 1 (M x N), Tensor 2 (N x O), this (M x O)
+	var bufferN = SendIntToGpu(AddMMKernel_, tensor_2.shape[0], "AddmmDimensionsN_");
+	var bufferO = SendIntToGpu(AddMMKernel_, tensor_2.shape[1], "AddmmDimensionsO_");
+	shader.SetBuffer (AddMMKernel_, "AddmmDataA_", dataBuffer);
+	shader.SetBuffer (AddMMKernel_, "AddmmDataB_", tensor_1.DataBuffer);
+	shader.SetBuffer (AddMMKernel_, "AddmmDataC_", tensor_2.DataBuffer);
 	shader.Dispatch (AddMMKernel_, size, 1, 1);
-}
-
-public void InitAddMatrixMultiplyGpu (FloatTensor tensor_1)
-{
-	var dim = new Dimensions[] {
-		new Dimensions (tensor_1.shape.Length, tensor_1.shape [0])
-	};
-
-	var dimBuffer = new ComputeBuffer (dim.Length, dim [0].Stride ());
-	dimBuffer.SetData (dim);
-	shader.SetBuffer (AddMMKernel_, "AddmmDimensions", dimBuffer);
 }
 
 public FloatTensor CeilGPU(FloatTensor result)

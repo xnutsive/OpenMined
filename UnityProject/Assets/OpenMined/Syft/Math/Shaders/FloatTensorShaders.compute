@@ -131,23 +131,22 @@ void AddElem (uint3 id: SV_DispatchThreadID) {
 RWStructuredBuffer<float> AddmmDataA_;
 RWStructuredBuffer<float> AddmmDataB_;
 RWStructuredBuffer<float> AddmmDataC_;
-RWStructuredBuffer<Dimensions> AddmmDimensions_;
+RWStructuredBuffer<int> AddmmDimensionsN_;
+RWStructuredBuffer<int> AddmmDimensionsO_;
 
 [numthreads(4,1,1)]
 void AddMM_ (uint3 id : SV_DispatchThreadID) {
-	// transpose
-	int columns = AddmmDimensions_[0].rows;
-	int rows = AddmmDimensions_[0].columns;
 
-	float product = 0;
+	int N = AddmmDimensionsN_[0];
+	int O = AddmmDimensionsO_[0];
 
-	int t = 0;
-	for (int i = 0; i < columns; i++) {
-		product += AddmmDataB_[id.x + t] * AddmmDataC_[i];
-		t += rows;
+	for (int i = 0; i < N; i++) {
+		int Arow = (int) ( ( id.x - (id.x % O) ) / O);
+		int Acol = id.x % O;
+		int BDataIndex = (Arow * N) + i;
+		int CDataIndex = Acol + (i * O);
+		AddmmDataA_[id.x] += AddmmDataB_[ BDataIndex ] * AddmmDataC_[ CDataIndex ];
 	}
-
-	AddmmDataA_[id.x] += product;
 }
 
 #pragma kernel AddMV_

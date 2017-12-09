@@ -21,7 +21,6 @@ public void AssertEqualTensorsData(FloatTensor t1, FloatTensor t2) {
 
 	float[] data1 = new float[t1.Size]; t1.DataBuffer.GetData(data1);
 	float[] data2 = new float[t2.Size]; t2.DataBuffer.GetData(data2);
-
 	Assert.AreEqual(t1.DataBuffer.count, t2.DataBuffer.count);
 	Assert.AreEqual(t1.DataBuffer.stride, t2.DataBuffer.stride);
 	Assert.AreNotEqual(t1.DataBuffer.GetNativeBufferPtr(), t2.DataBuffer.GetNativeBufferPtr());
@@ -987,6 +986,73 @@ public void SubtractScalar_()
 
 	AssertEqualTensorsData(expectedTensor, tensor1);
 }
+
+[Test]
+public void AddMatrixMultiplyTest()
+{
+	float[] base1_data = new float[] { 1, 2, 3, 4 };
+	int[] base1_shape = new int[] { 2, 2 };
+	var base1 = new FloatTensor(_ctrl: ctrl, _data: base1_data, _shape: base1_shape);
+
+	float[] base2_data = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int[] base2_shape = new int[] { 3, 3 };
+	var base2 = new FloatTensor(_ctrl: ctrl, _data: base2_data,_shape: base2_shape );
+
+	base1.Gpu(shader); base2.Gpu(shader);
+
+	float[] data = new float[] { 1, 2, 3, 4, 5, 6 };
+	int[] tensor1_shape = new int[] { 2, 3 };
+	int[] tensor2_shape = new int[] { 3, 2 };
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor1_shape);
+	var tensor1Cpu = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor1_shape);
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor2_shape);
+	var tensor2Cpu = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor2_shape);
+
+	tensor1.Gpu(shader); tensor2.Gpu(shader);
+
+	base1.AddMatrixMultiply(tensor1, tensor2);
+	base2.AddMatrixMultiply(tensor2, tensor1);
+
+	float[] expectedData1 = new float[base1_shape[0] * base1_shape[1]];
+
+	for (int i = 0; i < base1_shape[0]; i++)
+	{
+		for (int j = 0; j < base1_shape[1]; j++)
+		{
+			int expectedDataIndex = i * base1_shape[1] + j;
+			expectedData1 [expectedDataIndex] = base1_data [expectedDataIndex];
+
+			for (int k = 0; k < tensor1_shape[1]; k++)
+			{
+				expectedData1 [expectedDataIndex] += tensor1Cpu[i, k] * tensor2Cpu[k, j];
+			}
+		}
+	}
+	var expectedTensor1 = new FloatTensor(_ctrl: ctrl, _data: expectedData1, _shape: base1_shape);
+	expectedTensor1.Gpu(shader);
+	AssertEqualTensorsData(expectedTensor1, base1);
+
+	float[] expectedData2 = new float[base2_shape[0] * base2_shape[1]];
+
+	for (int i = 0; i < base2_shape[0]; i++)
+	{
+		for (int j = 0; j < base2_shape[1]; j++)
+		{
+			int expectedDataIndex = i * base2_shape[1] + j;
+			expectedData2 [expectedDataIndex] = base2_data [expectedDataIndex];
+			for (int k = 0; k < tensor2_shape[1]; k++)
+			{
+				expectedData2 [expectedDataIndex] += tensor2Cpu[i, k] * tensor1Cpu[k, j];
+			}
+		}
+	}
+
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: expectedData2, _shape: base2_shape);
+	expectedTensor2.Gpu(shader);
+	AssertEqualTensorsData(expectedTensor2, base2);
+}
+
 
 }
 }
