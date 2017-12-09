@@ -212,13 +212,13 @@ public void Sin()
 {
 	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = { 0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
 	int[] shape2 = { 4 };
 	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualSinTensor = tensor.Sin();
+	var actualSinTensor = tensor1.Sin();
 
 	for (int i = 2; i < actualSinTensor.Size; i++)
 	{
@@ -231,17 +231,17 @@ public void Sin_()
 {
 	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {  0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
 	int[] shape2 = { 4 };
 	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	tensor.Sin (inline: true);
+	tensor1.Sin (inline: true);
 
-	for (int i = 2; i < tensor.Size; i++)
+	for (int i = 2; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedSinTensor.Data[i], tensor.Data[i]);
+		Assert.AreEqual (expectedSinTensor.Data[i], tensor1.Data[i]);
 	}
 }
 

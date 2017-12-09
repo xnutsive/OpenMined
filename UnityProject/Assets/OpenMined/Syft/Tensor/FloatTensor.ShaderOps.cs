@@ -717,7 +717,7 @@ public FloatTensor SinGPU ()
 public void SinGPU_ ()
 {
 	shader.SetBuffer (SinKernel_, "SinData_", dataBuffer);
-	shader.Dispatch (SinKernel, this.size, 1, 1);
+	shader.Dispatch (SinKernel_, this.size, 1, 1);
 }
 
 
