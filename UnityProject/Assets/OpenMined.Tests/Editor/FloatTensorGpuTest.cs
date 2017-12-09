@@ -1395,5 +1395,72 @@ public void Rsqrt()
 	AssertApproximatelyEqualTensorsData(expectedTensor, result);
 }
 
+[Test]
+public void Sigmoid_()
+{
+	float[] data1 = { 0.0f };
+	int[] shape1 = { 1 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+	tensor1.Sigmoid(inline: true);
+
+	float[] data2 = { 0.5f };
+	int[] shape2 = { 1 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+	AssertEqualTensorsData(expectedTensor, tensor1);
+
+	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
+	int[] shape3 = { 4 };
+	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
+	int[] shape4 = { 4 };
+	// Verifies sum of function with inverse x adds up to 1
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	tensor3.Gpu(shader); tensor4.Gpu(shader);
+	tensor3.Sigmoid(inline: true); tensor4.Sigmoid(inline: true);
+	var sum = tensor3.Add(tensor4);
+
+	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
+	int[] shape5 = { 4 };
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
+	expectedTensor2.Gpu(shader);
+
+	AssertApproximatelyEqualTensorsData(expectedTensor2, sum);
+}
+
+[Test]
+public void Sigmoid()
+{
+	float[] data1 = { 0.0f };
+	int[] shape1 = { 1 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+	tensor1 = tensor1.Sigmoid();
+
+	float[] data2 = { 0.5f };
+	int[] shape2 = { 1 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+	AssertEqualTensorsData(expectedTensor, tensor1);
+
+	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
+	int[] shape3 = { 4 };
+	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
+	int[] shape4 = { 4 };
+	// Verifies sum of function with inverse x adds up to 1
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	tensor3.Gpu(shader); tensor4.Gpu(shader);
+	var sum = tensor3.Sigmoid().Add(tensor4.Sigmoid());
+
+	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
+	int[] shape5 = { 4 };
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
+	expectedTensor2.Gpu(shader);
+
+	AssertApproximatelyEqualTensorsData(expectedTensor2, sum);
+}
+
 }
 }

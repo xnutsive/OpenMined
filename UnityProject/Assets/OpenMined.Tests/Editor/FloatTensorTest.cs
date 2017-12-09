@@ -705,20 +705,30 @@ public void Sigmoid_()
 	int[] shape1 = { 1 };
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 	tensor1.Sigmoid(inline: true);
-	Assert.AreEqual(tensor1.Data[0], 0.5f);
 
-	float[] data2 = { 0.1f, 0.5f, 1.0f, 2.0f };
-	float[] data3 = { -0.1f, -0.5f, -1.0f, -2.0f };
-	int[] shape2 = { 4 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape2);
-	tensor2.Sigmoid(inline: true);
+	float[] data2 = { 0.5f };
+	int[] shape2 = { 1 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	Assert.AreEqual(expectedTensor.Data[0], tensor1.Data[0]);
+
+	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
+	int[] shape3 = { 4 };
+	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
+	int[] shape4 = { 4 };
+	// Verifies sum of function with inverse x adds up to 1
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
 	tensor3.Sigmoid(inline: true);
-	var sum = tensor2.Add(tensor3);
+	tensor4.Sigmoid(inline: true);
+	var sum = tensor3.Add(tensor4);
+
+	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
+	int[] shape5 = { 4 };
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
 
 	for (int i = 0; i < sum.Size; i++)
 	{
-		Assert.AreEqual(sum.Data[i], 1.0f);
+		Assert.AreEqual(sum.Data [i], expectedTensor2.Data [i]);
 	}
 }
 
@@ -728,18 +738,28 @@ public void Sigmoid()
 	float[] data1 = { 0.0f };
 	int[] shape1 = { 1 };
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1).Sigmoid();
-	Assert.AreEqual(tensor1.Data[0], 0.5f);
 
-	float[] data2 = { 0.1f, 0.5f, 1.0f, 2.0f };
-	float[] data3 = { -0.1f, -0.5f, -1.0f, -2.0f };
-	int[] shape2 = { 4 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape2);
-	var sum = tensor2.Sigmoid().Add(tensor3.Sigmoid());
+	float[] data2 = { 0.5f };
+	int[] shape2 = { 1 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	Assert.AreEqual(expectedTensor.Data[0], tensor1.Data[0]);
+
+	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
+	int[] shape3 = { 4 };
+	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
+	int[] shape4 = { 4 };
+	// Verifies sum of function with inverse x adds up to 1
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	var sum = tensor3.Sigmoid().Add(tensor4.Sigmoid());
+
+	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
+	int[] shape5 = { 4 };
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
 
 	for (int i = 0; i < sum.Size; i++)
 	{
-		Assert.AreEqual(sum.Data[i], 1.0f);
+		Assert.AreEqual(sum.Data [i], expectedTensor2.Data [i]);
 	}
 }
 
