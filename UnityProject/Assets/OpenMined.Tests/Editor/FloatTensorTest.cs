@@ -67,7 +67,7 @@ public void Cos()
 
 	var actualCosTensor = tensor.Cos();
 
-	for (int i = 2; i < actualCosTensor.Size; i++)
+	for (int i = 0; i < actualCosTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedCosTensor.Data[i], actualCosTensor.Data[i]);
 	}
@@ -86,7 +86,7 @@ public void Cos_()
 
 	tensor.Cos (inline: true);
 
-	for (int i = 2; i < tensor.Size; i++)
+	for (int i = 0; i < tensor.Size; i++)
 	{
 		Assert.AreEqual (expectedCosTensor.Data[i], tensor.Data[i]);
 	}
@@ -105,7 +105,7 @@ public void Acos()
 
 	var actualAcosTensor = tensor1.Acos();
 
-	for (int i = 2; i < actualAcosTensor.Size; i++)
+	for (int i = 0; i < actualAcosTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedAcosTensor.Data[i], actualAcosTensor.Data[i]);
 	}
@@ -124,7 +124,7 @@ public void Acos_()
 
 	tensor.Acos (inline: true );
 
-	for (int i = 2; i < tensor.Size; i++)
+	for (int i = 0; i < tensor.Size; i++)
 	{
 		Assert.AreEqual (expectedAcosTensor.Data[i], tensor.Data[i]);
 	}
@@ -143,7 +143,7 @@ public void Asin()
 
 	var actualAsinTensor = tensor1.Asin();
 
-	for (int i = 2; i < actualAsinTensor.Size; i++)
+	for (int i = 0; i < actualAsinTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedAsinTensor.Data[i], actualAsinTensor.Data[i]);
 	}
@@ -162,7 +162,7 @@ public void Asin_()
 
 	tensor1.Asin (inline: true);
 
-	for (int i = 2; i < tensor1.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
 		Assert.AreEqual (expectedAsinTensor.Data[i], tensor1.Data[i]);
 	}
@@ -181,7 +181,7 @@ public void Atan()
 
 	var actualAtanTensor = tensor1.Atan();
 
-	for (int i = 2; i < actualAtanTensor.Size; i++)
+	for (int i = 0; i < actualAtanTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedAtanTensor.Data[i], actualAtanTensor.Data[i]);
 	}
@@ -201,7 +201,7 @@ public void Atan_()
 
 	tensor1.Atan (inline: true);
 
-	for (int i = 2; i < tensor1.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
 		Assert.AreEqual (expectedAtanTensor.Data[i], tensor1.Data[i]);
 	}
@@ -220,7 +220,7 @@ public void Sin()
 
 	var actualSinTensor = tensor1.Sin();
 
-	for (int i = 2; i < actualSinTensor.Size; i++)
+	for (int i = 0; i < actualSinTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedSinTensor.Data[i], actualSinTensor.Data[i]);
 	}
@@ -239,7 +239,7 @@ public void Sin_()
 
 	tensor1.Sin (inline: true);
 
-	for (int i = 2; i < tensor1.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
 		Assert.AreEqual (expectedSinTensor.Data[i], tensor1.Data[i]);
 	}
@@ -258,7 +258,7 @@ public void Cosh()
 
 	var actualCoshTensor = tensor1.Cosh();
 
-	for (int i = 2; i < actualCoshTensor.Size; i++)
+	for (int i = 0; i < actualCoshTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedCoshTensor.Data[i], actualCoshTensor.Data[i]);
 	}
@@ -277,7 +277,7 @@ public void Cosh_()
 
 	tensor1.Cosh (inline: true);
 
-	for (int i = 2; i < tensor1.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
 		Assert.AreEqual (expectedCoshTensor.Data[i], tensor1.Data[i]);
 	}
@@ -1748,7 +1748,7 @@ public void Trunc()
 	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: truncatedData, _shape: shape);
 
 	var truncatedTensor = tensor.Trunc();
-	for (int i = 2; i < truncatedTensor.Size; i++)
+	for (int i = 0; i < truncatedTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedTensor.Data[i], truncatedTensor.Data[i]);
 	}
