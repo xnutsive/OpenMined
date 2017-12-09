@@ -164,7 +164,7 @@ public void Asin_()
 
 	for (int i = 2; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedAsinTensor.Data[i], tensor.Data[i]);
+		Assert.AreEqual (expectedAsinTensor.Data[i], tensor1.Data[i]);
 	}
 }
 
@@ -173,13 +173,13 @@ public void Atan()
 {
 	float[] data1 = { 30, 20, 40, 50 };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {  1.53747533f,  1.52083793f,  1.54580153f,  1.55079899f };
 	int[] shape2 = { 4 };
 	var expectedAtanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualAtanTensor = tensor.Atan();
+	var actualAtanTensor = tensor1.Atan();
 
 	for (int i = 2; i < actualAtanTensor.Size; i++)
 	{
@@ -193,17 +193,17 @@ public void Atan_()
 {
 	float[] data1 = { 30, 20, 40, 50 };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = { 1.53747533f,  1.52083793f,  1.54580153f,  1.55079899f };
 	int[] shape2 = { 4 };
 	var expectedAtanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	tensor.Atan (inline: true);
+	tensor1.Atan (inline: true);
 
-	for (int i = 2; i < tensor.Size; i++)
+	for (int i = 2; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedAtanTensor.Data[i], tensor.Data[i]);
+		Assert.AreEqual (expectedAtanTensor.Data[i], tensor1.Data[i]);
 	}
 }
 

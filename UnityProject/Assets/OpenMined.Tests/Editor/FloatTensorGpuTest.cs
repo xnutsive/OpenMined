@@ -1268,5 +1268,41 @@ public void Asin_()
 	AssertApproximatelyEqualTensorsData(expectedAsinTensor, tensor1);
 }
 
+[Test]
+public void Atan()
+{
+	float[] data1 = { 30, 20, 40, 50 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {  1.53747533f,  1.52083793f,  1.54580153f,  1.55079899f };
+	int[] shape2 = { 4 };
+	var expectedAtanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedAtanTensor.Gpu(shader);
+
+	var actualAtanTensor = tensor1.Atan();
+
+	AssertApproximatelyEqualTensorsData(expectedAtanTensor, actualAtanTensor);
+}
+
+[Test]
+public void Atan_()
+{
+	float[] data1 = { 30, 20, 40, 50 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1.53747533f,  1.52083793f,  1.54580153f,  1.55079899f };
+	int[] shape2 = { 4 };
+	var expectedAtanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedAtanTensor.Gpu(shader);
+
+	tensor1.Atan (inline: true);
+
+	AssertApproximatelyEqualTensorsData(expectedAtanTensor, tensor1);
+}
+
 }
 }

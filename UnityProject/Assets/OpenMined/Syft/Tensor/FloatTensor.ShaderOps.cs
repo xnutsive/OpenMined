@@ -248,7 +248,7 @@ public FloatTensor AtanGPU ()
 public void AtanGPU_ ()
 {
 	shader.SetBuffer (AtanKernel_, "AtanData_", dataBuffer);
-	shader.Dispatch (AtanKernel, this.size, 1, 1);
+	shader.Dispatch (AtanKernel_, this.size, 1, 1);
 }
 
 public void AddScalarGPU_ (float value)
