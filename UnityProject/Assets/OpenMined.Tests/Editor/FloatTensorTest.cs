@@ -1542,7 +1542,7 @@ public void Tan()
 
 	var actualTanTensor = tensor1.Tan();
 
-	for (int i = 2; i < actualTanTensor.Size; i++)
+	for (int i = 0; i < actualTanTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedTanTensor.Data[i], actualTanTensor.Data[i]);
 	}
@@ -1561,7 +1561,7 @@ public void Tan_()
 
 	tensor1.Tan (inline: true);
 
-	for (int i = 2; i < tensor1.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
 		Assert.AreEqual (expectedTanTensor.Data[i], tensor1.Data[i]);
 	}
@@ -1607,7 +1607,7 @@ public void Tanh()
 
 	var actualTanhTensor = tensor.Tanh();
 
-	for (int i = 2; i < actualTanhTensor.Size; i++)
+	for (int i = 0; i < actualTanhTensor.Size; i++)
 	{
 		Assert.AreEqual (expectedTanhTensor.Data[i], actualTanhTensor.Data[i]);
 	}
@@ -1636,15 +1636,15 @@ public void Sqrt()
 {
 	float[] data1 = { float.MaxValue, float.MinValue, 1f, 4f, 5f, 2.3232f, -30f };
 	int[] shape1 = { 7 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	float[] data2 = { float.NaN, float.NaN, 1f, 2f, 2.236068f, 1.524205f, float.NaN };
+	float[] data2 = { 1.8446743E+19f, float.NaN, 1f, 2f, 2.236068f, 1.524205f, float.NaN };
 	int[] shape2 = { 7 };
 	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualTensor = tensor.Sqrt();
+	var actualTensor = tensor1.Sqrt();
 
-	for (int i = 2; i < expectedTensor.Size; i++)
+	for (int i = 20 i < expectedTensor.Size; i++)
 	{
 		Assert.AreEqual (Math.Round(expectedTensor.Data[i], 3), Math.Round(actualTensor.Data[i], 3));
 	}

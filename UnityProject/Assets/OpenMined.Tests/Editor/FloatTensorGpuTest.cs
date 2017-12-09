@@ -34,7 +34,7 @@ public void AssertApproximatelyEqualTensorsData(FloatTensor t1, FloatTensor t2) 
 	Assert.AreEqual(t1.DataBuffer.count, t2.DataBuffer.count);
 	Assert.AreEqual(t1.DataBuffer.stride, t2.DataBuffer.stride);
 	Assert.AreNotEqual(t1.DataBuffer.GetNativeBufferPtr(), t2.DataBuffer.GetNativeBufferPtr());
-	Assert.That(data1, Is.EqualTo(data2).Within( .0001f) );
+	Assert.That(data2, Is.EqualTo(data1).Within( .0001f) );
 }
 
 [TestFixtureSetUp]
@@ -1496,6 +1496,42 @@ public void Tan_()
 	tensor1.Tan(inline: true);
 
 	AssertApproximatelyEqualTensorsData(expectedTanTensor, tensor1);
+}
+
+[Test]
+public void Tanh()
+{
+	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
+	int[] shape1 = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor.Gpu(shader);
+
+	float[] data2 = { -0.562580109f, 0.265298963f, 0.419347495f, 0.86483103f };
+	int[] shape2 = { 4 };
+	var expectedTanhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTanhTensor.Gpu(shader);
+
+	var actualTanhTensor = tensor.Tanh();
+
+	AssertApproximatelyEqualTensorsData(expectedTanhTensor, actualTanhTensor);
+}
+
+[Test]
+public void Sqrt()
+{
+	float[] data1 = { float.MaxValue, float.MinValue, 1f, 4f, 5f, 2.3232f, -30f };
+	int[] shape1 = { 7 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {  1.8446743E+19f, float.NaN, 1f, 2f, 2.236068f, 1.524205f, float.NaN };
+	int[] shape2 = { 7 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	var actualTensor = tensor1.Sqrt();
+
+	AssertApproximatelyEqualTensorsData(expectedTensor, actualTensor);
 }
 
 }

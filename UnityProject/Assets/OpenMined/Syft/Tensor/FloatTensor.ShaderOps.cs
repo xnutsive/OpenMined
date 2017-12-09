@@ -662,7 +662,7 @@ private FloatTensor SqrtGPU()
 {
 	if (!dataOnGpu) return this;
 
-	var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
+	var result = this.emptyTensorCopy();
 	shader.SetBuffer(SqrtKernel, "SqrtData", dataBuffer);
 	shader.SetBuffer(SqrtKernel, "SqrtResult", result.dataBuffer);
 	shader.Dispatch(SqrtKernel, size, 1, 1);
@@ -808,7 +808,7 @@ public void TanGPU_ ()
 
 public FloatTensor TanhGPU ()
 {
-	var result = new FloatTensor (_ctrl: ctrl, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
+	var result = this.emptyTensorCopy();
 	shader.SetBuffer (TanhKernel, "TanhData", dataBuffer);
 	shader.SetBuffer (TanhKernel, "TanhResult", result.DataBuffer);
 	shader.Dispatch (TanhKernel, this.size, 1, 1);
