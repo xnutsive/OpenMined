@@ -1546,9 +1546,9 @@ public void Tan_()
 [Test]
 public void AddMatrixVectorProductTest()
 {
-	float[] base_data = new float[] { 1, 2 };
-	int[] base_shape = new int[] { 2 };
-	var base_vector = new FloatTensor(_ctrl: ctrl, _data: base_data, _shape: base_shape);
+	float[] baseData = new float[] { 1, 2 };
+	int[] baseShape = new int[] { 2 };
+	var baseVector = new FloatTensor(_ctrl: ctrl, _data: baseData, _shape: baseShape);
 
 	float[] data1 = { 1, 2, 3, 4 };
 	int[] shape1 = new int[] { 2, 2 };
@@ -1558,15 +1558,15 @@ public void AddMatrixVectorProductTest()
 	int[] shape2 = new int[] { 2 };
 	var vector = new FloatTensor (_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	base_vector.AddMatrixVectorProduct(matrix, vector);
+	baseVector.AddMatrixVectorProduct(matrix, vector);
 
-	float[] expected_data = new float[] { 18, 41 };
-	int[] expected_shape = new int[] { 2 };
-	var expected_vector = new FloatTensor(_ctrl: ctrl, _data: expected_data, _shape: expected_shape);
+	float[] expectedData = new float[] { 18, 41 };
+	int[] expectedShape = new int[] { 2 };
+	var expectedVector = new FloatTensor(_ctrl: ctrl, _data: expectedData, _shape: expectedShape);
 
-	for (int i = 0; i < expected_vector.Size; i++)
+	for (int i = 0; i < expectedVector.Size; i++)
 	{
-		Assert.AreEqual (expected_vector.Data[i], base_vector.Data[i]);
+		Assert.AreEqual (expectedVector.Data[i], baseVector.Data[i]);
 	}
 
 }
