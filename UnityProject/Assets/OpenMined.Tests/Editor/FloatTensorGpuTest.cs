@@ -27,6 +27,16 @@ public void AssertEqualTensorsData(FloatTensor t1, FloatTensor t2) {
 	Assert.AreEqual(data1, data2);
 }
 
+public void AssertApproximatelyEqualTensorsData(FloatTensor t1, FloatTensor t2) {
+
+	float[] data1 = new float[t1.Size]; t1.DataBuffer.GetData(data1);
+	float[] data2 = new float[t2.Size]; t2.DataBuffer.GetData(data2);
+	Assert.AreEqual(t1.DataBuffer.count, t2.DataBuffer.count);
+	Assert.AreEqual(t1.DataBuffer.stride, t2.DataBuffer.stride);
+	Assert.AreNotEqual(t1.DataBuffer.GetNativeBufferPtr(), t2.DataBuffer.GetNativeBufferPtr());
+	Assert.That(data1, Is.EqualTo(data2).Within( .0001f) );
+}
+
 [TestFixtureSetUp]
 public void Init()
 {
@@ -1186,6 +1196,41 @@ public void Triu_()
 	AssertEqualTensorsData(tensor7Triu, tensor7);
 }
 
+[Test]
+public void Acos()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1.15927948f,  1.04719755f,  1.26610367f,  1.67096375f };
+	int[] shape2 = { 4 };
+	var expectedAcosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedAcosTensor.Gpu(shader);
+
+	var actualAcosTensor = tensor1.Acos();
+
+	AssertApproximatelyEqualTensorsData(expectedAcosTensor, actualAcosTensor);
+}
+
+[Test]
+public void Acos_()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {  1.15927948f,  1.04719755f,  1.26610367f,  1.67096375f };
+	int[] shape2 = { 4 };
+	var expectedAcosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedAcosTensor.Gpu(shader);
+
+	tensor1.Acos (inline: true );
+
+	AssertApproximatelyEqualTensorsData(expectedAcosTensor, tensor1);
+}
 
 }
 }

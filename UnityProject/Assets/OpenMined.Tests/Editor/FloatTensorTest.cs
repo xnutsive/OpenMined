@@ -97,13 +97,13 @@ public void Acos()
 {
 	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = { 1.15927948f,  1.04719755f,  1.26610367f,  1.67096375f };
 	int[] shape2 = { 4 };
 	var expectedAcosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualAcosTensor = tensor.Acos();
+	var actualAcosTensor = tensor1.Acos();
 
 	for (int i = 2; i < actualAcosTensor.Size; i++)
 	{

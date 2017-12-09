@@ -208,7 +208,7 @@ public void AbsGPU_ ()
 
 public FloatTensor AcosGPU ()
 {
-	var result = new FloatTensor (ctrl, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
+	var result = this.emptyTensorCopy();
 	shader.SetBuffer (AcosKernel, "AcosData", dataBuffer);
 	shader.SetBuffer (AcosKernel, "AcosResult", result.DataBuffer);
 	shader.Dispatch (AcosKernel, this.size, 1, 1);
@@ -218,7 +218,7 @@ public FloatTensor AcosGPU ()
 public void AcosGPU_ ()
 {
 	shader.SetBuffer (AcosKernel_, "AcosData_", dataBuffer);
-	shader.Dispatch (AcosKernel, this.size, 1, 1);
+	shader.Dispatch (AcosKernel_, this.size, 1, 1);
 }
 
 public FloatTensor AsinGPU ()
