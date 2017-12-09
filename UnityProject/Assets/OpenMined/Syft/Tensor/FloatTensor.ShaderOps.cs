@@ -616,10 +616,10 @@ public FloatTensor RsqrtGPU()
 {
 	if (dataOnGpu)
 	{
-		var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
+		var result = this.emptyTensorCopy();
 		shader.SetBuffer(RsqrtKernel, "RsqrtData", dataBuffer);
 		shader.SetBuffer(RsqrtKernel, "RsqrtResult", result.dataBuffer);
-		shader.Dispatch(RsqrtKernel, 1, 1, 1);
+		shader.Dispatch(RsqrtKernel, this.size, 1, 1);
 		return result;
 	}
 

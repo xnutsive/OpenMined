@@ -684,14 +684,17 @@ public void Rsqrt()
 {
 	float[] data1 = { 1, 2, 3, 4 };
 	int[] shape1 = { 4 };
-	float[] correct = { 1, (float)0.7071068, (float)0.5773503, (float)0.5};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 	var result = tensor1.Rsqrt();
 
-	for (int i = 2; i < correct.Length; i++)
+	float[] data2 = { 1, (float)0.7071068, (float)0.5773503, (float)0.5};
+	int[] shape2 = { 4 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	for (int i = 0; i < tensor1.Data.Length; i++)
 	{
-		Assert.AreEqual (Math.Round(correct[i], 3), Math.Round(result.Data[i], 3));
+		Assert.AreEqual (Math.Round(expectedTensor.Data[i], 3), Math.Round(result.Data[i], 3));
 	}
 }
 
