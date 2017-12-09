@@ -757,6 +757,78 @@ public void DivisionElementwiseUnequalSizes_()
 }
 
 [Test]
+public void DivisionScalar()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	// Test division by 0
+	float scalar = 0;
+	var result = tensor1.Div (scalar);
+
+	float[] data2 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape2 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor, result);
+
+	// Test division
+	float[] data3 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape3 = {2, 4};
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	tensor3.Gpu(shader);
+
+	scalar = 99;
+	tensor3.Div (scalar, inline: true);
+
+	float[] data4 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape4 = {2, 4};
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	expectedTensor2.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor2, tensor3);
+}
+
+[Test]
+public void DivisionScalar_()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	// Test division by 0
+	float scalar = 0;
+	var result = tensor1.Div (scalar);
+
+	float[] data2 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape2 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor, result);
+
+	// Test division
+	float[] data3 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape3 = {2, 4};
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	tensor3.Gpu(shader);
+
+	scalar = 99;
+	var result2 = tensor3.Div (scalar);
+
+	float[] data4 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape4 = {2, 4};
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	expectedTensor2.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor2, result2);
+}
+
+[Test]
 public void Floor()
 {
 	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };

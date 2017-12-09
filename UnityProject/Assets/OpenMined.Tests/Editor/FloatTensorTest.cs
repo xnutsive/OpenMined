@@ -772,20 +772,30 @@ public void DivisionScalar()
 	// Test division by 0
 	float scalar = 0;
 	var result = tensor1.Div (scalar);
+
+	float[] data2 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape2 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (tensor1.Data [i] / scalar, result.Data [i] );
+		Assert.AreEqual (expectedTensor.Data [i], result.Data [i] );
 	}
 	// Test division
-	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	float[] data3 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape3 = {2, 4};
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
 
 	scalar = 99;
-	tensor1.Div (scalar, inline: true);
-	for (int i = 0; i < tensor1.Size; i++)
+	tensor3.Div (scalar, inline: true);
+
+	float[] data4 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape4 = {2, 4};
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+
+	for (int i = 0; i < tensor3.Size; i++)
 	{
-		Assert.AreEqual (tensor2.Data [i] / scalar, tensor1.Data [i] );
+		Assert.AreEqual (expectedTensor2.Data [i], tensor3.Data [i] );
 	}
 }
 
@@ -795,14 +805,34 @@ public void DivisionScalar_()
 	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
 	int[] shape1 = {2, 4};
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	// Test multiplication by 0
+	// Test division by 0
 	float scalar = 0;
-	var result = tensor1.Mul (scalar);
+	var result = tensor1.Div (scalar);
+
+	float[] data2 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape2 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
+		Assert.AreEqual (expectedTensor.Data [i], result.Data [i] );
+	}
+	// Test division
+	float[] data3 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape3 = {2, 4};
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+
+	scalar = 99;
+	var result2 = tensor3.Div (scalar);
+
+	float[] data4 = { float.MinValue/scalar, -10/scalar, -1.5f/scalar, 0/scalar, 1.5f/scalar, 10/scalar, 20/scalar, float.MaxValue/scalar };
+	int[] shape4 = {2, 4};
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+
+	for (int i = 0; i < tensor3.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor2.Data [i], result2.Data [i] );
 	}
 }
 
