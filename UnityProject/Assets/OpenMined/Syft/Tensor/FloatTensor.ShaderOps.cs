@@ -233,7 +233,7 @@ public FloatTensor AsinGPU ()
 public void AsinGPU_ ()
 {
 	shader.SetBuffer (AsinKernel_, "AsinData_", dataBuffer);
-	shader.Dispatch (AsinKernel, this.size, 1, 1);
+	shader.Dispatch (AsinKernel_, this.size, 1, 1);
 }
 
 public FloatTensor AtanGPU ()

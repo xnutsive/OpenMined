@@ -1232,5 +1232,41 @@ public void Acos_()
 	AssertApproximatelyEqualTensorsData(expectedAcosTensor, tensor1);
 }
 
+[Test]
+public void Asin()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 0.41151685f,  0.52359878f,  0.30469265f, -0.10016742f };
+	int[] shape2 = { 4 };
+	var expectedAsinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedAsinTensor.Gpu(shader);
+
+	var actualAsinTensor = tensor1.Asin();
+
+	AssertApproximatelyEqualTensorsData(expectedAsinTensor, actualAsinTensor);
+}
+
+[Test]
+public void Asin_()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {  0.41151685f,  0.52359878f,  0.30469265f, -0.10016742f };
+	int[] shape2 = { 4 };
+	var expectedAsinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedAsinTensor.Gpu(shader);
+
+	tensor1.Asin (inline: true);
+
+	AssertApproximatelyEqualTensorsData(expectedAsinTensor, tensor1);
+}
+
 }
 }
