@@ -506,7 +506,7 @@ public FloatTensor RoundGPU()
 {
 	if (!dataOnGpu) return this;
 
-	var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
+	var result = this.emptyTensorCopy();
 	shader.SetBuffer(RoundKernel, "RoundData", dataBuffer);
 	shader.SetBuffer(RoundKernel, "RoundResult", result.dataBuffer);
 	shader.Dispatch(RoundKernel, this.Size, 1, 1);

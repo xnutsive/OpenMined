@@ -1093,6 +1093,24 @@ public void Neg()
 }
 
 [Test]
+public void Round()
+{
+	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {6, -20, 9, 100, 101};
+	int[] shape2 = { 5 };
+	var expectedRoundTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedRoundTensor.Gpu(shader);
+
+	var actualRoundTensor = tensor1.Round();
+
+	AssertEqualTensorsData(expectedRoundTensor, actualRoundTensor);
+}
+
+[Test]
 public void Rsqrt()
 {
 	float[] data1 = { 1, 2, 3, 4 };

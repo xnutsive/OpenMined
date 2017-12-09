@@ -1135,26 +1135,31 @@ public FloatTensor Reduce(
 
 public FloatTensor Min(long dim = -1, bool keepdim = false)
 {
+	// TODO: Implement GPU op. with GPU tests.
 	return Reduce(dim, keepdim, (acc, val, index, arr) => acc < val ? acc : val, (val, len) => val);
 }
 
 public FloatTensor Max(long dim = -1, bool keepdim = false)
 {
+	// TODO: Implement GPU op. with GPU tests.
 	return Reduce(dim, keepdim, (acc, val, index, arr) => acc > val ? acc : val, (val, len) => val);
 }
 
 public FloatTensor Sum(long dim = -1, bool keepdim = false)
 {
+	// TODO: Implement GPU op. with GPU tests.
 	return Reduce(dim, keepdim, (acc, val, index, arr) => acc + val, (val, len) => val);
 }
 
 public FloatTensor Prod(long dim = -1, bool keepdim = false)
 {
+	// TODO: Implement GPU op. with GPU tests.
 	return Reduce(dim, keepdim, (acc, val, index, arr) => acc * val, (val, len) => val);
 }
 
 public FloatTensor Mean(long dim = -1, bool keepdim = false)
 {
+	// TODO: Implement GPU op. with GPU tests.
 	return Reduce(dim, keepdim, (acc, val, index, arr) => acc + val, (val, len) => val / (float)len);
 }
 
