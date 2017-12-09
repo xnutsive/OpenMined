@@ -1219,13 +1219,13 @@ public void Floor_()
 
 	float[] data2 = { 5, -21, 9, 100, 100 };
 	int[] shape2 = { 5 };
-	var tensorFloor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
 	tensor1.Floor(inline: true);
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual(tensor1.Data[i], tensorFloor.Data[i]);
+		Assert.AreEqual(expectedTensor.Data[i], tensor1.Data[i]);
 	}
 }
 
@@ -1238,13 +1238,13 @@ public void Floor()
 
 	float[] data2 = { 5, -21, 9, 100, 100 };
 	int[] shape2 = { 5 };
-	var tensorFloor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
 	var result = tensor1.Floor(inline: true);
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual(tensorFloor.Data[i], result.Data[i]);
+		Assert.AreEqual(expectedTensor.Data[i], result.Data[i]);
 	}
 }
 

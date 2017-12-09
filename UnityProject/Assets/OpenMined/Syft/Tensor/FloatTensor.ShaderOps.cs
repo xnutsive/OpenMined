@@ -470,7 +470,7 @@ public void FloorGPU_()
 	Debug.LogFormat("<color=blue>FloatTensor.floor_ dataOnGpu: {0}</color>", dataOnGpu);
 
 	shader.SetBuffer(FloorKernel_, "FloorData_", dataBuffer);
-	shader.Dispatch(FloorKernel_, 1, 1, 1);
+	shader.Dispatch(FloorKernel_, this.Size, 1, 1);
 }
 
 public FloatTensor FloorGPU(FloatTensor result)
@@ -481,7 +481,7 @@ public FloatTensor FloorGPU(FloatTensor result)
 	{
 		shader.SetBuffer(FloorKernel, "FloorData", dataBuffer);
 		shader.SetBuffer(FloorKernel, "FloorResult", result.dataBuffer);
-		shader.Dispatch(FloorKernel, 1, 1, 1);
+		shader.Dispatch(FloorKernel, this.Size, 1, 1);
 	}
 	return result;
 }
