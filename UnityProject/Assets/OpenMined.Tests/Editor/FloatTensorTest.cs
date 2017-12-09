@@ -1181,13 +1181,13 @@ public void Ceil()
 
 	float[] data2 = { 6, -20, 9, 101, 101 };
 	int[] shape2 = { 5 };
-	var tensorCeil = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
 	var result = tensor1.Ceil ();
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (result.Data[i], tensorCeil.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], result.Data[i]);
 	}
 }
 
@@ -1200,13 +1200,13 @@ public void Ceil_()
 
 	float[] data2 = { 6, -20, 9, 101, 101 };
 	int[] shape2 = { 5 };
-	var tensorCeil = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
 	tensor1.Ceil (inline: true);
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (tensor1.Data[i], tensorCeil.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
 	}
 }
 

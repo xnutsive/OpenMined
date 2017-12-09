@@ -442,7 +442,7 @@ public FloatTensor CeilGPU(FloatTensor result)
 	if (!dataOnGpu) return this;
 	shader.SetBuffer(CeilKernel, "CeilData", dataBuffer);
 	shader.SetBuffer(CeilKernel, "CeilResult", result.DataBuffer);
-	shader.Dispatch(CeilKernel, 1, 1, 1);
+	shader.Dispatch(CeilKernel, this.Size, 1, 1);
 	return result;
 }
 
@@ -462,7 +462,7 @@ public void CeilGPU_()
 	Debug.LogFormat("<color=blue>FloatTensor.ceil_ dataOnGpu: {0}</color>", dataOnGpu);
 
 	shader.SetBuffer(CeilKernel_, "CeilData_", dataBuffer);
-	shader.Dispatch(CeilKernel_, 1, 1, 1);
+	shader.Dispatch(CeilKernel_, this.Size, 1, 1);
 }
 
 public void FloorGPU_()
