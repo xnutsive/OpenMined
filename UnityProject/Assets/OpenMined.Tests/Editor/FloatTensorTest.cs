@@ -841,13 +841,13 @@ public void Exp()
 {
 	float[] data1 = { 0, 1, 2, 5 };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {1f, 2.71828183f, 7.3890561f, 148.4131591f};
 	int[] shape2 = { 4 };
 	var expectedExpTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualExpTensor = tensor.Exp();
+	var actualExpTensor = tensor1.Exp();
 
 	for (int i = 0; i < actualExpTensor.Size; i++)
 	{

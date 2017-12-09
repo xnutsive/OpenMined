@@ -829,6 +829,24 @@ public void DivisionScalar_()
 }
 
 [Test]
+public void Exp()
+{
+	float[] data1 = { 0, 1, 2, 5 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {1f, 2.71828183f, 7.3890561f, 148.4131591f};
+	int[] shape2 = { 4 };
+	var expectedExpTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedExpTensor.Gpu(shader);
+
+	var actualExpTensor = tensor1.Exp();
+
+	AssertApproximatelyEqualTensorsData(expectedExpTensor, actualExpTensor);
+}
+
+[Test]
 public void Floor()
 {
 	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };

@@ -473,10 +473,10 @@ private FloatTensor ExpGPU()
 {
 	if (!dataOnGpu) return this;
 
-	var result = new FloatTensor (_ctrl: null, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
-	shader.SetBuffer(SqrtKernel, "ExptData", dataBuffer);
-	shader.SetBuffer(SqrtKernel, "ExpResult", result.dataBuffer);
-	shader.Dispatch(SqrtKernel, size, 1, 1);
+	var result = this.emptyTensorCopy();
+	shader.SetBuffer(ExpKernel, "ExpData", dataBuffer);
+	shader.SetBuffer(ExpKernel, "ExpResult", result.DataBuffer);
+	shader.Dispatch(ExpKernel, size, 1, 1);
 
 	return result;
 }
@@ -506,11 +506,11 @@ public FloatTensor RoundGPU()
 {
 	if (!dataOnGpu) return this;
 
-	var result = new FloatTensor (_ctrl: null, _shape:shape, _shader:this.shader, _dataOnGpu:dataOnGpu);
+	var result = new FloatTensor (_ctrl: null, _shape: shape, _shader: this.shader, _dataOnGpu: dataOnGpu);
 	shader.SetBuffer(RoundKernel, "RoundData", dataBuffer);
 	shader.SetBuffer(RoundKernel, "RoundResult", result.dataBuffer);
 	shader.Dispatch(RoundKernel, this.Size, 1, 1);
-	
+
 	return result;
 }
 
@@ -851,28 +851,28 @@ public FloatTensor TanhGPU ()
 
 public float TraceGPU ()
 {
-    // Note: only works for square matrices (as PyTorch does).
-    // Overview:
-    // 1. copy diagonal using DiagonalKernel
-    // 2. reduce (+) per group using Reduce1DSumKernel
-    // 3. sum over groups on cpu
+	// Note: only works for square matrices (as PyTorch does).
+	// Overview:
+	// 1. copy diagonal using DiagonalKernel
+	// 2. reduce (+) per group using Reduce1DSumKernel
+	// 3. sum over groups on cpu
 
-    int numcolumns = this.shape[1];
-    int groupsize = 8; // should match kernel group size (hardcoded)
-    int numgroups = (int)System.Math.Ceiling((double)numcolumns / groupsize);
+	int numcolumns = this.shape[1];
+	int groupsize = 8; // should match kernel group size (hardcoded)
+	int numgroups = (int)System.Math.Ceiling((double)numcolumns / groupsize);
 
-    // 1. copy diagonal to diagonalBuffer
+	// 1. copy diagonal to diagonalBuffer
 	var diagonalBuffer = new ComputeBuffer(1, numcolumns*sizeof(float));
-    var numcolumnsBuffer = SendIntToGpu (DiagonalKernel, numcolumns, "DiagonalNumcolumns");
+	var numcolumnsBuffer = SendIntToGpu (DiagonalKernel, numcolumns, "DiagonalNumcolumns");
 	shader.SetBuffer (DiagonalKernel, "DiagonalData", dataBuffer);
 	shader.SetBuffer (DiagonalKernel, "DiagonalResult", diagonalBuffer);
 	shader.Dispatch (DiagonalKernel, numgroups, 1, 1);
 
-    // 2. standard Reduce1D w/ op = +
-    var resultPerGroupBuffer = new ComputeBuffer (1, numgroups*sizeof(float)); // will hold each group's sum
-    shader.SetBuffer (Reduce1DSumKernel, "Reduce1DSumData", diagonalBuffer);
-    shader.SetBuffer (Reduce1DSumKernel, "Reduce1DSumResult", resultPerGroupBuffer);
-    shader.Dispatch  (Reduce1DSumKernel, numgroups, 1, 1);
+	// 2. standard Reduce1D w/ op = +
+	var resultPerGroupBuffer = new ComputeBuffer (1, numgroups*sizeof(float)); // will hold each group's sum
+	shader.SetBuffer (Reduce1DSumKernel, "Reduce1DSumData", diagonalBuffer);
+	shader.SetBuffer (Reduce1DSumKernel, "Reduce1DSumResult", resultPerGroupBuffer);
+	shader.Dispatch  (Reduce1DSumKernel, numgroups, 1, 1);
 
 	// 3. copy to cpu and sum over groups -> trace
 	float[] resultPerGroup = new float[numgroups];
@@ -883,7 +883,7 @@ public float TraceGPU ()
 		sum += item;
 	}
 
-    resultPerGroupBuffer.Release();
+	resultPerGroupBuffer.Release();
 	numcolumnsBuffer.Release();
 	diagonalBuffer.Release();
 
