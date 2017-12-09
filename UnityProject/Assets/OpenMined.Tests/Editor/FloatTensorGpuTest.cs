@@ -535,6 +535,148 @@ public void MultiplicationElementwiseUnequalShapes_()
 	            Throws.TypeOf<InvalidOperationException>());
 }
 
+[Test]
+public void DivisionElementwise()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	float[] data3 = { 1, 1, 1, (float)Double.NaN, 1, 1, 1, 1 };
+	int[] shape3 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	expectedTensor.Gpu(shader);
+
+	var tensor3 = tensor1.Div (tensor2);
+
+	AssertEqualTensorsData(expectedTensor, tensor3);
+}
+
+[Test]
+public void DivisionElementwiseUnequalSizes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Div(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalDimensions()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Div(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalShapes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Div(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwise_()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 1, 1, (float)Double.NaN, 1, 1, 1, 1 };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	tensor1.Div (tensor1, inline: true);
+
+	AssertEqualTensorsData(tensor2, tensor1);
+}
+
+[Test]
+public void DivisionElementwiseUnequalSizes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Div(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalDimensions_()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Div(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalShapes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+
+	Assert.That(() => tensor1.Div(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
 
 }
 }

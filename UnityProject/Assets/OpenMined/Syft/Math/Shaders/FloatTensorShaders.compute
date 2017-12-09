@@ -248,7 +248,7 @@ RWStructuredBuffer<float> DivElemDataB_;
 
 [numthreads(4,1,1)]
 void DivElem_ (uint3 id: SV_DispatchThreadID) {
-	DivElemDataA_[id.x] = DivElemDataA_[id.x] / DivElemDataB_[id.x];
+	DivElemDataA_[id.x] /= DivElemDataB_[id.x];
 }
 
 #pragma kernel DivScalar

@@ -375,14 +375,9 @@ public void DivElemGPU_ (FloatTensor tensor)
 	Debug.LogFormat ("<color=blue>FloatTensor.DivElemGPU_ dataOnGpu: {0}</color>", dataOnGpu);
 
 	if (dataOnGpu) {
-		if (tensor.id != this.id) {
-			shader.SetBuffer (DivElemKernel_, "DivElemDataA_", dataBuffer);
-			shader.SetBuffer (DivElemKernel_, "DivElemDataB_", tensor.dataBuffer);
-			shader.Dispatch (DivElemKernel_, this.size, 1, 1);
-		} else {
-			tensor.Zero_();
-			tensor.Add(1, inline: true);
-		}
+		shader.SetBuffer (DivElemKernel_, "DivElemDataA_", dataBuffer);
+		shader.SetBuffer (DivElemKernel_, "DivElemDataB_", tensor.dataBuffer);
+		shader.Dispatch (DivElemKernel_, this.size, 1, 1);
 	}
 }
 
