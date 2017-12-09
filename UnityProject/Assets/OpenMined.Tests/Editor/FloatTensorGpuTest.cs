@@ -1099,6 +1099,93 @@ public void Trunc()
 }
 
 
+[Test]
+public void Triu_()
+{
+	int k = 0;
+
+	// Test tensor with dimension < 2
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 6 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+	Assert.That(() => tensor1.Triu_(k),
+	            Throws.TypeOf<InvalidOperationException>());
+
+	// Test tensor with dimension > 2
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8 };
+	int[] shape2 = { 2, 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	tensor2.Gpu(shader);
+	Assert.That(() => tensor2.Triu_(k),
+	            Throws.TypeOf<InvalidOperationException>());
+
+	// Test dim = 2, k = 0
+	k = 0;
+	float[] data3 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int[] shape3 = { 3, 3 };
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	tensor3.Gpu(shader);
+	tensor3.Triu_(k);
+	float[] data3Triu = { 1, 2, 3, 0, 5, 6, 0, 0, 9 };
+	var tensor3Triu = new FloatTensor(_ctrl: ctrl, _data: data3Triu, _shape: shape3);
+	tensor3Triu.Gpu(shader);
+
+	AssertEqualTensorsData(tensor3Triu, tensor3);
+
+	// Test dim = 2, k = 2
+	k = 2;
+	float[] data4 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int[] shape4 = { 3, 3 };
+	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	tensor4.Gpu(shader);
+	tensor4.Triu_(k);
+	float[] data4Triu = { 0, 0, 3, 0, 0, 0, 0, 0, 0 };
+	var tensor4Triu = new FloatTensor(_ctrl: ctrl, _data: data4Triu, _shape: shape4);
+	tensor4Triu.Gpu(shader);
+
+	AssertEqualTensorsData(tensor4Triu, tensor4);
+
+	// Test dim = 2, k = -1
+	k = -1;
+	float[] data5 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int[] shape5 = { 3, 3 };
+	var tensor5 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
+	tensor5.Gpu(shader);
+	tensor5.Triu_(k);
+	float[] data5Triu = { 1, 2, 3, 4, 5, 6, 0, 8, 9 };
+	var tensor5Triu = new FloatTensor(_ctrl: ctrl, _data: data5Triu, _shape: shape5);
+	tensor5Triu.Gpu(shader);
+
+	AssertEqualTensorsData(tensor5Triu, tensor5);
+
+	// Test dim = 2, k >> ndims
+	k = 100;
+	float[] data6 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int[] shape6 = { 3, 3 };
+	var tensor6 = new FloatTensor(_ctrl: ctrl, _data: data6, _shape: shape6);
+	tensor6.Gpu(shader);
+	tensor6.Triu_(k);
+	float[] data6Triu = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	var tensor6Triu = new FloatTensor(_ctrl: ctrl, _data: data6Triu, _shape: shape6);
+	tensor6Triu.Gpu(shader);
+
+	AssertEqualTensorsData(tensor6Triu, tensor6);
+
+	// Test dim = 2, k << ndims
+	k = -100;
+	float[] data7 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int[] shape7 = { 3, 3 };
+	var tensor7 = new FloatTensor(_ctrl: ctrl, _data: data7, _shape: shape7);
+	tensor7.Gpu(shader);
+	tensor7.Triu_(k);
+	float[] data7Triu = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	var tensor7Triu = new FloatTensor(_ctrl: ctrl, _data: data7Triu, _shape: shape7);
+	tensor7Triu.Gpu(shader);
+
+	AssertEqualTensorsData(tensor7Triu, tensor7);
+}
+
 
 }
 }
