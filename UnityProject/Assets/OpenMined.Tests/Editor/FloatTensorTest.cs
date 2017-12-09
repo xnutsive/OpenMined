@@ -41,54 +41,39 @@ public void TearDown()
 }
 
 [Test]
-public void Copy()
+public void Abs()
 {
-	float[] array = { 1, 2, 3, 4, 5 };
-	int[] shape = { 5 };
+	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: array, _shape: shape);
-	var copy = tensor.Copy();
+	float[] data2 = { 1, 0, 1, float.MaxValue, -float.MinValue };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	Assert.AreEqual(copy.Shape,tensor.Shape);
-	Assert.AreEqual(copy.Data, tensor.Data);
-	Assert.AreNotEqual(copy.Id, tensor.Id);
-}
+	var tensor2 = tensor1.Abs();
 
-[Test]
-public void Cos()
-{
-	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
-	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 0.92106099f,  0.87758256f,  0.95533649f,  0.99500417f };
-	int[] shape2 = { 4 };
-	var expectedCosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var actualCosTensor = tensor.Cos();
-
-	for (int i = 0; i < actualCosTensor.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedCosTensor.Data[i], actualCosTensor.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], tensor2.Data[i]);
 	}
 }
 
 [Test]
-public void Cos_()
+public void Abs_()
 {
-	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
-	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	float[] data2 = {  0.92106099f,  0.87758256f,  0.95533649f,  0.99500417f };
-	int[] shape2 = { 4 };
-	var expectedCosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	float[] data2 = { 1, 0, 1, float.MaxValue, -float.MinValue };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	tensor.Cos (inline: true);
-
-	for (int i = 0; i < tensor.Size; i++)
+	tensor1.Abs(inline: true);
+	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedCosTensor.Data[i], tensor.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
 	}
 }
 
@@ -128,6 +113,250 @@ public void Acos_()
 	{
 		Assert.AreEqual (expectedAcosTensor.Data[i], tensor.Data[i]);
 	}
+}
+
+[Test]
+public void Add()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	int[] shape1 = {2, 5};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
+	int[] shape2 = {2, 5};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var tensorSum = tensor1.Add (tensor2);
+
+	for (int i = 0; i < tensorSum.Size; i++)
+	{
+		Assert.AreEqual (tensor1.Data [i] + tensor2.Data [i], tensorSum.Data [i]);
+	}
+}
+
+[Test]
+public void Add_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	int[] shape1 = {2, 5};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
+	int[] shape2 = {2, 5};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	float[] data3 = { 4, 4, 9, 13, 15, 7, 11, 16, 14, 17};
+	int[] shape3 = {2, 5};
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+
+	tensor1.Add (tensor2, inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor3.Data[i], tensor1.Data [i]);
+	}
+}
+
+[Test]
+public void AddMatrixMultiplyTest()
+{
+	float[] base1_data = new float[] { 1, 2, 3, 4 };
+	int[] base1_shape = new int[] { 2, 2 };
+	var base1 = new FloatTensor(_ctrl: ctrl, _data: base1_data, _shape: base1_shape);
+
+	float[] base2_data = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	int[] base2_shape = new int[] { 3, 3 };
+	var base2 = new FloatTensor(_ctrl: ctrl, _data: base2_data,_shape: base2_shape );
+
+	float[] data = new float[] { 1, 2, 3, 4, 5, 6 };
+	int[] tensor1_shape = new int[] { 2, 3 };
+	int[] tensor2_shape = new int[] { 3, 2 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor1_shape);
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor2_shape);
+
+	base1.AddMatrixMultiply(tensor1, tensor2);
+	base2.AddMatrixMultiply(tensor2, tensor1);
+
+	for (int i = 0; i < base1_shape[0]; i++)
+	{
+		for (int j = 0; j < base1_shape[1]; j++)
+		{
+			float mm_res = base1_data[i * base1_shape[1] + j];
+			for (int k = 0; k < tensor1_shape[1]; k++)
+			{
+				mm_res += tensor1[i, k] * tensor2[k, j];
+			}
+			Assert.AreEqual(base1[i, j], mm_res);
+		}
+	}
+
+	for (int i = 0; i < base2_shape[0]; i++)
+	{
+		for (int j = 0; j < base2_shape[1]; j++)
+		{
+			float mm_res = base2_data[i * base2_shape[1] + j];
+			for (int k = 0; k < tensor2_shape[1]; k++)
+			{
+				mm_res += tensor2[i, k] * tensor1[k, j];
+			}
+			Assert.AreEqual(base2[i, j], mm_res);
+		}
+	}
+}
+
+[Test]
+public void AddMatrixVectorProductTest()
+{
+	float[] baseData = new float[] { 1, 2 };
+	int[] baseShape = new int[] { 2 };
+	var baseVector = new FloatTensor(_ctrl: ctrl, _data: baseData, _shape: baseShape);
+
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = new int[] { 2, 2 };
+	var matrix = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = new float[] { 5, 6 };
+	int[] shape2 = new int[] { 2 };
+	var vector = new FloatTensor (_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	baseVector.AddMatrixVectorProduct(matrix, vector);
+
+	float[] expectedData = new float[] { 18, 41 };
+	int[] expectedShape = new int[] { 2 };
+	var expectedVector = new FloatTensor(_ctrl: ctrl, _data: expectedData, _shape: expectedShape);
+
+	for (int i = 0; i < expectedVector.Size; i++)
+	{
+		Assert.AreEqual (expectedVector.Data[i], baseVector.Data[i]);
+	}
+}
+
+[Test]
+public void AddScalar()
+{
+	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = {3, 2};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float scalar = -100;
+
+	var tensorSum = tensor1.Add (scalar);
+
+	for (int i = 0; i < tensorSum.Size; i++)
+	{
+		Assert.AreEqual (tensor1.Data [i] + scalar, tensorSum.Data [i]);
+	}
+}
+
+[Test]
+public void AddScalar_()
+{
+	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = {5, 1};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { -101, -100, -99, float.MaxValue-100, float.MinValue-100 };
+	int[] shape2 = {5, 1};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	float scalar = -100;
+
+	tensor1.Add (scalar, inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor1.Data[i], tensor2.Data [i]);
+	}
+}
+
+[Test]
+public void AddUnequalDimensions()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Add(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalDimensions_()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Add(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalShapes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Add(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalShapes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Add(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalSizes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Add(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void AddUnequalSizes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Add(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
 }
 
 [Test]
@@ -208,42 +437,95 @@ public void Atan_()
 }
 
 [Test]
-public void Sin()
+public void Ceil()
 {
-	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
-	int[] shape1 = { 4 };
+	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
+	int[] shape1 = { 5 };
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	float[] data2 = { 0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
-	int[] shape2 = { 4 };
-	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	float[] data2 = { 6, -20, 9, 101, 101 };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualSinTensor = tensor1.Sin();
+	var result = tensor1.Ceil ();
 
-	for (int i = 0; i < actualSinTensor.Size; i++)
+	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedSinTensor.Data[i], actualSinTensor.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], result.Data[i]);
 	}
 }
 
 [Test]
-public void Sin_()
+public void Ceil_()
 {
-	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
-	int[] shape1 = { 4 };
+	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
+	int[] shape1 = { 5 };
 	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	float[] data2 = {  0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
-	int[] shape2 = { 4 };
-	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	float[] data2 = { 6, -20, 9, 101, 101 };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	tensor1.Sin (inline: true);
+	tensor1.Ceil (inline: true);
 
 	for (int i = 0; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedSinTensor.Data[i], tensor1.Data[i]);
+		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
 	}
 }
+
+[Test]
+public void Copy()
+{
+	float[] array = { 1, 2, 3, 4, 5 };
+	int[] shape = { 5 };
+
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: array, _shape: shape);
+	var copy = tensor.Copy();
+
+	Assert.AreEqual(copy.Shape,tensor.Shape);
+	Assert.AreEqual(copy.Data, tensor.Data);
+	Assert.AreNotEqual(copy.Id, tensor.Id);
+}
+
+[Test]
+public void Cos()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 0.92106099f,  0.87758256f,  0.95533649f,  0.99500417f };
+	int[] shape2 = { 4 };
+	var expectedCosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualCosTensor = tensor.Cos();
+
+	for (int i = 0; i < actualCosTensor.Size; i++)
+	{
+		Assert.AreEqual (expectedCosTensor.Data[i], actualCosTensor.Data[i]);
+	}
+}
+
+[Test]
+public void Cos_()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {  0.92106099f,  0.87758256f,  0.95533649f,  0.99500417f };
+	int[] shape2 = { 4 };
+	var expectedCosTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	tensor.Cos (inline: true);
+
+	for (int i = 0; i < tensor.Size; i++)
+	{
+		Assert.AreEqual (expectedCosTensor.Data[i], tensor.Data[i]);
+	}
+}
+
 
 [Test]
 public void Cosh()
@@ -348,6 +630,1295 @@ public void Create3DTensor()
 }
 
 [Test]
+public void DivisionElementwise()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var tensorMult = tensor1.Div (tensor2);
+
+	for (int i = 0; i < tensorMult.Size; i++)
+	{
+		float current = tensor1.Data [i] / tensor2.Data [i];
+		Assert.AreEqual (tensorMult.Data [i], current);
+	}
+}
+
+[Test]
+public void DivisionElementwise_()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 1, 1, (float)Double.NaN, 1, 1, 1, 1 };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	tensor1.Div (tensor1, inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor2.Data [i], tensor1.Data [i]);
+	}
+}
+
+[Test]
+public void DivisionElementwiseUnequalDimensions()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Div(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalDimensions_()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Div(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalShapes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Div(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalShapes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Div(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalSizes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Div(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionElementwiseUnequalSizes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Div(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void DivisionScalar()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	// Test division by 0
+	float scalar = 0;
+	var result = tensor1.Div (scalar);
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor1.Data [i] / scalar, result.Data [i] );
+	}
+	// Test division
+	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	scalar = 99;
+	tensor1.Div (scalar, inline: true);
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor2.Data [i] / scalar, tensor1.Data [i] );
+	}
+}
+
+[Test]
+public void DivisionScalar_()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	// Test multiplication by 0
+	float scalar = 0;
+	var result = tensor1.Mul (scalar);
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
+	}
+}
+
+[Test]
+public void Exp()
+{
+	float[] data1 = { 0, 1, 2, 5 };
+	int[] shape1 = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {1f, 2.71828183f, 7.3890561f, 148.4131591f};
+	int[] shape2 = { 4 };
+	var expectedExpTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualExpTensor = tensor.Exp();
+
+	for (int i = 0; i < actualExpTensor.Size; i++)
+	{
+		Assert.AreEqual (Math.Round(expectedExpTensor.Data[i],3), Math.Round(actualExpTensor.Data[i],3));
+	}
+}
+
+[Test]
+public void Floor()
+{
+	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 5, -21, 9, 100, 100 };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var result = tensor1.Floor(inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual(expectedTensor.Data[i], result.Data[i]);
+	}
+}
+
+[Test]
+public void Floor_()
+{
+	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 5, -21, 9, 100, 100 };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	tensor1.Floor(inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual(expectedTensor.Data[i], tensor1.Data[i]);
+	}
+}
+
+[Test]
+public void GetIndexGetIndeces()
+{
+	float[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape = { 3, 2, 2 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+
+	long[] idxs = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+	long[][] idxarrays = new long[][] {
+		new long[] { 0, 0, 0 },
+		new long[] { 0, 1, 0 },
+		new long[] { 2, 0, 1 }
+	};
+
+	foreach (long i in idxs)
+		Assert.AreEqual(i,tensor.GetIndex(tensor.GetIndices(i)));
+	foreach (long[] i in idxarrays)
+		Assert.AreEqual(i, tensor.GetIndices(tensor.GetIndex(i)));
+}
+
+public void IsContiguous()
+{
+	float[] data = new float[] { 1, 2, 3, 4, 5, 6 };
+	int[] shape = new int[] { 2, 3 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+	Assert.AreEqual(tensor.IsContiguous(), true);
+	var transposedTensor = tensor.Transpose();
+	Assert.AreEqual(transposedTensor.IsContiguous(), false);
+}
+
+[Test]
+public void Max()
+{
+	float[] data = new float[] {
+		1, 2, 3,
+		4, 5, 6
+	};
+
+	int[] shape = new int[] { 2, 3 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+
+	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
+
+	FloatTensor result = tensor.Max();
+
+	Console.WriteLine("tensor.Max() {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Size, 1);
+	Assert.AreEqual(result.Data[0], 6.0);
+
+	result = tensor.Max(0);
+
+	Console.WriteLine("tensor.Max(0) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 4.0);
+	Assert.AreEqual(result.Data[1], 5.0);
+	Assert.AreEqual(result.Data[2], 6.0);
+
+	result = tensor.Max(1);
+
+	Console.WriteLine("tensor.Max(1) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 2);
+	Assert.AreEqual(result.Size, 2);
+	Assert.AreEqual(result.Data[0], 3.0);
+	Assert.AreEqual(result.Data[1], 6.0);
+
+	result = tensor.Max(0, true);
+
+	Console.WriteLine("tensor.Max(0, true) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 2);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Shape[1], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 4.0);
+	Assert.AreEqual(result.Data[1], 5.0);
+	Assert.AreEqual(result.Data[2], 6.0);
+}
+
+[Test]
+public void Mean()
+{
+	float[] data = new float[] {
+		1, 2, 3,
+		4, 5, 6
+	};
+
+	int[] shape = new int[] { 2, 3 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+
+	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
+
+	FloatTensor result = tensor.Mean();
+
+	Console.WriteLine("tensor.Mean() {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Size,  1);
+	Assert.AreEqual(result.Data[0], 21.0 / 6.0);
+
+	result = tensor.Mean(0);
+
+	Console.WriteLine("tensor.Mean(0) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 5.0 / 2.0);
+	Assert.AreEqual(result.Data[1], 7.0 / 2.0);
+	Assert.AreEqual(result.Data[2], 9.0 / 2.0);
+
+	result = tensor.Mean(1);
+
+	Console.WriteLine("tensor.Mean(1) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 2);
+	Assert.AreEqual(result.Size, 2);
+	Assert.AreEqual(result.Data[0], 6.0 / 3.0);
+	Assert.AreEqual(result.Data[1], 15.0 / 3.0);
+
+	result = tensor.Mean(0, true);
+
+	Console.WriteLine("tensor.Mean(0, true) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 2);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Shape[1], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 5.0 / 2.0);
+	Assert.AreEqual(result.Data[1], 7.0 / 2.0);
+	Assert.AreEqual(result.Data[2], 9.0 / 2.0);
+}
+
+[Test]
+public void Min()
+{
+	float[] data = new float[] {
+		1, 2, 3,
+		4, 5, 6
+	};
+
+	int[] shape = new int[] { 2, 3 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+
+	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
+
+	FloatTensor result = tensor.Min();
+
+	Console.WriteLine("tensor.Min() {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Size, 1);
+	Assert.AreEqual(result.Data[0], 1.0);
+
+	result = tensor.Min(0);
+
+	Console.WriteLine("tensor.Min(0) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 1.0);
+	Assert.AreEqual(result.Data[1], 2.0);
+	Assert.AreEqual(result.Data[2], 3.0);
+
+	result = tensor.Min(1);
+
+	Console.WriteLine("tensor.Min(1) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 2);
+	Assert.AreEqual(result.Size, 2);
+	Assert.AreEqual(result.Data[0], 1.0);
+	Assert.AreEqual(result.Data[1], 4.0);
+
+	result = tensor.Min(0, true);
+
+	Console.WriteLine("tensor.Min(0, true) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 2);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Shape[1], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 1.0);
+	Assert.AreEqual(result.Data[1], 2.0);
+	Assert.AreEqual(result.Data[2], 3.0);
+}
+
+[Test]
+public void MultiplicationElementwise()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var tensorMult = tensor1.Mul (tensor2);
+
+	for (int i = 0; i < tensorMult.Size; i++)
+	{
+		float current = tensor1.Data [i] * tensor2.Data [i];
+		Assert.AreEqual (tensorMult.Data [i], current);
+	}
+}
+
+[Test]
+public void MultiplicationElementwise_()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	float[] data3 = { float.PositiveInfinity, 100, 2.25f, 0, 2.25f, 100, 400, float.PositiveInfinity };
+	int[] shape3 = {2, 4};
+	var tensorMult = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+
+	tensor1.Mul (tensor2, inline: true);
+
+	for (int i = 0; i < tensorMult.Size; i++)
+	{
+		Assert.AreEqual (tensorMult.Data [i], tensor1.Data [i]);
+	}
+}
+
+[Test]
+public void MutiplicationlElementwiseUnequalDimensions()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Mul(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void MultiplicationElementwisenUnequalDimensions_()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Mul(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void MultiplicationElementwiseUnequalShapes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	Assert.That(() => tensor1.Mul(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void MultiplicationElementwiseUnequalShapes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	Assert.That(() => tensor1.Mul(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void MultiplicationElementwiseUnequalSizes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Mul(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void MultiplicationElementwiseUnequalSizes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Mul(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void MultiplicationScalar()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	// Test multiplication by 0
+	float scalar = 0;
+	var result = tensor1.Mul (scalar);
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
+	}
+
+	// Test multiplication by positive
+	tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	scalar = 99;
+	result = tensor1.Mul (scalar);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
+	}
+
+	// Test multiplication by negative
+	tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	scalar = -99;
+	result = tensor1.Mul (scalar);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
+	}
+
+	// Test multiplication by decimal
+	tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	scalar = 0.000001f;
+	result = tensor1.Mul (scalar);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
+	}
+}
+
+[Test]
+public void Neg()
+{
+	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 0, -1, -float.MaxValue, -float.MinValue };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var result = tensor1.Neg ();
+
+	for (int i = 0; i < result.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data[i], result.Data[i]);
+	}
+}
+
+[Test]
+public void Prod()
+{
+	float[] data = new float[] {
+		1, 2, 3,
+		4, 5, 6
+	};
+
+	int[] shape = new int[] { 2, 3 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+
+	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
+
+	FloatTensor result = tensor.Prod();
+
+	Console.WriteLine("tensor.Prod() {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Size,  1);
+	Assert.AreEqual(result.Data[0], 720.0);
+
+	result = tensor.Prod(0);
+
+	Console.WriteLine("tensor.Prod(0) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 4.0);
+	Assert.AreEqual(result.Data[1], 10.0);
+	Assert.AreEqual(result.Data[2], 18.0);
+
+	result = tensor.Prod(1);
+
+	Console.WriteLine("tensor.Prod(1) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 2);
+	Assert.AreEqual(result.Size, 2);
+	Assert.AreEqual(result.Data[0], 6.0);
+	Assert.AreEqual(result.Data[1], 120.0);
+
+	result = tensor.Prod(0, true);
+
+	Console.WriteLine("tensor.Prod(0, true) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 2);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Shape[1], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 4.0);
+	Assert.AreEqual(result.Data[1], 10.0);
+	Assert.AreEqual(result.Data[2], 18.0);
+}
+
+[Test]
+public void Round()
+{
+	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
+	int[] shape1 = { 5 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {6, -20, 9, 100, 101};
+	int[] shape2 = { 5 };
+	var expectedRoundTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualRoundTensor = tensor.Round();
+
+	for (int i = 0; i < actualRoundTensor.Size; i++)
+	{
+		Assert.AreEqual(expectedRoundTensor.Data[i], actualRoundTensor.Data[i]);
+	}
+}
+
+
+[Test]
+public void Rsqrt()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var result = tensor1.Rsqrt();
+
+	float[] data2 = { 1, (float)0.7071068, (float)0.5773503, (float)0.5};
+	int[] shape2 = { 4 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	for (int i = 0; i < tensor1.Data.Length; i++)
+	{
+		Assert.AreEqual (Math.Round(expectedTensor.Data[i], 3), Math.Round(result.Data[i], 3));
+	}
+}
+
+[Test]
+public void Sigmoid()
+{
+	float[] data1 = { 0.0f };
+	int[] shape1 = { 1 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1).Sigmoid();
+
+	float[] data2 = { 0.5f };
+	int[] shape2 = { 1 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	Assert.AreEqual(expectedTensor.Data[0], tensor1.Data[0]);
+
+	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
+	int[] shape3 = { 4 };
+	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
+	int[] shape4 = { 4 };
+	// Verifies sum of function with inverse x adds up to 1
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	var sum = tensor3.Sigmoid().Add(tensor4.Sigmoid());
+
+	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
+	int[] shape5 = { 4 };
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
+
+	for (int i = 0; i < sum.Size; i++)
+	{
+		Assert.AreEqual(sum.Data [i], expectedTensor2.Data [i]);
+	}
+}
+
+[Test]
+public void Sigmoid_()
+{
+	float[] data1 = { 0.0f };
+	int[] shape1 = { 1 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Sigmoid(inline: true);
+
+	float[] data2 = { 0.5f };
+	int[] shape2 = { 1 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	Assert.AreEqual(expectedTensor.Data[0], tensor1.Data[0]);
+
+	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
+	int[] shape3 = { 4 };
+	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
+	int[] shape4 = { 4 };
+	// Verifies sum of function with inverse x adds up to 1
+	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	tensor3.Sigmoid(inline: true);
+	tensor4.Sigmoid(inline: true);
+	var sum = tensor3.Add(tensor4);
+
+	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
+	int[] shape5 = { 4 };
+	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
+
+	for (int i = 0; i < sum.Size; i++)
+	{
+		Assert.AreEqual(sum.Data [i], expectedTensor2.Data [i]);
+	}
+}
+
+[Test]
+public void Sign()
+{
+	float[] data1 = {float.MinValue, -100.0f, -1.0f, -0.0001f, -0.0f, +0.0f, 0.0001f, 1.0f, 10.0f, float.MaxValue};
+	int[] shape1 = { 1, 10 };
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
+
+	var result1 = tensor1.Sign();
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data[i], result1.Data[i]);
+	}
+}
+
+[Test]
+public void Sign_()
+{
+	float[] data1 = {float.MinValue, -100.0f, -1.0f, -0.0001f, -0.0f, +0.0f, 0.0001f, 1.0f, 10.0f, float.MaxValue};
+	int[] shape1 = { 1, 10 };
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
+
+	tensor1.Sign (inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
+	}
+}
+
+[Test]
+public void Sin()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
+	int[] shape2 = { 4 };
+	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualSinTensor = tensor1.Sin();
+
+	for (int i = 0; i < actualSinTensor.Size; i++)
+	{
+		Assert.AreEqual (expectedSinTensor.Data[i], actualSinTensor.Data[i]);
+	}
+}
+
+[Test]
+public void Sin_()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {  0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
+	int[] shape2 = { 4 };
+	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	tensor1.Sin (inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (expectedSinTensor.Data[i], tensor1.Data[i]);
+	}
+}
+
+[Test]
+public void Sinh()
+{
+	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
+	int[] shape2 = { 4 };
+	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualSinhTensor = tensor1.Sinh();
+
+	for (int i = 0; i < actualSinhTensor.Size; i++)
+	{
+		var rounded = Decimal.Round((Decimal)actualSinhTensor.Data[i], 5);
+		Assert.AreEqual (expectedSinhTensor.Data[i], rounded);
+	}
+}
+
+[Test]
+public void Sinh_()
+{
+	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
+	int[] shape2 = { 4 };
+	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	tensor1.Sinh (inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		var rounded = Decimal.Round((Decimal)tensor1.Data[i], 5);
+		Assert.AreEqual (expectedSinhTensor.Data[i], rounded);
+	}
+}
+
+[Test]
+public void SizeTensor()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape1 = { 2, 3, 2 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var actualSizeTensor = tensor.SizeTensor();
+
+	float[] data2 = { 2, 3, 2 };
+	int[] shape2 = { 3 };
+	var expectedSizeTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	for (int i = 0; i < shape1.Length; i++)
+	{
+		Assert.AreEqual (actualSizeTensor.Data[i], expectedSizeTensor.Data[i]);
+	}
+}
+
+[Test]
+public void Squeeze()
+{
+	float[] data1 = {1, 2, 3, 4};
+	int[] shape1 = {2, 1, 2, 1};
+
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	var newTensor = tensor.Squeeze();
+
+	Assert.AreEqual(2, newTensor.Shape[0]);
+	Assert.AreEqual(2, newTensor.Shape[1]);
+	Assert.AreEqual(2, newTensor.Shape.Length);
+
+	var anotherTensor = tensor.Squeeze(dim: 3);
+
+	Assert.AreEqual(2, anotherTensor.Shape[0]);
+	Assert.AreEqual(1, anotherTensor.Shape[1]);
+	Assert.AreEqual(3, anotherTensor.Shape.Length);
+}
+
+[Test]
+public void Squeeze_()
+{
+	float[] data1 = {1, 2, 3, 4};
+	int[] shape1 = {2, 1, 2, 1};
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	tensor1.Squeeze(inline: true);
+
+	Assert.AreEqual(2, tensor1.Shape[0]);
+	Assert.AreEqual(2, tensor1.Shape[1]);
+	Assert.AreEqual(2, tensor1.Shape.Length);
+
+	float[] data2 = {1, 2, 3, 4};
+	int[] shape2 = {2, 1, 2, 1};
+
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	var anotherTensor = tensor2.Squeeze(dim: 3, inline: true);
+
+	Assert.AreEqual(2, tensor2.Shape[0]);
+	Assert.AreEqual(1, tensor2.Shape[1]);
+	Assert.AreEqual(3, tensor2.Shape.Length);
+}
+
+
+[Test]
+public void Sqrt()
+{
+	float[] data1 = { float.MaxValue, float.MinValue, 1f, 4f, 5f, 2.3232f, -30f };
+	int[] shape1 = { 7 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1.8446743E+19f, float.NaN, 1f, 2f, 2.236068f, 1.524205f, float.NaN };
+	int[] shape2 = { 7 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualTensor = tensor1.Sqrt();
+
+	for (int i = 0; i < expectedTensor.Size; i++)
+	{
+		Assert.AreEqual (Math.Round(expectedTensor.Data[i], 3), Math.Round(actualTensor.Data[i], 3));
+	}
+}
+
+[Test]
+public void SubtractElementwise()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { float.MaxValue, 10, 1.5f, 0, -1.5f, -10, -20, float.MinValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
+	int[] shape3 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+
+	var result = tensor1.Sub (tensor2);
+
+	for (int i = 0; i < result.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data [i], result.Data [i]);
+	}
+}
+
+[Test]
+public void SubtractElementwise_()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { float.MaxValue, 10, 1.5f, 0, -1.5f, -10, -20, float.MinValue };
+	int[] shape2 = {2, 4};
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
+	int[] shape3 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+
+	tensor1.Sub (tensor2, inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data [i], tensor1.Data [i]);
+	}
+}
+
+[Test]
+public void SubtractElementwiseUnequalDimensions()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Sub(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalDimensions_()
+{
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4 };
+	int[] shape2 = { 2, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Sub(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalShapes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Sub(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalShapes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape1 = { 2, 3 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6 };
+	int[] shape2 = { 3, 2 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Sub(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalSizes()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Sub(tensor2),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractElementwiseUnequalSizes_()
+{
+	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	int[] shape1 = { 2, 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape2 = { 2, 6 };
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	Assert.That(() => tensor1.Sub(tensor2, inline: true),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
+public void SubtractScalar()
+{
+	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = {3, 2};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
+	int[] shape2 = {3, 2};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	float scalar = 100;
+	var tensor3 = tensor1.Sub (scalar);
+
+	for (int i = 0; i < tensor3.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data [i], tensor3.Data [i]);
+	}
+}
+
+[Test]
+public void SubtractScalar_()
+{
+	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = {5, 1};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
+	int[] shape2 = {5, 1};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	float scalar = 100;
+
+	tensor1.Sub (scalar, inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data [i], tensor1.Data [i]);
+	}
+}
+
+[Test]
+public void Sum()
+{
+	float[] data = new float[] {
+		1, 2, 3,
+		4, 5, 6
+	};
+
+	int[] shape = new int[] { 2, 3 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+
+	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
+
+	FloatTensor result = tensor.Sum();
+
+	Console.WriteLine("tensor.Sum() {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Size,  1);
+	Assert.AreEqual(result.Data[0], 21.0);
+
+	result = tensor.Sum(0);
+
+	Console.WriteLine("tensor.Sum(0) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 5.0);
+	Assert.AreEqual(result.Data[1], 7.0);
+	Assert.AreEqual(result.Data[2], 9.0);
+
+	result = tensor.Sum(1);
+
+	Console.WriteLine("tensor.Sum(1) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 1);
+	Assert.AreEqual(result.Shape[0], 2);
+	Assert.AreEqual(result.Size, 2);
+	Assert.AreEqual(result.Data[0], 6.0);
+	Assert.AreEqual(result.Data[1], 15.0);
+
+	result = tensor.Sum(0, true);
+
+	Console.WriteLine("tensor.Sum(0, true) {0}", string.Join(", ", result.Data));
+	Assert.AreEqual(result.Shape.Length, 2);
+	Assert.AreEqual(result.Shape[0], 1);
+	Assert.AreEqual(result.Shape[1], 3);
+	Assert.AreEqual(result.Size, 3);
+	Assert.AreEqual(result.Data[0], 5.0);
+	Assert.AreEqual(result.Data[1], 7.0);
+	Assert.AreEqual(result.Data[2], 9.0);
+}
+
+[Test]
+public void Tan()
+{
+	float[] data1 = { 30, 20, 40, 50 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {-6.4053312f, 2.23716094f, -1.11721493f, -0.27190061f};
+	int[] shape2 = { 4 };
+	var expectedTanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualTanTensor = tensor1.Tan();
+
+	for (int i = 0; i < actualTanTensor.Size; i++)
+	{
+		Assert.AreEqual (expectedTanTensor.Data[i], actualTanTensor.Data[i]);
+	}
+}
+
+[Test]
+public void Tan_()
+{
+	float[] data1 = { 30, 20, 40, 50 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {-6.4053312f, 2.23716094f, -1.11721493f, -0.27190061f};
+	int[] shape2 = { 4 };
+	var expectedTanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	tensor1.Tan (inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (expectedTanTensor.Data[i], tensor1.Data[i]);
+	}
+}
+
+[Test]
+public void Tanh()
+{
+	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
+	int[] shape1 = { 4 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = { -0.562580109f, 0.265298963f, 0.419347495f, 0.86483103f };
+	int[] shape2 = { 4 };
+	var expectedTanhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	var actualTanhTensor = tensor.Tanh();
+
+	for (int i = 0; i < actualTanhTensor.Size; i++)
+	{
+		Assert.AreEqual (expectedTanhTensor.Data[i], actualTanhTensor.Data[i]);
+	}
+}
+
+[Test]
+public void TensorId()
+{
+	float[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+	int[] shape = { 2, 3, 2 };
+
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+
+	Assert.AreNotEqual(tensor1.Id, tensor2.Id);
+	Assert.AreEqual(tensor1.Id + 1, tensor2.Id);
+}
+
+[Test]
+public void Trace()
+{
+	// test #1
+	float[] data1 = { 1.2f, 2, 3, 4 };
+	int[] shape1 = { 2, 2 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	float actual = tensor.Trace();
+	float expected = 5.2f;
+
+	Assert.AreEqual (expected, actual);
+
+	// test #2
+	float[] data3 = { 1, 2, 3 };
+	int[] shape3 = { 3 };
+	var non2DTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	Assert.That(() => non2DTensor.Trace(),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
 public void Transpose2D()
 {
 	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
@@ -414,25 +1985,6 @@ public void Transpose3D()
 }
 
 [Test]
-public void TransposeNoDimensionsSpecified()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape1 = { 3, 2, 2 };
-
-	// Test Tensor with more than 2 dimensions
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	Assert.That(() => tensor.Transpose(),
-	            Throws.TypeOf<InvalidOperationException>());
-
-	// Test tensor with less than 2 dimensions
-	float[] data2 = { 1, 2, 3, 4, 5 };
-	int[] shape2 = { 5 };
-	tensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	Assert.That(() => tensor.Transpose(),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
 public void TransposeDimensionsOutOfRange()
 {
 	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
@@ -454,1376 +2006,22 @@ public void TransposeDimensionsOutOfRange()
 }
 
 [Test]
-public void AddScalar()
-{
-	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = {3, 2};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float scalar = -100;
-
-	var tensorSum = tensor1.Add (scalar);
-
-	for (int i = 0; i < tensorSum.Size; i++)
-	{
-		Assert.AreEqual (tensor1.Data [i] + scalar, tensorSum.Data [i]);
-	}
-}
-
-[Test]
-public void AddScalar_()
-{
-	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = {5, 1};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { -101, -100, -99, float.MaxValue-100, float.MinValue-100 };
-	int[] shape2 = {5, 1};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	float scalar = -100;
-
-	tensor1.Add (scalar, inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor1.Data[i], tensor2.Data [i]);
-	}
-}
-
-[Test]
-public void Add()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-	int[] shape1 = {2, 5};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
-	int[] shape2 = {2, 5};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var tensorSum = tensor1.Add (tensor2);
-
-	for (int i = 0; i < tensorSum.Size; i++)
-	{
-		Assert.AreEqual (tensor1.Data [i] + tensor2.Data [i], tensorSum.Data [i]);
-	}
-}
-
-[Test]
-public void AddUnequalSizes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Add(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void AddUnequalDimensions()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Add(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void AddUnequalShapes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Add(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void Add_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-	int[] shape1 = {2, 5};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
-	int[] shape2 = {2, 5};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	float[] data3 = { 4, 4, 9, 13, 15, 7, 11, 16, 14, 17};
-	int[] shape3 = {2, 5};
-	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
-
-	tensor1.Add (tensor2, inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor3.Data[i], tensor1.Data [i]);
-	}
-}
-
-[Test]
-public void AddUnequalSizes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Add(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void AddUnequalDimensions_()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Add(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void AddUnequalShapes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Add(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void Abs()
-{
-	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 0, 1, float.MaxValue, -float.MinValue };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var tensor2 = tensor1.Abs();
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], tensor2.Data[i]);
-	}
-}
-
-[Test]
-public void Abs_()
-{
-	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 0, 1, float.MaxValue, -float.MinValue };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	tensor1.Abs(inline: true);
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
-	}
-}
-
-[Test]
-public void Neg()
-{
-	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 0, -1, -float.MaxValue, -float.MinValue };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var result = tensor1.Neg ();
-
-	for (int i = 0; i < result.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], result.Data[i]);
-	}
-}
-
-[Test]
-public void Rsqrt()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	var result = tensor1.Rsqrt();
-
-	float[] data2 = { 1, (float)0.7071068, (float)0.5773503, (float)0.5};
-	int[] shape2 = { 4 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	for (int i = 0; i < tensor1.Data.Length; i++)
-	{
-		Assert.AreEqual (Math.Round(expectedTensor.Data[i], 3), Math.Round(result.Data[i], 3));
-	}
-}
-
-[Test]
-public void Sigmoid_()
-{
-	float[] data1 = { 0.0f };
-	int[] shape1 = { 1 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	tensor1.Sigmoid(inline: true);
-
-	float[] data2 = { 0.5f };
-	int[] shape2 = { 1 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	Assert.AreEqual(expectedTensor.Data[0], tensor1.Data[0]);
-
-	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
-	int[] shape3 = { 4 };
-	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
-	int[] shape4 = { 4 };
-	// Verifies sum of function with inverse x adds up to 1
-	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
-	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
-	tensor3.Sigmoid(inline: true);
-	tensor4.Sigmoid(inline: true);
-	var sum = tensor3.Add(tensor4);
-
-	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
-	int[] shape5 = { 4 };
-	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
-
-	for (int i = 0; i < sum.Size; i++)
-	{
-		Assert.AreEqual(sum.Data [i], expectedTensor2.Data [i]);
-	}
-
-	// TODO: Finish these tests ???
-	float[] data6 = { 1000.0f };
-	int[] shape6 = { 1 };
-	float[] data7 = { -1000.0f };
-	int[] shape7 = { 1 };
-
-	var tensor6 = new FloatTensor(_ctrl: ctrl, _data: data6, _shape: shape6);
-	var tensor7 = new FloatTensor(_ctrl: ctrl, _data: data7, _shape: shape7);
-
-	tensor6.Sigmoid(inline: true);
-	tensor7.Sigmoid(inline: true);
-//	Assert.DoesNotThrow();
-//	Assert.DoesNotThrow();
-}
-
-[Test]
-public void Sigmoid()
-{
-	float[] data1 = { 0.0f };
-	int[] shape1 = { 1 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1).Sigmoid();
-
-	float[] data2 = { 0.5f };
-	int[] shape2 = { 1 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	Assert.AreEqual(expectedTensor.Data[0], tensor1.Data[0]);
-
-	float[] data3 = { 0.1f, 0.5f, 1.0f, 2.0f };
-	int[] shape3 = { 4 };
-	float[] data4 = { -0.1f, -0.5f, -1.0f, -2.0f };
-	int[] shape4 = { 4 };
-	// Verifies sum of function with inverse x adds up to 1
-	var tensor3 = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
-	var tensor4 = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
-	var sum = tensor3.Sigmoid().Add(tensor4.Sigmoid());
-
-	float[] data5 = { 1.0f, 1.0f, 1.0f, 1.0f};
-	int[] shape5 = { 4 };
-	var expectedTensor2 = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
-
-	for (int i = 0; i < sum.Size; i++)
-	{
-		Assert.AreEqual(sum.Data [i], expectedTensor2.Data [i]);
-	}
-}
-
-[Test]
-public void Sign()
-{
-	float[] data1 = {float.MinValue, -100.0f, -1.0f, -0.0001f, -0.0f, +0.0f, 0.0001f, 1.0f, 10.0f, float.MaxValue};
-	int[] shape1 = { 1, 10 };
-
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
-
-	var result1 = tensor1.Sign();
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], result1.Data[i]);
-	}
-}
-
-[Test]
-public void Sign_()
-{
-	float[] data1 = {float.MinValue, -100.0f, -1.0f, -0.0001f, -0.0f, +0.0f, 0.0001f, 1.0f, 10.0f, float.MaxValue};
-	int[] shape1 = { 1, 10 };
-
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = {-1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape1);
-
-	tensor1.Sign (inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
-	}
-}
-
-[Test]
-public void Zero_()
-{
-	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 0, 0, 0, 0, 0 };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	tensor1.Zero_ ();
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
-	}
-}
-
-[Test]
-public void MultiplicationElementwise()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var tensorMult = tensor1.Mul (tensor2);
-
-	for (int i = 0; i < tensorMult.Size; i++)
-	{
-		float current = tensor1.Data [i] * tensor2.Data [i];
-		Assert.AreEqual (tensorMult.Data [i], current);
-	}
-}
-
-[Test]
-public void MultiplicationElementwiseUnequalSizes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Mul(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void MulElementwiseUnequalDimensions()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Mul(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void MultiplicationElementwiseUnequalShapes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	Assert.That(() => tensor1.Mul(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void MultiplicationElementwise_()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	float[] data3 = { float.PositiveInfinity, 100, 2.25f, 0, 2.25f, 100, 400, float.PositiveInfinity };
-	int[] shape3 = {2, 4};
-	var tensorMult = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
-
-	tensor1.Mul (tensor2, inline: true);
-
-	for (int i = 0; i < tensorMult.Size; i++)
-	{
-		Assert.AreEqual (tensorMult.Data [i], tensor1.Data [i]);
-	}
-}
-
-[Test]
-public void MultiplicationElementwiseUnequalSizes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Mul(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void MultiplicationElementwisenUnequalDimensions_()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Mul(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void MultiplicationElementwiseUnequalShapes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	Assert.That(() => tensor1.Mul(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void DivisionElementwise_()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 1, 1, (float)Double.NaN, 1, 1, 1, 1 };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	tensor1.Div (tensor1, inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor2.Data [i], tensor1.Data [i]);
-	}
-}
-
-[Test]
-public void DivisionElementwise()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var tensorMult = tensor1.Div (tensor2);
-
-	for (int i = 0; i < tensorMult.Size; i++)
-	{
-		float current = tensor1.Data [i] / tensor2.Data [i];
-		Assert.AreEqual (tensorMult.Data [i], current);
-	}
-}
-
-[Test]
-public void DivisionElementwiseUnequalSizes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Div(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void DivisionElementwiseUnequalDimensions()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Div(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void DivisionElementwiseUnequalShapes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Div(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void DivisionScalar()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	// Test division by 0
-	float scalar = 0;
-	var result = tensor1.Div (scalar);
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor1.Data [i] / scalar, result.Data [i] );
-	}
-	// Test division
-	float[] data2 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	scalar = 99;
-	tensor1.Div (scalar, inline: true);
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor2.Data [i] / scalar, tensor1.Data [i] );
-	}
-}
-
-[Test]
-public void DivisionScalar_()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	// Test multiplication by 0
-	float scalar = 0;
-	var result = tensor1.Mul (scalar);
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
-	}
-}
-
-[Test]
-public void DivisionElementwiseUnequalSizes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Div(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void DivisionElementwiseUnequalDimensions_()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Div(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void DivisionElementwiseUnequalShapes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Div(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-//        [Test]
-//        public void ElementwiseMultiplicationDataOnDifferent()
-//        {
-//            int[] shape1 = { 2, 3 };
-//            var tensor1 = new FloatTensor(shape1);
-//            int[] shape2 = { 2, 3 };
-//            var tensor2 = new FloatTensor(shape2);
-//
-//			Assert.That(() => tensor1.Mul(tensor2),
-//                Throws.TypeOf<InvalidOperationException>());
-//        }
-
-[Test]
-public void TensorId()
-{
-	float[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape = { 2, 3, 2 };
-
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-
-	Assert.AreNotEqual(tensor1.Id, tensor2.Id);
-	Assert.AreEqual(tensor1.Id + 1, tensor2.Id);
-}
-
-[Test]
-public void MultiplicationScalar()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	// Test multiplication by 0
-	float scalar = 0;
-	var result = tensor1.Mul (scalar);
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
-	}
-
-	// Test multiplication by positive
-	tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	scalar = 99;
-	result = tensor1.Mul (scalar);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
-	}
-
-	// Test multiplication by negative
-	tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	scalar = -99;
-	result = tensor1.Mul (scalar);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
-	}
-
-	// Test multiplication by decimal
-	tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	scalar = 0.000001f;
-	result = tensor1.Mul (scalar);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
-	}
-}
-
-[Test]
-public void Ceil()
-{
-	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 6, -20, 9, 101, 101 };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var result = tensor1.Ceil ();
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], result.Data[i]);
-	}
-}
-
-[Test]
-public void Ceil_()
-{
-	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 6, -20, 9, 101, 101 };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	tensor1.Ceil (inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
-	}
-}
-
-[Test]
-public void Exp()
-{
-	float[] data1 = { 0, 1, 2, 5 };
-	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = {1f, 2.71828183f, 7.3890561f, 148.4131591f};
-	int[] shape2 = { 4 };
-	var expectedExpTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var actualExpTensor = tensor.Exp();
-
-	for (int i = 0; i < actualExpTensor.Size; i++)
-	{
-		Assert.AreEqual (Math.Round(expectedExpTensor.Data[i],3), Math.Round(actualExpTensor.Data[i],3));
-	}
-}
-
-[Test]
-public void Floor_()
-{
-	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 5, -21, 9, 100, 100 };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	tensor1.Floor(inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual(expectedTensor.Data[i], tensor1.Data[i]);
-	}
-}
-
-[Test]
-public void Floor()
-{
-	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
-	int[] shape1 = { 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 5, -21, 9, 100, 100 };
-	int[] shape2 = { 5 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var result = tensor1.Floor(inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual(expectedTensor.Data[i], result.Data[i]);
-	}
-}
-
-[Test]
-public void Round()
-{
-	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };
-	int[] shape1 = { 5 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = {6, -20, 9, 100, 101};
-	int[] shape2 = { 5 };
-	var expectedRoundTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var actualRoundTensor = tensor.Round();
-
-	for (int i = 0; i < actualRoundTensor.Size; i++)
-	{
-		Assert.AreEqual(expectedRoundTensor.Data[i], actualRoundTensor.Data[i]);
-	}
-}
-
-[Test]
-public void SubtractElementwise()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { float.MaxValue, 10, 1.5f, 0, -1.5f, -10, -20, float.MinValue };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
-	int[] shape3 = {2, 4};
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
-
-	var result = tensor1.Sub (tensor2);
-
-	for (int i = 0; i < result.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data [i], result.Data [i]);
-	}
-}
-
-[Test]
-public void SubtractElementwiseUnequalSizes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Sub(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void SubtractElementwiseUnequalDimensions()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Sub(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void SubtractElementwiseUnequalShapes()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Sub(tensor2),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void SubtractElementwise_()
-{
-	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
-	int[] shape1 = {2, 4};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { float.MaxValue, 10, 1.5f, 0, -1.5f, -10, -20, float.MinValue };
-	int[] shape2 = {2, 4};
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	float[] data3 = { float.NegativeInfinity, -20, -3, 0, 3, 20, 40, float.PositiveInfinity };
-	int[] shape3 = {2, 4};
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
-
-	tensor1.Sub (tensor2, inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data [i], tensor1.Data [i]);
-	}
-}
-
-[Test]
-public void SubtractElementwiseUnequalSizes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	int[] shape1 = { 2, 5 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape2 = { 2, 6 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Sub(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void SubtractElementwiseUnequalDimensions_()
-{
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4 };
-	int[] shape2 = { 2, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Sub(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void SubtractElementwiseUnequalShapes_()
-{
-	float[] data1 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape1 = { 2, 3 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1, 2, 3, 4, 5, 6 };
-	int[] shape2 = { 3, 2 };
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	Assert.That(() => tensor1.Sub(tensor2, inline: true),
-	            Throws.TypeOf<InvalidOperationException>());
-}
-
-[Test]
-public void SubtractScalar()
-{
-	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = {3, 2};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
-	int[] shape2 = {3, 2};
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	float scalar = 100;
-	var tensor3 = tensor1.Sub (scalar);
-
-	for (int i = 0; i < tensor3.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data [i], tensor3.Data [i]);
-	}
-}
-
-[Test]
-public void SubtractScalar_()
-{
-	float[] data1 = { -1, 0, 0.1f, 1, float.MaxValue, float.MinValue };
-	int[] shape1 = {5, 1};
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { -101, -100, -99.9f, -99, float.MaxValue-100, float.MinValue-100 };
-	int[] shape2 = {5, 1};
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	float scalar = 100;
-
-	tensor1.Sub (scalar, inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data [i], tensor1.Data [i]);
-	}
-}
-
-//
-//        [Test]
-//        public void ElementwiseSubtractDataOnDifferent()
-//        {
-//            int[] shape1 = { 2, 3 };
-//            var tensor1 = new FloatTensor(shape1, true);
-//            int[] shape2 = { 2, 3 };
-//            var tensor2 = new FloatTensor(shape2, false);
-//
-//			Assert.That(() => tensor1.SubtractElementwise(tensor2),
-//                Throws.TypeOf<InvalidOperationException>());
-//        }
-
-[Test]
-public void GetIndexGetIndeces()
-{
-	float[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape = { 3, 2, 2 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-
-	long[] idxs = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-	long[][] idxarrays = new long[][] {
-		new long[] { 0, 0, 0 },
-		new long[] { 0, 1, 0 },
-		new long[] { 2, 0, 1 }
-	};
-
-	foreach (long i in idxs)
-		Assert.AreEqual(i,tensor.GetIndex(tensor.GetIndices(i)));
-	foreach (long[] i in idxarrays)
-		Assert.AreEqual(i, tensor.GetIndices(tensor.GetIndex(i)));
-}
-
-[Test]
-public void AddMatrixMultiplyTest()
-{
-	float[] base1_data = new float[] { 1, 2, 3, 4 };
-	int[] base1_shape = new int[] { 2, 2 };
-	var base1 = new FloatTensor(_ctrl: ctrl, _data: base1_data, _shape: base1_shape);
-
-	float[] base2_data = new float[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	int[] base2_shape = new int[] { 3, 3 };
-	var base2 = new FloatTensor(_ctrl: ctrl, _data: base2_data,_shape: base2_shape );
-
-	float[] data = new float[] { 1, 2, 3, 4, 5, 6 };
-	int[] tensor1_shape = new int[] { 2, 3 };
-	int[] tensor2_shape = new int[] { 3, 2 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor1_shape);
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data, _shape: tensor2_shape);
-
-	base1.AddMatrixMultiply(tensor1, tensor2);
-	base2.AddMatrixMultiply(tensor2, tensor1);
-
-	for (int i = 0; i < base1_shape[0]; i++)
-	{
-		for (int j = 0; j < base1_shape[1]; j++)
-		{
-			float mm_res = base1_data[i * base1_shape[1] + j];
-			for (int k = 0; k < tensor1_shape[1]; k++)
-			{
-				mm_res += tensor1[i, k] * tensor2[k, j];
-			}
-			Assert.AreEqual(base1[i, j], mm_res);
-		}
-	}
-
-	for (int i = 0; i < base2_shape[0]; i++)
-	{
-		for (int j = 0; j < base2_shape[1]; j++)
-		{
-			float mm_res = base2_data[i * base2_shape[1] + j];
-			for (int k = 0; k < tensor2_shape[1]; k++)
-			{
-				mm_res += tensor2[i, k] * tensor1[k, j];
-			}
-			Assert.AreEqual(base2[i, j], mm_res);
-		}
-	}
-}
-
-[Test]
-public void Tan()
-{
-	float[] data1 = { 30, 20, 40, 50 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = {-6.4053312f, 2.23716094f, -1.11721493f, -0.27190061f};
-	int[] shape2 = { 4 };
-	var expectedTanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var actualTanTensor = tensor1.Tan();
-
-	for (int i = 0; i < actualTanTensor.Size; i++)
-	{
-		Assert.AreEqual (expectedTanTensor.Data[i], actualTanTensor.Data[i]);
-	}
-}
-
-[Test]
-public void Tan_()
-{
-	float[] data1 = { 30, 20, 40, 50 };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = {-6.4053312f, 2.23716094f, -1.11721493f, -0.27190061f};
-	int[] shape2 = { 4 };
-	var expectedTanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	tensor1.Tan (inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		Assert.AreEqual (expectedTanTensor.Data[i], tensor1.Data[i]);
-	}
-}
-
-[Test]
-public void AddMatrixVectorProductTest()
-{
-	float[] baseData = new float[] { 1, 2 };
-	int[] baseShape = new int[] { 2 };
-	var baseVector = new FloatTensor(_ctrl: ctrl, _data: baseData, _shape: baseShape);
-
-	float[] data1 = { 1, 2, 3, 4 };
-	int[] shape1 = new int[] { 2, 2 };
-	var matrix = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = new float[] { 5, 6 };
-	int[] shape2 = new int[] { 2 };
-	var vector = new FloatTensor (_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	baseVector.AddMatrixVectorProduct(matrix, vector);
-
-	float[] expectedData = new float[] { 18, 41 };
-	int[] expectedShape = new int[] { 2 };
-	var expectedVector = new FloatTensor(_ctrl: ctrl, _data: expectedData, _shape: expectedShape);
-
-	for (int i = 0; i < expectedVector.Size; i++)
-	{
-		Assert.AreEqual (expectedVector.Data[i], baseVector.Data[i]);
-	}
-}
-
-[Test]
-public void Tanh()
-{
-	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
-	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { -0.562580109f, 0.265298963f, 0.419347495f, 0.86483103f };
-	int[] shape2 = { 4 };
-	var expectedTanhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var actualTanhTensor = tensor.Tanh();
-
-	for (int i = 0; i < actualTanhTensor.Size; i++)
-	{
-		Assert.AreEqual (expectedTanhTensor.Data[i], actualTanhTensor.Data[i]);
-	}
-}
-
-[Test]
-public void SizeTensor()
+public void TransposeNoDimensionsSpecified()
 {
 	float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-	int[] shape1 = { 2, 3, 2 };
+	int[] shape1 = { 3, 2, 2 };
+
+	// Test Tensor with more than 2 dimensions
 	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	var actualSizeTensor = tensor.SizeTensor();
-
-	float[] data2 = { 2, 3, 2 };
-	int[] shape2 = { 3 };
-	var expectedSizeTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	for (int i = 0; i < shape1.Length; i++)
-	{
-		Assert.AreEqual (actualSizeTensor.Data[i], expectedSizeTensor.Data[i]);
-	}
-}
-
-[Test]
-public void Sqrt()
-{
-	float[] data1 = { float.MaxValue, float.MinValue, 1f, 4f, 5f, 2.3232f, -30f };
-	int[] shape1 = { 7 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { 1.8446743E+19f, float.NaN, 1f, 2f, 2.236068f, 1.524205f, float.NaN };
-	int[] shape2 = { 7 };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var actualTensor = tensor1.Sqrt();
-
-	for (int i = 0; i < expectedTensor.Size; i++)
-	{
-		Assert.AreEqual (Math.Round(expectedTensor.Data[i], 3), Math.Round(actualTensor.Data[i], 3));
-	}
-}
-
-[Test]
-public void Sinh()
-{
-	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
-	int[] shape2 = { 4 };
-	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	var actualSinhTensor = tensor1.Sinh();
-
-	for (int i = 0; i < actualSinhTensor.Size; i++)
-	{
-		var rounded = Decimal.Round((Decimal)actualSinhTensor.Data[i], 5);
-		Assert.AreEqual (expectedSinhTensor.Data[i], rounded);
-	}
-}
-
-[Test]
-public void Sinh_()
-{
-	float[] data1 = { -0.6366f, 0.2718f, 0.4469f, 1.3122f };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	float[] data2 = { -0.68048f, 0.27516f, 0.46193f, 1.72255f };
-	int[] shape2 = { 4 };
-	var expectedSinhTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-
-	tensor1.Sinh (inline: true);
-
-	for (int i = 0; i < tensor1.Size; i++)
-	{
-		var rounded = Decimal.Round((Decimal)tensor1.Data[i], 5);
-		Assert.AreEqual (expectedSinhTensor.Data[i], rounded);
-	}
-}
-
-[Test]
-public void Squeeze()
-{
-	float[] data1 = {1, 2, 3, 4};
-	int[] shape1 = {2, 1, 2, 1};
-
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	var newTensor = tensor.Squeeze();
-
-	Assert.AreEqual(2, newTensor.Shape[0]);
-	Assert.AreEqual(2, newTensor.Shape[1]);
-	Assert.AreEqual(2, newTensor.Shape.Length);
-
-	var anotherTensor = tensor.Squeeze(dim: 3);
-
-	Assert.AreEqual(2, anotherTensor.Shape[0]);
-	Assert.AreEqual(1, anotherTensor.Shape[1]);
-	Assert.AreEqual(3, anotherTensor.Shape.Length);
-}
-
-[Test]
-public void Squeeze_()
-{
-	float[] data1 = {1, 2, 3, 4};
-	int[] shape1 = {2, 1, 2, 1};
-
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	tensor1.Squeeze(inline: true);
-
-	Assert.AreEqual(2, tensor1.Shape[0]);
-	Assert.AreEqual(2, tensor1.Shape[1]);
-	Assert.AreEqual(2, tensor1.Shape.Length);
-
-	float[] data2 = {1, 2, 3, 4};
-	int[] shape2 = {2, 1, 2, 1};
-
-	var tensor2 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-
-	var anotherTensor = tensor2.Squeeze(dim: 3, inline: true);
-
-	Assert.AreEqual(2, tensor2.Shape[0]);
-	Assert.AreEqual(1, tensor2.Shape[1]);
-	Assert.AreEqual(3, tensor2.Shape.Length);
-}
-
-[Test]
-public void Trace()
-{
-	// test #1
-	float[] data1 = { 1.2f, 2, 3, 4 };
-	int[] shape1 = { 2, 2 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	float actual = tensor.Trace();
-	float expected = 5.2f;
-
-	Assert.AreEqual (expected, actual);
-
-	// test #2
-	float[] data3 = { 1, 2, 3 };
-	int[] shape3 = { 3 };
-	var non2DTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
-	Assert.That(() => non2DTensor.Trace(),
+	Assert.That(() => tensor.Transpose(),
 	            Throws.TypeOf<InvalidOperationException>());
-}
 
-[Test]
-public void Trunc()
-{
-	float[] data = { -0.323232f, 0.323893f, 0.99999f, 1.2323389f };
-	int[] shape = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-
-	float[] truncatedData = { -0f, 0f, 0f, 1f };
-	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: truncatedData, _shape: shape);
-
-	var truncatedTensor = tensor.Trunc();
-	for (int i = 0; i < truncatedTensor.Size; i++)
-	{
-		Assert.AreEqual (expectedTensor.Data[i], truncatedTensor.Data[i]);
-	}
+	// Test tensor with less than 2 dimensions
+	float[] data2 = { 1, 2, 3, 4, 5 };
+	int[] shape2 = { 5 };
+	tensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	Assert.That(() => tensor.Transpose(),
+	            Throws.TypeOf<InvalidOperationException>());
 }
 
 public void Triu_()
@@ -1911,280 +2109,41 @@ public void Triu_()
 	}
 }
 
-public void IsContiguous()
-{
-	float[] data = new float[] { 1, 2, 3, 4, 5, 6 };
-	int[] shape = new int[] { 2, 3 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-	Assert.AreEqual(tensor.IsContiguous(), true);
-	var transposedTensor = tensor.Transpose();
-	Assert.AreEqual(transposedTensor.IsContiguous(), false);
-}
-
-// TODO: AddMatrixMultiplyTests when implemented on CPU
-// TODO: MultiplyDerivative when implemented on CPU
-
-
 [Test]
-public void Min()
+public void Trunc()
 {
-	float[] data = new float[] {
-		1, 2, 3,
-		4, 5, 6
-	};
-
-	int[] shape = new int[] { 2, 3 };
+	float[] data = { -0.323232f, 0.323893f, 0.99999f, 1.2323389f };
+	int[] shape = { 4 };
 	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
 
-	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
+	float[] truncatedData = { -0f, 0f, 0f, 1f };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: truncatedData, _shape: shape);
 
-	FloatTensor result = tensor.Min();
-
-	Console.WriteLine("tensor.Min() {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Size, 1);
-	Assert.AreEqual(result.Data[0], 1.0);
-
-	result = tensor.Min(0);
-
-	Console.WriteLine("tensor.Min(0) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 1.0);
-	Assert.AreEqual(result.Data[1], 2.0);
-	Assert.AreEqual(result.Data[2], 3.0);
-
-	result = tensor.Min(1);
-
-	Console.WriteLine("tensor.Min(1) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 2);
-	Assert.AreEqual(result.Size, 2);
-	Assert.AreEqual(result.Data[0], 1.0);
-	Assert.AreEqual(result.Data[1], 4.0);
-
-	result = tensor.Min(0, true);
-
-	Console.WriteLine("tensor.Min(0, true) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 2);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Shape[1], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 1.0);
-	Assert.AreEqual(result.Data[1], 2.0);
-	Assert.AreEqual(result.Data[2], 3.0);
+	var truncatedTensor = tensor.Trunc();
+	for (int i = 0; i < truncatedTensor.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data[i], truncatedTensor.Data[i]);
+	}
 }
 
 [Test]
-public void Max()
+public void Zero_()
 {
-	float[] data = new float[] {
-		1, 2, 3,
-		4, 5, 6
-	};
+	float[] data1 = { -1, 0, 1, float.MaxValue, float.MinValue };
+	int[] shape1 = { 5 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
-	int[] shape = new int[] { 2, 3 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
+	float[] data2 = { 0, 0, 0, 0, 0 };
+	int[] shape2 = { 5 };
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
+	tensor1.Zero_ ();
 
-	FloatTensor result = tensor.Max();
-
-	Console.WriteLine("tensor.Max() {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Size, 1);
-	Assert.AreEqual(result.Data[0], 6.0);
-
-	result = tensor.Max(0);
-
-	Console.WriteLine("tensor.Max(0) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 4.0);
-	Assert.AreEqual(result.Data[1], 5.0);
-	Assert.AreEqual(result.Data[2], 6.0);
-
-	result = tensor.Max(1);
-
-	Console.WriteLine("tensor.Max(1) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 2);
-	Assert.AreEqual(result.Size, 2);
-	Assert.AreEqual(result.Data[0], 3.0);
-	Assert.AreEqual(result.Data[1], 6.0);
-
-	result = tensor.Max(0, true);
-
-	Console.WriteLine("tensor.Max(0, true) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 2);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Shape[1], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 4.0);
-	Assert.AreEqual(result.Data[1], 5.0);
-	Assert.AreEqual(result.Data[2], 6.0);
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (expectedTensor.Data[i], tensor1.Data[i]);
+	}
 }
-
-[Test]
-public void Sum()
-{
-	float[] data = new float[] {
-		1, 2, 3,
-		4, 5, 6
-	};
-
-	int[] shape = new int[] { 2, 3 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-
-	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
-
-	FloatTensor result = tensor.Sum();
-
-	Console.WriteLine("tensor.Sum() {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Size,  1);
-	Assert.AreEqual(result.Data[0], 21.0);
-
-	result = tensor.Sum(0);
-
-	Console.WriteLine("tensor.Sum(0) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 5.0);
-	Assert.AreEqual(result.Data[1], 7.0);
-	Assert.AreEqual(result.Data[2], 9.0);
-
-	result = tensor.Sum(1);
-
-	Console.WriteLine("tensor.Sum(1) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 2);
-	Assert.AreEqual(result.Size, 2);
-	Assert.AreEqual(result.Data[0], 6.0);
-	Assert.AreEqual(result.Data[1], 15.0);
-
-	result = tensor.Sum(0, true);
-
-	Console.WriteLine("tensor.Sum(0, true) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 2);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Shape[1], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 5.0);
-	Assert.AreEqual(result.Data[1], 7.0);
-	Assert.AreEqual(result.Data[2], 9.0);
-}
-
-[Test]
-public void Prod()
-{
-	float[] data = new float[] {
-		1, 2, 3,
-		4, 5, 6
-	};
-
-	int[] shape = new int[] { 2, 3 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-
-	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
-
-	FloatTensor result = tensor.Prod();
-
-	Console.WriteLine("tensor.Prod() {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Size,  1);
-	Assert.AreEqual(result.Data[0], 720.0);
-
-	result = tensor.Prod(0);
-
-	Console.WriteLine("tensor.Prod(0) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 4.0);
-	Assert.AreEqual(result.Data[1], 10.0);
-	Assert.AreEqual(result.Data[2], 18.0);
-
-	result = tensor.Prod(1);
-
-	Console.WriteLine("tensor.Prod(1) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 2);
-	Assert.AreEqual(result.Size, 2);
-	Assert.AreEqual(result.Data[0], 6.0);
-	Assert.AreEqual(result.Data[1], 120.0);
-
-	result = tensor.Prod(0, true);
-
-	Console.WriteLine("tensor.Prod(0, true) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 2);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Shape[1], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 4.0);
-	Assert.AreEqual(result.Data[1], 10.0);
-	Assert.AreEqual(result.Data[2], 18.0);
-}
-
-[Test]
-public void Mean()
-{
-	float[] data = new float[] {
-		1, 2, 3,
-		4, 5, 6
-	};
-
-	int[] shape = new int[] { 2, 3 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data, _shape: shape);
-
-	Console.WriteLine("tensor {0}", string.Join(", ", tensor.Data));
-
-	FloatTensor result = tensor.Mean();
-
-	Console.WriteLine("tensor.Mean() {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Size,  1);
-	Assert.AreEqual(result.Data[0], 21.0 / 6.0);
-
-	result = tensor.Mean(0);
-
-	Console.WriteLine("tensor.Mean(0) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 5.0 / 2.0);
-	Assert.AreEqual(result.Data[1], 7.0 / 2.0);
-	Assert.AreEqual(result.Data[2], 9.0 / 2.0);
-
-	result = tensor.Mean(1);
-
-	Console.WriteLine("tensor.Mean(1) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 1);
-	Assert.AreEqual(result.Shape[0], 2);
-	Assert.AreEqual(result.Size, 2);
-	Assert.AreEqual(result.Data[0], 6.0 / 3.0);
-	Assert.AreEqual(result.Data[1], 15.0 / 3.0);
-
-	result = tensor.Mean(0, true);
-
-	Console.WriteLine("tensor.Mean(0, true) {0}", string.Join(", ", result.Data));
-	Assert.AreEqual(result.Shape.Length, 2);
-	Assert.AreEqual(result.Shape[0], 1);
-	Assert.AreEqual(result.Shape[1], 3);
-	Assert.AreEqual(result.Size, 3);
-	Assert.AreEqual(result.Data[0], 5.0 / 2.0);
-	Assert.AreEqual(result.Data[1], 7.0 / 2.0);
-	Assert.AreEqual(result.Data[2], 9.0 / 2.0);
-}
-
 
 /* closes class and namespace */
 }
