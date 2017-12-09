@@ -184,7 +184,7 @@ public void Add_()
 }
 
 [Test]
-public void AddMatrixMultiplyTest()
+public void AddMatrixMultiply()
 {
 	float[] base1_data = new float[] { 1, 2, 3, 4 };
 	int[] base1_shape = new int[] { 2, 2 };
@@ -250,7 +250,7 @@ public void AddMatrixMultiplyTest()
 }
 
 [Test]
-public void AddMatrixVectorProductTest()
+public void AddMatrixVectorProduct()
 {
 	float[] baseData = new float[] { 1, 2 };
 	int[] baseShape = new int[] { 2 };
@@ -610,6 +610,8 @@ public void Cosh_()
 
 	AssertApproximatelyEqualTensorsData(expectedCoshTensor, tensor1);
 }
+
+// 'Create1DTensor', 'Create2DTensor' and 'Create3DTensor' non required for GPU
 
 [Test]
 public void DivisionElementwise()
