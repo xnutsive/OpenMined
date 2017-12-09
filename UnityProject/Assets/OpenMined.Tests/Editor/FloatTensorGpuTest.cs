@@ -1053,6 +1053,33 @@ public void AddMatrixMultiplyTest()
 	AssertEqualTensorsData(expectedTensor2, base2);
 }
 
+[Test]
+public void AddMatrixVectorProductTest()
+{
+	float[] baseData = new float[] { 1, 2 };
+	int[] baseShape = new int[] { 2 };
+	var baseVector = new FloatTensor(_ctrl: ctrl, _data: baseData, _shape: baseShape);
+	baseVector.Gpu(shader);
+
+	float[] data1 = { 1, 2, 3, 4 };
+	int[] shape1 = new int[] { 2, 2 };
+	var matrix = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	matrix.Gpu(shader);
+
+	float[] data2 = new float[] { 5, 6 };
+	int[] shape2 = new int[] { 2 };
+	var vector = new FloatTensor (_ctrl: ctrl, _data: data2, _shape: shape2);
+	vector.Gpu(shader);
+
+	baseVector.AddMatrixVectorProduct(matrix, vector);
+
+	float[] expectedData = new float[] { 18, 41 };
+	int[] expectedShape = new int[] { 2 };
+	var expectedVector = new FloatTensor(_ctrl: ctrl, _data: expectedData, _shape: expectedShape);
+	expectedVector.Gpu(shader);
+
+	AssertEqualTensorsData(expectedVector, baseVector);
+}
 
 }
 }

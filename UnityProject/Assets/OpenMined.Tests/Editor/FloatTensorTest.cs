@@ -1568,7 +1568,6 @@ public void AddMatrixVectorProductTest()
 	{
 		Assert.AreEqual (expectedVector.Data[i], baseVector.Data[i]);
 	}
-
 }
 
 [Test]

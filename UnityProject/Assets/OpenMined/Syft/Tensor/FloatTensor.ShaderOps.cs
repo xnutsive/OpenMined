@@ -443,7 +443,7 @@ public void AddMatrixVectorProductGPU (FloatTensor matrix, FloatTensor vector)
 {
 	var refShapeBuffer = SendIntToGpu (AddMVKernel_, this.Shape [0], "AddMVRefShape_");
 	shader.SetBuffer (AddMVKernel_, "AddMVRefData", dataBuffer);
-	shader.SetBuffer (AddMVKernel_, "AddMVMatrixData", matrix.DataBuffer);                 //d
+	shader.SetBuffer (AddMVKernel_, "AddMVMatrixData", matrix.DataBuffer);
 	shader.SetBuffer (AddMVKernel_, "AddMVVectorData", vector.DataBuffer);
 	shader.Dispatch (AddMVKernel_, this.Size, 1, 1);
 	refShapeBuffer.Release ();
