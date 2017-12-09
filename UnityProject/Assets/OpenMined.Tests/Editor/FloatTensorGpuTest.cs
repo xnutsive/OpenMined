@@ -678,5 +678,59 @@ public void DivisionElementwiseUnequalShapes_()
 	            Throws.TypeOf<InvalidOperationException>());
 }
 
+[Test]
+public void MultiplicationScalar()
+{
+	float[] data1 = { float.MinValue, -10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue };
+	int[] shape1 = {2, 4};
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	// Test multiplication by 0
+	float scalar = 0;
+	var result = tensor1.Mul (scalar);
+
+	float[] data2 = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	int[] shape2 = {2, 4};
+	var expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedTensor.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor, result);
+
+	// Test multiplication by positive
+	scalar = 99;
+	result = tensor1.Mul (scalar);
+
+	float[] data3 = { float.NegativeInfinity, -990, -148.5f, 0, 148.5f, 990, 1980, float.PositiveInfinity };
+	int[] shape3 = {2, 4};
+	expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	expectedTensor.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor, result);
+
+	// Test multiplication by negative
+	scalar = -99;
+	result = tensor1.Mul (scalar);
+
+	float[] data4 = { float.PositiveInfinity, 990, 148.5f, 0, -148.5f, -990, -1980, float.NegativeInfinity };
+	int[] shape4 = {2, 4};
+	expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data4, _shape: shape4);
+	expectedTensor.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor, result);
+
+	// Test multiplication by decimal
+	scalar = 0.000001f;
+	result = tensor1.Mul (scalar);
+
+	float[] data5 = { float.MinValue * scalar, -0.000010f, -0.0000015f, 0, 0.0000015f, 0.000010f, 0.000020f, float.MaxValue * scalar};
+	int[] shape5 = {2, 4};
+	expectedTensor = new FloatTensor(_ctrl: ctrl, _data: data5, _shape: shape5);
+	expectedTensor.Gpu(shader);
+
+	AssertEqualTensorsData(expectedTensor, result);
+}
+
+
 }
 }

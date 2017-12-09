@@ -1171,6 +1171,7 @@ public void MultiplicationScalar()
 		Assert.AreEqual (tensor2.Data [i] * scalar, result.Data [i] );
 	}
 }
+
 [Test]
 public void Ceil()
 {
