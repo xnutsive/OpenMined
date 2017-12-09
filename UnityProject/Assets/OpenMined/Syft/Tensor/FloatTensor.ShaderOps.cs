@@ -802,7 +802,7 @@ public FloatTensor TanGPU ()
 public void TanGPU_ ()
 {
 	shader.SetBuffer (TanKernel_, "TanData_", dataBuffer);
-	shader.Dispatch (TanKernel, this.size, 1, 1);
+	shader.Dispatch (TanKernel_, this.size, 1, 1);
 }
 
 

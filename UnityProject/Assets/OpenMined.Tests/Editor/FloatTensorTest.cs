@@ -1534,13 +1534,13 @@ public void Tan()
 {
 	float[] data1 = { 30, 20, 40, 50 };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {-6.4053312f, 2.23716094f, -1.11721493f, -0.27190061f};
 	int[] shape2 = { 4 };
 	var expectedTanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	var actualTanTensor = tensor.Tan();
+	var actualTanTensor = tensor1.Tan();
 
 	for (int i = 2; i < actualTanTensor.Size; i++)
 	{
@@ -1553,17 +1553,17 @@ public void Tan_()
 {
 	float[] data1 = { 30, 20, 40, 50 };
 	int[] shape1 = { 4 };
-	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
 
 	float[] data2 = {-6.4053312f, 2.23716094f, -1.11721493f, -0.27190061f};
 	int[] shape2 = { 4 };
 	var expectedTanTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
 
-	tensor.Tan (inline: true);
+	tensor1.Tan (inline: true);
 
-	for (int i = 2; i < tensor.Size; i++)
+	for (int i = 2; i < tensor1.Size; i++)
 	{
-		Assert.AreEqual (expectedTanTensor.Data[i], tensor.Data[i]);
+		Assert.AreEqual (expectedTanTensor.Data[i], tensor1.Data[i]);
 	}
 }
 
