@@ -477,6 +477,11 @@ namespace OpenMined.Syft.Tensor
                     var result = Exp();
                     return result.Id.ToString();
                 }
+                case "exp_":
+                {
+                    Exp(inline: true);
+                    return Id.ToString();
+                }
                 case "mul_scalar":
                 {
                     FloatTensor result = Mul(float.Parse(msgObj.tensorIndexParams[0]));

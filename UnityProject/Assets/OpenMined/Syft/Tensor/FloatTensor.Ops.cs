@@ -362,12 +362,14 @@ public FloatTensor Div(float value, bool inline = false)
 	return result;
 }
 
-public FloatTensor Exp()
+public FloatTensor Exp(bool inline = false)
 {
-	var result = new FloatTensor(_ctrl: ctrl, _shape: shape, _shader: this.shader);
+	//var result = new FloatTensor(_ctrl:ctrl, _shape:shape, _shader:this.shader);
+	FloatTensor result = inline ? this : this.emptyTensorCopy();
 
 	if (dataOnGpu) {
-		return ExpGPU ();
+		if (inline) { ExpGPU_(); return this;}
+		else { return ExpGPU (); }
 	} else {
 		var nCpu = SystemInfo.processorCount;
 		Parallel.For (0, nCpu, workerId => {

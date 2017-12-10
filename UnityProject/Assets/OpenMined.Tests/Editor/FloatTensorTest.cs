@@ -856,6 +856,25 @@ public void Exp()
 }
 
 [Test]
+public void Exp_()
+{
+	float[] data1 = { 0, 1, 2, 5 };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+
+	float[] data2 = {1f, 2.71828183f, 7.3890561f, 148.4131591f};
+	int[] shape2 = { 4 };
+	var expectedExpTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+
+	tensor1.Exp(inline: true);
+
+	for (int i = 0; i < tensor1.Size; i++)
+	{
+		Assert.AreEqual (Math.Round(expectedExpTensor.Data[i],3), Math.Round(tensor1.Data[i],3));
+	}
+}
+
+[Test]
 public void Floor()
 {
 	float[] data1 = { 5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f };

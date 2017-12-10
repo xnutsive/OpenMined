@@ -297,6 +297,15 @@ void Exp (uint3 id: SV_DispatchThreadID) {
 	ExpResult[id.x] = exp(ExpData[id.x]);
 }
 
+#pragma kernel Exp_
+
+RWStructuredBuffer<float> ExpData_;
+
+[numthreads(4,1,1)]
+void Exp_ (uint3 id: SV_DispatchThreadID) {
+    ExpData_[id.x] = exp(ExpData_[id.x]);
+}
+
 #pragma kernel Floor_
 
 RWStructuredBuffer<float> FloorData_;
