@@ -1130,42 +1130,6 @@ public void Rsqrt()
 }
 
 [Test]
-public void Sin()
-{
-	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	tensor1.Gpu(shader);
-
-	float[] data2 = { 0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
-	int[] shape2 = { 4 };
-	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	expectedSinTensor.Gpu(shader);
-
-	var actualSinTensor = tensor1.Sin();
-
-	AssertApproximatelyEqualTensorsData(expectedSinTensor, actualSinTensor);
-}
-
-[Test]
-public void Sin_()
-{
-	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
-	int[] shape1 = { 4 };
-	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
-	tensor1.Gpu(shader);
-
-	float[] data2 = {  0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
-	int[] shape2 = { 4 };
-	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
-	expectedSinTensor.Gpu(shader);
-
-	tensor1.Sin (inline: true);
-
-	AssertApproximatelyEqualTensorsData(expectedSinTensor, tensor1);
-}
-
-[Test]
 public void Sigmoid()
 {
 	float[] data1 = { 0.0f };
@@ -1265,6 +1229,42 @@ public void Sign_()
 	tensor1.Sign (inline: true);
 
 	AssertEqualTensorsData(expectedTensor, tensor1);
+}
+
+[Test]
+public void Sin()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = { 0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
+	int[] shape2 = { 4 };
+	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedSinTensor.Gpu(shader);
+
+	var actualSinTensor = tensor1.Sin();
+
+	AssertApproximatelyEqualTensorsData(expectedSinTensor, actualSinTensor);
+}
+
+[Test]
+public void Sin_()
+{
+	float[] data1 = { 0.4f, 0.5f, 0.3f, -0.1f };
+	int[] shape1 = { 4 };
+	var tensor1 = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor1.Gpu(shader);
+
+	float[] data2 = {  0.38941834f,  0.47942554f,  0.29552021f, -0.09983342f };
+	int[] shape2 = { 4 };
+	var expectedSinTensor = new FloatTensor(_ctrl: ctrl, _data: data2, _shape: shape2);
+	expectedSinTensor.Gpu(shader);
+
+	tensor1.Sin (inline: true);
+
+	AssertApproximatelyEqualTensorsData(expectedSinTensor, tensor1);
 }
 
 [Test]
