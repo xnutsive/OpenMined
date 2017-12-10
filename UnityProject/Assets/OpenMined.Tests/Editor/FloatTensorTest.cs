@@ -10,6 +10,7 @@ using UnityEditor.VersionControl;
 namespace OpenMined.Tests
 {
 
+[Category("FloatTensorCPUTests")]
 public class FloatTensorTest
 {
 

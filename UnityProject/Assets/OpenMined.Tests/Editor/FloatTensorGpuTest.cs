@@ -11,6 +11,7 @@ using UnityEditor.VersionControl;
 namespace OpenMined.Tests
 {
 
+[Category("FloatTensorGPUTests")]
 public class FloatTensorGpuTest
 {
 
