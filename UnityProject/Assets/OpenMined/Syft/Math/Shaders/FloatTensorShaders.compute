@@ -428,21 +428,27 @@ RWStructuredBuffer<float> Reduce1DSumResult;
 groupshared float sharedMem[REDUCE1D_NUMTHREADS * 1 * 1];
 
 [numthreads(REDUCE1D_NUMTHREADS, 1, 1)]
-void Reduce1DSum (uint3 Gid: SV_GroupID, uint3 id: SV_DispatchThreadID, uint GI: SV_GroupIndex) {
-    sharedMem[GI] = Reduce1DSumData[id.x];
+void Reduce1DSum (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID, uint3 id: SV_DispatchThreadID) {
+    sharedMem[groupThreadID.x] = Reduce1DSumData[id.x];
+
+		if ( isnan(sharedMem[groupThreadID.x]) ) {
+				sharedMem[groupThreadID.x] = 0;
+		}
+		GroupMemoryBarrierWithGroupSync();
 
     [unroll(REDUCE1D_NUMTHREADS / 2)]
     for (uint s = REDUCE1D_NUMTHREADS / 2; s > 0; s >>= 1)
     {
-        if (GI < s)
-            sharedMem[GI] += sharedMem[GI + s];
+        if (groupThreadID.x < s) {
+            sharedMem[groupThreadID.x] += sharedMem[groupThreadID.x + s];
+				}
         GroupMemoryBarrierWithGroupSync();
     }
 
     // Have the 1st thread write out to the output
-    if (GI == 0)
+    if (groupThreadID.x == 0)
     {
-        Reduce1DSumResult[Gid.x] = sharedMem[0];
+				Reduce1DSumResult[groupID.x] = sharedMem[0];
     }
 }
 

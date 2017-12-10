@@ -877,6 +877,7 @@ public float TraceGPU ()
 	// 3. copy to cpu and sum over groups -> trace
 	float[] resultPerGroup = new float[numgroups];
 	resultPerGroupBuffer.GetData(resultPerGroup);
+	UnityEngine.Debug.Log(resultPerGroup[0]);
 
 	float sum = 0;
 	foreach (var item in resultPerGroup) {

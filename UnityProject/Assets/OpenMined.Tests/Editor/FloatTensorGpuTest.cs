@@ -1562,6 +1562,28 @@ public void Tanh()
 }
 
 [Test]
+public void Trace()
+{
+	// test #1
+	float[] data1 = { 1.2f, 2, 3, 4 };
+	int[] shape1 = { 2, 2 };
+	var tensor = new FloatTensor(_ctrl: ctrl, _data: data1, _shape: shape1);
+	tensor.Gpu(shader);
+	float actual = tensor.Trace();
+	float expected = 5.2f;
+
+	Assert.AreEqual (expected, actual);
+
+	// test #2
+	float[] data3 = { 1, 2, 3 };
+	int[] shape3 = { 3 };
+	var non2DTensor = new FloatTensor(_ctrl: ctrl, _data: data3, _shape: shape3);
+	non2DTensor.Gpu(shader);
+	Assert.That(() => non2DTensor.Trace(),
+	            Throws.TypeOf<InvalidOperationException>());
+}
+
+[Test]
 public void Triu_()
 {
 	int k = 0;

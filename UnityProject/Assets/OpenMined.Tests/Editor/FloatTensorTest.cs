@@ -1347,7 +1347,6 @@ public void Round()
 	}
 }
 
-
 [Test]
 public void Rsqrt()
 {
