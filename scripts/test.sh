@@ -5,8 +5,12 @@ PROJECT_FOLDER="$(pwd)/UnityProject"
 RESULTS_FILENAME="results.xml"
 RESULTS_FILEPATH="$(pwd)"/$RESULTS_FILENAME
 EDITOR_LOG_FILEPATH=" $(echo ~/Library/Logs/Unity/Editor.log)"
+GPU_TESTS_FILEPATH=$PROJECT_FOLDER/Assets/OpenMined.Tests/Editor/FloatTensorGpuTest.cs
 
 echo $PROJECT_FOLDER
+
+## Delete GPU tests file
+rm $GPU_TESTS_FILEPATH
 
 ## Run Unity Editor tests
 echo "travis_fold:start:editor_tests"
