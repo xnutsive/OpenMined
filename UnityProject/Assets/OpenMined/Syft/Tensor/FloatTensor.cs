@@ -215,7 +215,9 @@ namespace OpenMined.Syft.Tensor
 
 //			// Lastly: let's set the ID of the tensor.
 //			// IDEs might show a warning, but ref and volatile seems to be working with Interlocked API.
-            id = System.Threading.Interlocked.Increment (ref nCreated);
+
+            id = System.Threading.Interlocked.Increment(ref nCreated);
+
 
             ctrl.addTensor(this);
             if (SystemInfo.supportsComputeShaders && shader == null)
@@ -477,6 +479,11 @@ namespace OpenMined.Syft.Tensor
                     var result = Exp();
                     return result.Id.ToString();
                 }
+                case "exp_":
+                {
+                    Exp(inline: true);
+                    return Id.ToString();
+                }
                 case "mul_scalar":
                 {
                     FloatTensor result = Mul(float.Parse(msgObj.tensorIndexParams[0]));
@@ -503,6 +510,11 @@ namespace OpenMined.Syft.Tensor
                 {
                     this.Floor(inline: true);
                     return this.id + "";
+                }
+                case "round":
+                {
+                    var result = Round();
+                    return result.Id.ToString();
                 }
                 case "get":
                 {
@@ -555,21 +567,26 @@ namespace OpenMined.Syft.Tensor
                         }
                         case "data":
                         {
-                          string out_str = "";
+                            string out_str = "";
 
-                          if (dataOnGpu) {
-                            int[] temp_data = new int[size];
-                            dataBuffer.GetData (temp_data);
-                            for (int i = 0; i < size; i++) {
-                              out_str += temp_data [i] + ",";
+                            if (dataOnGpu)
+                            {
+                                int[] temp_data = new int[size];
+                                dataBuffer.GetData(temp_data);
+                                for (int i = 0; i < size; i++)
+                                {
+                                    out_str += temp_data[i] + ",";
+                                }
                             }
-                          } else {
-                            for (int i = 0; i < size; i++) {
-                              out_str += data [i] + ",";
+                            else
+                            {
+                                for (int i = 0; i < size; i++)
+                                {
+                                    out_str += data[i] + ",";
+                                }
                             }
-                          }
 
-                          return out_str;
+                            return out_str;
                         }
                         case "dataOnGpu":
                         {
@@ -637,9 +654,9 @@ namespace OpenMined.Syft.Tensor
                 }
                 case "mm":
                 {
-                  var tensor_1 = ctrl.getTensor (int.Parse (msgObj.tensorIndexParams [0]));
-                  var result = this.MM (tensor_1);
-                  return result.id + "";
+                    var tensor_1 = ctrl.getTensor(int.Parse(msgObj.tensorIndexParams[0]));
+                    var result = this.MM(tensor_1);
+                    return result.id + "";
                 }
                 case "pow_elem_":
                 {
@@ -776,12 +793,6 @@ namespace OpenMined.Syft.Tensor
                     this.Sub(float.Parse(msgObj.tensorIndexParams[0]), inline: true);
                     return this.id + "";
                 }
-                case "sum_dim":
-                {
-                    Debug.LogFormat("sum_dim");
-                    FloatTensor result = this.Sum(int.Parse(msgObj.tensorIndexParams[0]));
-                    return result.Id + "";
-                }
                 case "to_numpy":
                 {
                     return string.Join(" ", data);
@@ -863,7 +874,19 @@ namespace OpenMined.Syft.Tensor
                     View(new_dims, inline: true);
                     return Id.ToString();
                 }
+                case "view_as":
+                {
+                    var tensor_1 = ctrl.getTensor (int.Parse (msgObj.tensorIndexParams [0]));
+                    var result = ViewAs (tensor_1, false);
+                    return result.Id.ToString ();
+                }
 
+                case "view_as_":
+                {
+                    var tensor_1 = ctrl.getTensor (int.Parse (msgObj.tensorIndexParams [0]));
+                    this.ViewAs (tensor_1, true);
+                    return Id.ToString ();
+                }
                 case "zero_":
                 {
                     Zero_();
@@ -903,6 +926,76 @@ namespace OpenMined.Syft.Tensor
                         return Id.ToString();
                     }
                 }
+                case "min":
+                {
+                    int dim = -1;
+                    bool keepdim = false;
+
+                    if (msgObj.tensorIndexParams.Length > 0)
+                    {
+                        dim = int.Parse(msgObj.tensorIndexParams[0]);
+                        keepdim = bool.Parse(msgObj.tensorIndexParams[1]);
+
+                    }
+
+                    return Min(dim: dim, keepdim: keepdim).Id.ToString();
+                }
+                case "max":
+                {
+                    int dim = -1;
+                    bool keepdim = false;
+
+                    if (msgObj.tensorIndexParams.Length > 0)
+                    {
+                        dim = int.Parse(msgObj.tensorIndexParams[0]);
+                        keepdim = bool.Parse(msgObj.tensorIndexParams[1]);
+
+                    }
+
+                    return Max(dim: dim, keepdim: keepdim).Id.ToString();
+                }
+                case "sum":
+                {
+                    int dim = -1;
+                    bool keepdim = false;
+
+                    if (msgObj.tensorIndexParams.Length > 0)
+                    {
+                        dim = int.Parse(msgObj.tensorIndexParams[0]);
+                        keepdim = bool.Parse(msgObj.tensorIndexParams[1]);
+
+                    }
+
+                    return Sum(dim: dim, keepdim: keepdim).Id.ToString();
+                }
+                case "prod":
+                {
+                    int dim = -1;
+                    bool keepdim = false;
+
+                    if (msgObj.tensorIndexParams.Length > 0)
+                    {
+                        dim = int.Parse(msgObj.tensorIndexParams[0]);
+                        keepdim = bool.Parse(msgObj.tensorIndexParams[1]);
+
+                    }
+
+                    return Prod(dim: dim, keepdim: keepdim).Id.ToString();
+                }
+                case "mean":
+                {
+                    int dim = -1;
+                    bool keepdim = false;
+
+                    if (msgObj.tensorIndexParams.Length > 0)
+                    {
+                        dim = int.Parse(msgObj.tensorIndexParams[0]);
+                        keepdim = bool.Parse(msgObj.tensorIndexParams[1]);
+
+                    }
+
+                    return Mean(dim: dim, keepdim: keepdim).Id.ToString();
+                }
                 default:
                     break;
             }
@@ -938,8 +1031,7 @@ namespace OpenMined.Syft.Tensor
                     for (int i = 0; i < d1; i++)
                     {
                         float f = data[i + j * d1 + k * d1 * d2];
-						            print += f.ToString("0.0000") + ", ";
-
+                        print += f.ToString("0.0000") + ", ";
                     }
                     print += "\n";
                 }

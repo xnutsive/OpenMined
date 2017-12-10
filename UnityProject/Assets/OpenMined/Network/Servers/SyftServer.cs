@@ -1,43 +1,42 @@
 ﻿using UnityEngine;
-
 using OpenMined.Network.Controllers;
 using OpenMined.Syft;
 
 namespace OpenMined.Network.Servers
 {
-	public class SyftServer : MonoBehaviour
-	{
-		public bool Connected;
-		private NetMqPublisher _netMqPublisher;
-		private string _response;
 
-		private SyftController controller;
+    public class SyftServer : MonoBehaviour
+    {
+        public bool Connected;
+        private NetMqPublisher _netMqPublisher;
+        private string _response;
 
-		[SerializeField]
-		private ComputeShader shader;
+        private SyftController controller;
 
-		private void Start ()
-		{
-			_netMqPublisher = new NetMqPublisher (HandleMessage);
-			_netMqPublisher.Start ();
+        [SerializeField] private ComputeShader shader;
 
-			controller = new SyftController (shader);
-		}
+        private void Start()
+        {
+            _netMqPublisher = new NetMqPublisher(HandleMessage);
+            _netMqPublisher.Start();
 
-		private void Update ()
-		{
-			_netMqPublisher.Update ();
-		}
+            controller = new SyftController(shader);
+        }
 
-		private string HandleMessage (string message)
-		{
-			//Debug.LogFormat("HandleMessage... {0}", message);
-			return controller.processMessage (message);
-		}
+        private void Update()
+        {
+            _netMqPublisher.Update();
+        }
 
-		private void OnDestroy ()
-		{
-			_netMqPublisher.Stop ();
-		}
-	}
+        private string HandleMessage(string message)
+        {
+            //Debug.LogFormat("HandleMessage... {0}", message);
+            return controller.processMessage(message);
+        }
+
+        private void OnDestroy()
+        {
+            _netMqPublisher.Stop();
+        }
+    }
 }

@@ -131,23 +131,22 @@ void AddElem (uint3 id: SV_DispatchThreadID) {
 RWStructuredBuffer<float> AddmmDataA_;
 RWStructuredBuffer<float> AddmmDataB_;
 RWStructuredBuffer<float> AddmmDataC_;
-RWStructuredBuffer<Dimensions> AddmmDimensions_;
+RWStructuredBuffer<int> AddmmDimensionsN_;
+RWStructuredBuffer<int> AddmmDimensionsO_;
 
 [numthreads(4,1,1)]
 void AddMM_ (uint3 id : SV_DispatchThreadID) {
-	// transpose
-	int columns = AddmmDimensions_[0].rows;
-	int rows = AddmmDimensions_[0].columns;
 
-	float product = 0;
+	int N = AddmmDimensionsN_[0];
+	int O = AddmmDimensionsO_[0];
 
-	int t = 0;
-	for (int i = 0; i < columns; i++) {
-		product += AddmmDataB_[id.x + t] * AddmmDataC_[i];
-		t += rows;
+	for (int i = 0; i < N; i++) {
+		int Arow = (int) ( ( id.x - (id.x % O) ) / O);
+		int Acol = id.x % O;
+		int BDataIndex = (Arow * N) + i;
+		int CDataIndex = Acol + (i * O);
+		AddmmDataA_[id.x] += AddmmDataB_[ BDataIndex ] * AddmmDataC_[ CDataIndex ];
 	}
-
-	AddmmDataA_[id.x] += product;
 }
 
 #pragma kernel AddMV_
@@ -263,7 +262,7 @@ RWStructuredBuffer<float> DivElemDataB_;
 
 [numthreads(4,1,1)]
 void DivElem_ (uint3 id: SV_DispatchThreadID) {
-	DivElemDataA_[id.x] = DivElemDataA_[id.x] / DivElemDataB_[id.x];
+	DivElemDataA_[id.x] /= DivElemDataB_[id.x];
 }
 
 #pragma kernel DivScalar
@@ -298,6 +297,15 @@ void Exp (uint3 id: SV_DispatchThreadID) {
 	ExpResult[id.x] = exp(ExpData[id.x]);
 }
 
+#pragma kernel Exp_
+
+RWStructuredBuffer<float> ExpData_;
+
+[numthreads(4,1,1)]
+void Exp_ (uint3 id: SV_DispatchThreadID) {
+    ExpData_[id.x] = exp(ExpData_[id.x]);
+}
+
 #pragma kernel Floor_
 
 RWStructuredBuffer<float> FloorData_;
@@ -315,6 +323,16 @@ RWStructuredBuffer<float> FloorResult;
 [numthreads(4,1,1)]
 void Floor (uint3 id: SV_DispatchThreadID) {
 		FloorResult[id.x] = floor(FloorData[id.x]);
+}
+
+#pragma kernel Round
+
+RWStructuredBuffer<float> RoundData;
+RWStructuredBuffer<float> RoundResult;
+
+[numthreads(4,1,1)]
+void Round (uint3 id: SV_DispatchThreadID) {
+	RoundResult[id.x] = round(RoundData[id.x]);
 }
 
 #pragma kernel MulScalar_
@@ -419,21 +437,27 @@ RWStructuredBuffer<float> Reduce1DSumResult;
 groupshared float sharedMem[REDUCE1D_NUMTHREADS * 1 * 1];
 
 [numthreads(REDUCE1D_NUMTHREADS, 1, 1)]
-void Reduce1DSum (uint3 Gid: SV_GroupID, uint3 id: SV_DispatchThreadID, uint GI: SV_GroupIndex) {
-    sharedMem[GI] = Reduce1DSumData[id.x];
+void Reduce1DSum (uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID, uint3 id: SV_DispatchThreadID) {
+    sharedMem[groupThreadID.x] = Reduce1DSumData[id.x];
+
+		if ( isnan(sharedMem[groupThreadID.x]) ) {
+				sharedMem[groupThreadID.x] = 0;
+		}
+		GroupMemoryBarrierWithGroupSync();
 
     [unroll(REDUCE1D_NUMTHREADS / 2)]
     for (uint s = REDUCE1D_NUMTHREADS / 2; s > 0; s >>= 1)
     {
-        if (GI < s)
-            sharedMem[GI] += sharedMem[GI + s];
+        if (groupThreadID.x < s) {
+            sharedMem[groupThreadID.x] += sharedMem[groupThreadID.x + s];
+				}
         GroupMemoryBarrierWithGroupSync();
     }
 
     // Have the 1st thread write out to the output
-    if (GI == 0)
+    if (groupThreadID.x == 0)
     {
-        Reduce1DSumResult[Gid.x] = sharedMem[0];
+				Reduce1DSumResult[groupID.x] = sharedMem[0];
     }
 }
 
@@ -452,7 +476,12 @@ RWStructuredBuffer<float> SigmoidData_;
 
 [numthreads(1,1,1)]
 void Sigmoid_ (uint3 id : SV_DispatchThreadID) {
-	SigmoidData_[id.x] = 1 / (1 + exp(-SigmoidData_[id.x]));
+	if (SigmoidData_[id.x] >= 0) {
+		SigmoidData_[id.x] = 1 / (1 + exp(-SigmoidData_[id.x]));
+	} else {
+		float tmp = exp(SigmoidData_[id.x]);
+		SigmoidData_[id.x] = tmp / (1 + tmp);
+	}
 }
 
 #pragma kernel Sigmoid
@@ -462,7 +491,12 @@ RWStructuredBuffer<float> SigmoidResult;
 
 [numthreads(1,1,1)]
 void Sigmoid (uint3 id : SV_DispatchThreadID) {
-	SigmoidResult[id.x] = 1 / (1 + exp(-SigmoidData[id.x]));
+	if (SigmoidData_[id.x] >= 0) {
+		SigmoidResult[id.x] = 1 / (1 + exp(-SigmoidData_[id.x]));
+	} else {
+		float tmp = exp(SigmoidData_[id.x]);
+		SigmoidResult[id.x] = tmp / (1 + tmp);
+	}
 }
 
 #pragma kernel Sign
