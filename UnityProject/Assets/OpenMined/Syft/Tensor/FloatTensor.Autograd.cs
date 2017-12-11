@@ -7,15 +7,13 @@ namespace OpenMined.Syft.Tensor
 	{
 
 		private bool autograd;
+		public FloatTensor Grad { get; private set; }
+
 		private bool keepgrads;
 
 		private List<FloatTensor> creators;
 		private string creation_op;
 		private Dictionary<int, int> children;
-
-		private FloatTensor grad;
-
-	
 
 		public void InitAutograd() {
 //			if(!autograd) {
@@ -83,9 +81,7 @@ namespace OpenMined.Syft.Tensor
 
 				children.Add (result.Id, 0);
 			}
-
 		}
-
 
 		public void Backward(FloatTensor grad = null, FloatTensor grad_origin=null) {
 
@@ -103,14 +99,14 @@ namespace OpenMined.Syft.Tensor
 					}
 				}	
 
-				if (this.grad == null) {
-					this.grad = grad;
+				if (this.Grad == null) {
+					this.Grad = grad;
 				} else {
-					this.grad.Add (grad, true);
+					this.Grad.Add (grad, true);
 				}
 
 				// grads must not have grads of their own
-				if (this.grad.autograd == true) {
+				if (this.Grad.autograd == true) {
 					throw new InvalidOperationException ("Sorry, grads cannot have grads");
 				}
 
