@@ -77,3 +77,11 @@ def test_round():
     np.testing.assert_array_equal(expected, b.to_numpy())
     # a doesn't change
     np.testing.assert_array_equal(data, a.to_numpy())
+
+def test_log1p():
+    data = np.array([1.2, -0.9, 9.9, 0.1, -0.455])
+    expected = np.array([0.78845736, -2.30258509,  2.38876279,  0.09531018, -0.60696948])
+    a = pytest.sc.FloatTensor(data)
+    b = a.log1p()
+
+    np.testing.assert_almost_equal(expected, b.to_numpy(), decimal=5)

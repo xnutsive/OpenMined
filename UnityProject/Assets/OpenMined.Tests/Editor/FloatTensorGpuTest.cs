@@ -10,7 +10,7 @@ using UnityEditor.VersionControl;
 namespace OpenMined.Tests
 {
 
-	public class FloatTensorTest
+	public class FloatTensorGPUTest
 	{
 
 		public SyftController ctrl;
