@@ -53,7 +53,7 @@ def test_exp_():
     a.exp_()
 
     # a does change when inlined
-    np.testing.assert_almost_equal(expected, b.to_numpy(), decimal=4)
+    np.testing.assert_almost_equal(expected, a.to_numpy(), decimal=4)
 
 
 def test_trace():

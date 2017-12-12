@@ -598,9 +598,9 @@ namespace OpenMined.Syft.Tensor
                         }
                         case "grad":
                         {
-                            if (grad == null)
+                            if (Grad == null)
                                 return "";
-                            return grad.id + "";
+                            return Grad.id + "";
                         }
                         case "id":
                         {

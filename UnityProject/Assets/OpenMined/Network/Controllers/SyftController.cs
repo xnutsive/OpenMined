@@ -25,7 +25,7 @@ namespace OpenMined.Network.Controllers
 			get { return shader; }
 		}
 
-		private float[] randomWeights (int length)
+		public float[] RandomWeights (int length)
 		{
 			Random.InitState (1);
 			float[] syn0 = new float[length];
