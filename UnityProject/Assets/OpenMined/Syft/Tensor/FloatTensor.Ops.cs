@@ -435,8 +435,7 @@ namespace OpenMined.Syft.Tensor
 			var result = new FloatTensor(_ctrl: ctrl, _shape: shape, _shader: this.shader);
 
 			if (dataOnGpu) {
-				// TODO: Create GPU implementation
-				throw new NotImplementedException();
+				return Log1pGPU ();
 			} else {
 				var nCpu = SystemInfo.processorCount;
 				Parallel.For (0, nCpu, workerId => {
