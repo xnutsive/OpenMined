@@ -13,15 +13,15 @@ namespace OpenMined.Syft.Tensor
 		}
 
 		public void Dispose ()
-		{ 
+		{
 			Dispose (true);
-			GC.SuppressFinalize (this);           
+			GC.SuppressFinalize (this);
 		}
 
 		protected virtual void Dispose (bool disposing)
 		{
 			if (disposed)
-				return; 
+				return;
 
 			if (disposing) {
 				data = null;
@@ -39,6 +39,7 @@ namespace OpenMined.Syft.Tensor
 		~FloatTensor ()
 		{
 			Dispose (false);
+#pragma warning disable 420
 			System.Threading.Interlocked.Increment (ref nDeleted);
 		}
 	}

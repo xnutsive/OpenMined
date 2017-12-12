@@ -216,6 +216,7 @@ namespace OpenMined.Syft.Tensor
 //			// Lastly: let's set the ID of the tensor.
 //			// IDEs might show a warning, but ref and volatile seems to be working with Interlocked API.
 
+#pragma warning disable 420
             id = System.Threading.Interlocked.Increment(ref nCreated);
 
 
