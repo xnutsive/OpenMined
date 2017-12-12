@@ -168,7 +168,7 @@ namespace OpenMined.Syft.Tensor
 				FloorKernel_ = shader.FindKernel ("Floor_");
 				FloorKernel = shader.FindKernel ("Floor");
 				RoundKernel = shader.FindKernel ("Round");
-//				Log1pKernel = shader.FindKernel ("Log1p");
+				Log1pKernel = shader.FindKernel ("Log1p");
 				MulScalarKernel_ = shader.FindKernel ("MulScalar_");
 				MulElemKernel_ = shader.FindKernel ("MulElem_");
 				MulScalarKernel = shader.FindKernel ("MulScalar");
