@@ -53,11 +53,8 @@ namespace OpenMined.Syft.Tensor
             keepgrads = _keepgrads;
             creation_op = _creation_op;
 
-            if (autograd)
-            {
-                InitAutograd();
-            }
-
+            InitGraph();
+           
             // First: check that shape is valid.
             if (_shape == null || _shape.Length == 0)
             {
@@ -141,7 +138,7 @@ namespace OpenMined.Syft.Tensor
 //			// Lastly: let's set the ID of the tensor.
 //			// IDEs might show a warning, but ref and volatile seems to be working with Interlocked API.
 
-#pragma warning disable 420
+            #pragma warning disable 420
             id = System.Threading.Interlocked.Increment(ref nCreated);
 
 
@@ -583,7 +580,7 @@ namespace OpenMined.Syft.Tensor
                         {
                             if (msgObj.tensorIndexParams[1] == "1")
                             {
-                                InitAutograd();
+                                autograd = true;
                                 return "1";
                             }
                             else

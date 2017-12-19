@@ -38,6 +38,7 @@
               <e p="BaseTensor.MemoryOps.cs" t="Include" />
               <e p="FloatTensor.Autograd.cs" t="Include" />
               <e p="FloatTensor.cs" t="Include" />
+              <e p="FloatTensor.Graph.cs" t="Include" />
               <e p="FloatTensor.Helpers.cs" t="Include" />
               <e p="FloatTensor.Ops.cs" t="Include" />
               <e p="FloatTensor.ShaderOps.cs" t="Include" />
