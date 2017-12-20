@@ -5,7 +5,10 @@ namespace OpenMined.Syft.Tensor
 {
     public partial class FloatTensor
     {
-       
+	    private bool autograd;
+	    public FloatTensor Grad { get; private set; }
+	    private bool keepgrads;
+	    
 	    public void Backward(FloatTensor grad = null, FloatTensor grad_origin = null)
 	    {
 

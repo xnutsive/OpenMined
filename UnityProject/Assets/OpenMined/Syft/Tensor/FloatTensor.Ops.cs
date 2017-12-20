@@ -48,6 +48,7 @@ namespace OpenMined.Syft.Tensor
 			SameSizeDimensionsShapeAndLocation(ref x);
 
 			FloatTensor result = inline ? this : this.emptyTensorCopy();
+		    
 			if (dataOnGpu & x.dataOnGpu) {
 
 				if (inline) {
@@ -256,7 +257,7 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-        public FloatTensor Div(FloatTensor x, bool inline = false)
+        public FloatTensor Div(FloatTensor x, bool inline = false, FloatTensor result = null)
         {
             if (!IsContiguous() || !x.IsContiguous()) {
                 throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
@@ -265,8 +266,8 @@ namespace OpenMined.Syft.Tensor
             // Check if both tensors are compatible for sum
             SameSizeDimensionsShapeAndLocation(ref x);
 
-            var result = inline ? this : this.emptyTensorCopy();
-
+            result = HookAutograd(ref result, ref x, "div_elem", inline);
+            
             if (dataOnGpu & x.dataOnGpu)
             {
                 result.Gpu(shader);
@@ -285,8 +286,7 @@ namespace OpenMined.Syft.Tensor
                 result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a / b).ToArray();
             }
 
-            if (autograd)
-                HookAutograd(ref result, ref x, "div_elem");
+                
 
             return result;
         }
@@ -435,50 +435,9 @@ namespace OpenMined.Syft.Tensor
                     "Cannot do MM on tensors that aren't 2 dimentional. Try calling view() to reshape");
             }
             
-            var resultShape = new int[2];
-            resultShape[0] = shape[0];
-            resultShape[1] = x.shape[1];
+            result = HookAutograd(ref result, ref x,  "mm", false, new int[]{shape[0],x.shape[1]});
             
-            // checks to see if the input has been seen previously. If so, then it assumes
-            // that we should just use the previous computation graph instead of initializing
-            // a new result. The assumption here is that if the same tensors are used to perform
-            // the same operation, then they should output to the same memory instead of allocating
-            // new memory.
-            bool autograd_pre_initialized = false;
-            
-            if (result == null)
-            {
-                if (this.sibling == x.id)
-                {
-                    //Debug.Log("Id:" + this.id + " Children:" + this.children_indices.Count);
-                    autograd_pre_initialized = true;
-                    result = controller.getTensor(this.children_indices[0]);
-                    result.Zero_();
-                }
-                else
-                {
-                    result = new FloatTensor(_controller: controller, _shape: resultShape);
-                }
-            }
-
-            if (this.dataOnGpu)
-            {
-                result.Gpu(shader);
-            }
-
             result.AddMatrixMultiply(this, x);
-
-            if (autograd_pre_initialized)
-            {
-                this.ResetAutogradCounts();
-                result.ResetAutogradCounts();
-                x.ResetAutogradCounts();
-                
-                
-            } else if (autograd)
-            {
-                HookAutograd(ref result, ref x, "mm");
-            }
 
             return result;
         }
@@ -545,30 +504,8 @@ namespace OpenMined.Syft.Tensor
 
             // Check if both tensors are compatible for sum
             SameSizeDimensionsShapeAndLocation(ref x);
-
             
-
-            // checks to see if the input has been seen previously. If so, then it assumes
-            // that we should just use the previous computation graph instead of initializing
-            // a new result. The assumption here is that if the same tensors are used to perform
-            // the same operation, then they should output to the same memory instead of allocating
-            // new memory.
-            bool autograd_pre_initialized = false;
-            
-            if (result == null)
-            {
-                if (this.sibling == x.id)
-                {
-                    //Debug.Log("Id:" + this.id + " Children:" + this.children_indices.Count);
-                    autograd_pre_initialized = true;
-                    result = controller.getTensor(this.children_indices[0]);
-                    result.Zero_();
-                }
-                else
-                {
-                    result = inline ? this : this.emptyTensorCopy();
-                }
-            }
+            result = HookAutograd(ref result, ref x, "sub_elem", inline);
             
             if (dataOnGpu & x.dataOnGpu)
             {
@@ -586,16 +523,6 @@ namespace OpenMined.Syft.Tensor
             {
                 result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a - b).ToArray();
 
-                if (autograd_pre_initialized)
-                {
-                    this.ResetAutogradCounts();
-                    result.ResetAutogradCounts();
-                    x.ResetAutogradCounts();
-                }
-                else if (autograd && !inline)
-                {
-                    HookAutograd(ref result, ref x, "sub_elem");
-                }
             }
 
             return result;
@@ -636,23 +563,9 @@ namespace OpenMined.Syft.Tensor
         {
             if (inline & autograd)
                 throw new InvalidOperationException("Cannot call inline functions if you intend to run backprop.");
-
-            bool autograd_pre_initialized = false;
             
-            if (result == null)
-            {
-                if (this.children_indices.Count > 0)
-                {
-                    autograd_pre_initialized = true;
-                    result = controller.getTensor(this.children_indices[0]);
-                    result.Zero_();
-                }
-                else
-                {
-                    result = inline ? this : this.emptyTensorCopy();
-                }
-            }
-
+            result = HookAutograd(ref result, value, "pow_scalar", inline);
+            
             if (dataOnGpu)
             {
                 result.Gpu(shader);
@@ -662,17 +575,7 @@ namespace OpenMined.Syft.Tensor
             }
 
             result.Data = data.AsParallel().Select(x => (float) Math.Pow((double) x, value)).ToArray();
-            if (autograd_pre_initialized)
-            {
-                this.ResetAutogradCounts();
-                result.ResetAutogradCounts();
-            }
-            else if (autograd)
-            {
-                HookAutograd(ref result, value, "pow_scalar");    
-            }
             
-
             return result;
         }
 
@@ -931,22 +834,8 @@ namespace OpenMined.Syft.Tensor
                 SigmoidGPU_();
                 return this;
             }
-
-            bool autograd_pre_initialized = false;
-            //Debug.Log("Id:" + this.id + " Children:" + this.children.Count);
-            if (result == null)
-            {
-                if (autograd && this.children_indices.Count > 0)
-                {
-                    autograd_pre_initialized = true;
-                    result = controller.getTensor(this.children_indices[0]);
-                    result.Zero_();
-                }
-                else
-                {
-                    result = inline ? this : this.emptyTensorCopy();
-                }
-            }
+            
+            result = HookAutograd(ref result, "sigmoid", inline);
 
             var nCpu = SystemInfo.processorCount;
             Parallel.For(0, nCpu, workerId =>
@@ -967,15 +856,6 @@ namespace OpenMined.Syft.Tensor
                 }
             });
 
-            if (autograd_pre_initialized)
-            {
-                this.ResetAutogradCounts();
-                result.ResetAutogradCounts();
-            }
-            else if (autograd)
-            {
-                HookAutograd(ref result, "sigmoid");
-            }
 
             return result;
         }
