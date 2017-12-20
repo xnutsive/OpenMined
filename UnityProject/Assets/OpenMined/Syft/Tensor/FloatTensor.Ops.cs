@@ -47,8 +47,7 @@ namespace OpenMined.Syft.Tensor
 			// Check if both tensors are compatible for sum
 			SameSizeDimensionsShapeAndLocation(ref x);
 
-		    result = HookAutograd (ref result, ref x, "add_elem", inline);
-		    
+		  result = HookAutograd (ref result, ref x, "add_elem", inline);
 			if (dataOnGpu & x.dataOnGpu) {
 
 				if (inline) {
