@@ -58,6 +58,7 @@ namespace OpenMined.Syft.Tensor
 		            if (autograd)
 		                throw new InvalidOperationException("Cannot call inline functions if you intend to run backprop.");
 
+
 		            AddElemGPU_(x);
 		            return this;
 		        }
@@ -74,6 +75,7 @@ namespace OpenMined.Syft.Tensor
                         result.Data [i] = x.Data [i] + Data [i];
                 }
             });
+
 
 			return result;
 		}
