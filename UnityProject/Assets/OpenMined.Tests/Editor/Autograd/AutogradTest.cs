@@ -93,5 +93,36 @@ namespace OpenMined.Tests.Editor.Autograd
                 Assert.AreEqual(expectedGradTensor.Data[i], tensor1.Grad.Data[i], 1e-4);
             }
         }
+
+        [Test]
+        public void SumAutograd()
+        {
+            float[] data = { 1,  2,  3,  4,  5,  6,  7,  8,  9,
+                              10, 11, 12, 13, 14, 15, 16, 17, 18,
+                              19, 20, 21, 22, 23, 24, 25, 26, 27 };
+            int[] shape = { 3, 3, 3 };
+
+            var tensor = new Syft.Tensor.FloatTensor(_controller: ctrl, _data: data, _shape: shape, _autograd: true);
+
+            var sum = tensor.Sum(1);
+
+            float[] gradData = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            int[] gradShape = { 3, 3 };
+
+            var gradTensor = new Syft.Tensor.FloatTensor(_controller: ctrl, _data: gradData, _shape: gradShape); 
+
+            sum.Backward(gradTensor);
+
+            var grad = tensor.Grad;
+            Console.WriteLine(grad);
+
+            float[] expectedData = { 1, 2, 3, 1, 2, 3, 1, 2, 3,
+                                     4, 5, 6, 4, 5, 6, 4, 5, 6,
+                                     7, 8, 9, 7, 8, 9, 7, 8, 9 };
+            int[] expectedShape = { 3, 3, 3 };
+
+            Assert.IsTrue(expectedData.SequenceEqual(grad.Data));
+            Assert.IsTrue(expectedShape.SequenceEqual(grad.Shape)); 
+        }
     }
 }

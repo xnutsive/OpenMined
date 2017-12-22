@@ -127,6 +127,7 @@ namespace OpenMined.Syft.Tensor
                     else if (creation_op.Contains("sum-"))
                     {
                         FloatTensor creator = controller.getTensor(creators[0]).Copy();
+                        Console.WriteLine(creator);
 
                         var dim = creator.Shape.Length - 1;
                         var split = creation_op.Split('-');
@@ -135,9 +136,9 @@ namespace OpenMined.Syft.Tensor
                             dim = int.Parse(split[1]);
                         }
 
-                        if(grad.Shape == this.Shape && grad.Strides == this.Strides) {
+                        if(grad.Shape.SequenceEqual(this.Shape) && grad.Strides.SequenceEqual(this.Strides)) {
                             var res = SumGradient(creator, grad, dim);
-                            creator.Backward(res);
+                            creator.Backward(res, this);
                         } else {
                             throw new InvalidOperationException("Unable to calculate grad on output of different shape or stride");
                         }
@@ -168,13 +169,14 @@ namespace OpenMined.Syft.Tensor
             else
             {
                 var index = 0;
+
                 var numCopies = 1;
                 for (var i = 0; i < dim; i++)
                 {
                     numCopies *= stride[i];
                 }
-
-                for (var i = 0; i < numCopies; i++)
+                
+                for (var i = 0; i < numCopies / (shape[dim] * stride[dim]); i++)
                 {
                     for (var j = 0; j < inputShape[dim]; j++)
                     {
