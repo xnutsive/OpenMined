@@ -15,23 +15,6 @@ namespace OpenMined.Syft.Tensor
             set { autograd = value; }
         }
 
-        // parameters are overrides
-        public FloatTensor Copy()
-        {
-            FloatTensor copy = new FloatTensor(controller,
-                _shape: this.shape,
-                _data: data,
-                _dataBuffer: dataBuffer,
-                _shapeBuffer: shapeBuffer,
-                _shader: shader,
-                _copyData: true,
-                _dataOnGpu: dataOnGpu,
-                _autograd: autograd,
-                _keepgrads: keepgrads,
-                _creation_op: creation_op);
-            return copy;
-        }
-
         public FloatTensor(SyftController _controller,
             int[] _shape,
             float[] _data = null,
@@ -51,11 +34,13 @@ namespace OpenMined.Syft.Tensor
             keepgrads = _keepgrads;
             creation_op = _creation_op;
 
+            InitGraph();
+            
             if (autograd)
             {
                 InitAutograd();
             }
-
+            
             // First: check that shape is valid.
             if (_shape == null || _shape.Length == 0)
             {
@@ -544,6 +529,11 @@ namespace OpenMined.Syft.Tensor
                 {
                     var result = Reciprocal();
                     return result.Id.ToString();
+                }
+                case "reciprocal_":
+                {
+                    Reciprocal(inline: true);
+                    return Id.ToString();
                 }
                 case "remainder_elem":
                 {

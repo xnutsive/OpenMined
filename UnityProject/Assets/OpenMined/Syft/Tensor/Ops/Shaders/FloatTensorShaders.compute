@@ -504,6 +504,15 @@ void Reciprocal (uint3 id: SV_DispatchThreadID) {
 	ReciprocalResult[id.x] = 1 / ReciprocalData[id.x];
 }
 
+#pragma kernel Reciprocal_
+
+RWStructuredBuffer<float> ReciprocalData_;
+
+[numthreads(4,1,1)]
+void Reciprocal_ (uint3 id: SV_DispatchThreadID) {
+    ReciprocalData_[id.x] = 1 / ReciprocalData_[id.x];
+}
+
 #pragma kernel RemainderElem_
 
 RWStructuredBuffer<float> RemainderElemDataA_;

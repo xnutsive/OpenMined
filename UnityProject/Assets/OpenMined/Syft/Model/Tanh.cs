@@ -4,7 +4,7 @@ using OpenMined.Syft.Tensor;
 
 namespace OpenMined.Syft.Layer
 {
-    public class Tanh : Model
+    public class Tanh : Layer
     {
 
         public Tanh(SyftController controller)

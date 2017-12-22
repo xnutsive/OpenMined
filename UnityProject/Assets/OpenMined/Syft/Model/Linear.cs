@@ -3,9 +3,9 @@ using OpenMined.Network.Controllers;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
 
-namespace OpenMined.Syft.Model
+namespace OpenMined.Syft.Layer
 {
-	public class Linear: Layer.Model
+	public class Linear: Layer
 	{
 
 		
@@ -41,7 +41,7 @@ namespace OpenMined.Syft.Model
 
 		}
 
-		public override FloatTensor Forward(FloatTensor input)
+        public override FloatTensor Forward(FloatTensor input)
 		{
 			
 			FloatTensor output = input.MM(_weights);

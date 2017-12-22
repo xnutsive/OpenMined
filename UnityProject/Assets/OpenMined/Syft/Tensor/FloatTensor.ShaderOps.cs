@@ -46,6 +46,7 @@ namespace OpenMined.Syft.Tensor
         [SerializeField] private static int PowScalarKernel;
         [SerializeField] private static int PowElemKernel;
         [SerializeField] private static int ReciprocalKernel;
+        [SerializeField] private static int ReciprocalKernel_;
         [SerializeField] private static int RemainderElemKernel;
         [SerializeField] private static int RemainderElemKernel_;
         [SerializeField] private static int RemainderScalarKernel;
@@ -131,6 +132,7 @@ namespace OpenMined.Syft.Tensor
             NegateKernel = shader.FindKernel("Negate");
             NegateKernel_ = shader.FindKernel("Negate_");
             ReciprocalKernel = shader.FindKernel("Reciprocal");
+            ReciprocalKernel_ = shader.FindKernel("Reciprocal_");
             RsqrtKernel = shader.FindKernel("Rsqrt");
             RsqrtKernel_ = shader.FindKernel("Rsqrt_");
             // PowKernel = shader.FindKernel ("Pow");
@@ -694,6 +696,12 @@ namespace OpenMined.Syft.Tensor
             shader.Dispatch(ReciprocalKernel, size, 1, 1);
 
             return result;
+        }
+
+        public void ReciprocalGPU_()
+        {
+            shader.SetBuffer(ReciprocalKernel_, "ReciprocalData_", dataBuffer);
+            shader.Dispatch(ReciprocalKernel_, this.size, 1, 1);
         }
 
         public FloatTensor RsqrtGPU()

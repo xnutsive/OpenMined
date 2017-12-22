@@ -499,6 +499,15 @@ def test_reciprocal():
     # a doesn't change
     np.testing.assert_array_equal(data, a.to_numpy())
 
+def test_reciprocal_():
+    data = np.array([1., 2., 3., 4.])
+    expected = np.array([1., 0.5, 0.33333333, 0.25])
+    a = pytest.sc.FloatTensor(data)
+    a.reciprocal_()
+
+    # a does change when inlined
+    np.testing.assert_almost_equal(expected, a.to_numpy(), decimal=4)
+
 
 def test_round():
     data = np.array([12.7292, -3.11, 9.00, 20.4999, 20.5001])

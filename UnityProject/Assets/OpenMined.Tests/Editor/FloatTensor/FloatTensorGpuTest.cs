@@ -1160,6 +1160,24 @@ namespace OpenMined.Tests
         }
 
         [Test]
+        public void Reciprocal_()
+        {
+            float[] data1 = {1f, 2f, 3f, 4f};
+            int[] shape1 = {4};
+            var tensor1 = new FloatTensor(_controller: ctrl, _data: data1, _shape: shape1);
+            tensor1.Gpu(shader);
+
+            float[] data2 = {1f, 0.5f, 0.33333333f, 0.25f};
+            int[] shape2 = {4};
+            var expectedReciprocalTensor = new FloatTensor(_controller: ctrl, _data: data2, _shape: shape2);
+            expectedReciprocalTensor.Gpu(shader);
+
+            tensor1.Reciprocal(inline: true);
+
+            AssertApproximatelyEqualTensorsData(expectedReciprocalTensor, tensor1);
+        }
+
+        [Test]
         public void Round()
         {
             float[] data1 = {5.89221f, -20.11f, 9.0f, 100.4999f, 100.5001f};

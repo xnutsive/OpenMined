@@ -14,7 +14,32 @@ namespace OpenMined.Syft.Tensor
         {
 //			FloatTensor result = new FloatTensor(ctrl, _shape:shape, _data:data, _dataBuffer:dataBuffer, _shader:this.shader);
 //			return new FloatTensor(ctrl, _shape:shape, _dataOnGpu:dataOnGpu, _shader:shader);
-            return Copy();
+            FloatTensor result = new FloatTensor(controller,
+                _shape: this.shape,
+                _data: data,
+                _dataBuffer: dataBuffer,
+                _shapeBuffer: shapeBuffer,
+                _shader: shader,
+                _copyData: true,
+                _dataOnGpu: dataOnGpu,
+                _autograd: autograd,
+                _keepgrads: keepgrads,
+                _creation_op: "emptyTensorCopy");
+            
+            result.Zero_();
+
+            return result;
+        }
+        
+        // parameters are overrides
+        public FloatTensor Copy(FloatTensor result = null)
+        {
+            
+            result = HookAutograd(ref result, "copy", false);
+            result.Zero_();
+            result.Add(this, inline: true);
+            
+            return result;
         }
 
 		public FloatTensor Abs(bool inline = false)
@@ -80,6 +105,27 @@ namespace OpenMined.Syft.Tensor
 			return result;
 		}
 
+        
+        public FloatTensor Add(float value, bool inline = false, FloatTensor result = null)
+        {
+            result = HookAutograd (ref result, value, "add_scalar", inline);
+
+            if (dataOnGpu) {
+                result.Gpu (shader);
+                if (inline) { AddScalarGPU_ (value); return this; }
+                else { return AddScalarGPU (value, result); }
+            }
+            else {
+                var nCpu = SystemInfo.processorCount;
+                Parallel.For (0, nCpu, workerId => {
+                    var max = size * (workerId + 1) / nCpu;
+                    for (var i = size * workerId / nCpu; i < max; i++) {
+                        result.Data [i] = value + Data [i];
+                    }
+                });
+            }
+            return result;
+        }
 
 		public FloatTensor Acos (bool inline = false)
 		{
@@ -138,27 +184,6 @@ namespace OpenMined.Syft.Tensor
 
 				return result;
 			}
-		}
-
-		public FloatTensor Add(float value, bool inline = false)
-		{
-			FloatTensor result = inline ? this : this.emptyTensorCopy();
-
-			if (dataOnGpu) {
-				result.Gpu (shader);
-				if (inline) { AddScalarGPU_ (value); return this; }
-				else { return AddScalarGPU (value, result); }
-			}
-			else {
-				var nCpu = SystemInfo.processorCount;
-				Parallel.For (0, nCpu, workerId => {
-					var max = size * (workerId + 1) / nCpu;
-					for (var i = size * workerId / nCpu; i < max; i++) {
-					        result.Data [i] = value + Data [i];
-					}
-				});
-			}
-			return result;
 		}
 
 		public FloatTensor AddMatrixMultiply(FloatTensor tensor1, FloatTensor tensor2)
@@ -285,8 +310,6 @@ namespace OpenMined.Syft.Tensor
                 result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a / b).ToArray();
             }
 
-                
-
             return result;
         }
 
@@ -340,9 +363,10 @@ namespace OpenMined.Syft.Tensor
             return this;
         }
 
-        public FloatTensor Div(float value, bool inline = false)
+        public FloatTensor Div(float value, bool inline = false, FloatTensor result = null)
         {
-            var result = inline ? this : this.emptyTensorCopy();
+            result = HookAutograd (ref result, value, "div_scalar", inline);
+            
             if (dataOnGpu)
             {
                 result.Gpu(shader);
@@ -481,9 +505,9 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-        public FloatTensor Mul(float value, bool inline = false)
+        public FloatTensor Mul(float value, bool inline = false, FloatTensor result = null)
         {
-            var result = inline ? this : this.emptyTensorCopy();
+            result = HookAutograd (ref result, value, "mul_scalar", inline);
 
             if (dataOnGpu)
             {
@@ -575,9 +599,9 @@ namespace OpenMined.Syft.Tensor
         }
 
 
-        public FloatTensor Neg(bool inline = false)
+        public FloatTensor Neg(bool inline = false, FloatTensor result = null)
         {
-            var result = inline ? this : this.emptyTensorCopy();
+            result = HookAutograd(ref result, "neg", inline);
 
             if (dataOnGpu)
             {
@@ -597,9 +621,8 @@ namespace OpenMined.Syft.Tensor
             if (dataOnGpu)
             {
                 if (!inline) return ReciprocalGPU();
-                //TODO impolemnt inline for GPU
-                //ReciprocalGPU_();
-                //return this;
+                ReciprocalGPU_();
+                return this;
             }
             result.Data = data.AsParallel().Select(x => (float) 1/x).ToArray();
             return result;
@@ -679,9 +702,9 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-        public FloatTensor Sub(float value, bool inline = false)
+        public FloatTensor Sub(float value, bool inline = false, FloatTensor result = null)
         {
-            var result = inline ? this : this.emptyTensorCopy();
+            result = HookAutograd (ref result, value, "sub_scalar", inline);
 
             if (dataOnGpu)
             {
@@ -740,7 +763,7 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-        public FloatTensor Transpose(int dimension1, int dimension2)
+        public FloatTensor Transpose(int dimension1, int dimension2, FloatTensor result = null)
         {
             if (!IsContiguous()) {
                 throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
@@ -762,7 +785,9 @@ namespace OpenMined.Syft.Tensor
             newShape[dimension1] = newShape[dimension2];
             newShape[dimension2] = tmpDim;
 
-            var result = new FloatTensor(_controller: controller, _shape: newShape, _shader: this.shader);
+            //var result = new FloatTensor(_controller: controller, _shape: newShape, _shader: this.shader);
+            result = HookAutograd(ref result, "transpose", false, newShape);
+  
             var nCpu = SystemInfo.processorCount;
             Parallel.For(0, nCpu, workerId =>
             {
@@ -870,7 +895,6 @@ namespace OpenMined.Syft.Tensor
                     }
                 }
             });
-
 
             return result;
         }

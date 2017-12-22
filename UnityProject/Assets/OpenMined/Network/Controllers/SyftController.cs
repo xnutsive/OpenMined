@@ -6,7 +6,7 @@ using UnityEngine;
 using OpenMined.Syft.Tensor;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Layer;
-using OpenMined.Syft.Model;
+using OpenMined.Syft.Layer.Loss;
 using Random = UnityEngine.Random;
 
 
@@ -18,7 +18,7 @@ namespace OpenMined.Network.Controllers
 
 		private Dictionary<int, FloatTensor> tensors;
 		private Dictionary<int, Model> models;
-		private bool allow_new_tensors = true;
+		public bool allow_new_tensors = true;
 
 		public SyftController (ComputeShader _shader)
 		{
@@ -87,13 +87,13 @@ namespace OpenMined.Network.Controllers
 		}
 
 		public FloatTensor createZerosTensorLike(FloatTensor tensor) {
-			FloatTensor new_tensor = tensor.Copy ();
+			FloatTensor new_tensor = tensor.emptyTensorCopy ();
 			new_tensor.Zero_ ();
 			return new_tensor;
 		}
 
 		public FloatTensor createOnesTensorLike(FloatTensor tensor) {
-			FloatTensor new_tensor = tensor.Copy ();
+			FloatTensor new_tensor = tensor.emptyTensorCopy();
 			new_tensor.Zero_ ();
 			new_tensor.Add ((float)1,true);
 			return new_tensor;
@@ -114,7 +114,7 @@ namespace OpenMined.Network.Controllers
 						if (msgObj.objectIndex == 0 && msgObj.functionCall == "create")
 						{
 							FloatTensor tensor = new FloatTensor(this, _shape: msgObj.shape, _data: msgObj.data, _shader: this.Shader);
-							Debug.LogFormat("<color=magenta>createTensor:{1}</color> {0}", string.Join(", ", tensor.Data), tensor.Id);
+							//Debug.LogFormat("<color=magenta>createTensor:{1}</color> {0}", string.Join(", ", tensor.Data), tensor.Id);
 							return tensor.Id.ToString();
 						}
 						else if (msgObj.objectIndex > tensors.Count)
@@ -159,6 +159,19 @@ namespace OpenMined.Network.Controllers
                                 Tanh model = new Tanh(this);
                                 return model.Id.ToString();
                             }
+                            else if (model_type == "crossentropyloss")
+                            {
+                                Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
+                                CrossEntropyLoss model = new CrossEntropyLoss(this);
+                                return model.Id.ToString();
+                            }
+                            else if (model_type == "mseloss")
+                            {
+                                Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
+                                MSELoss model = new MSELoss(this);
+                                return model.Id.ToString();
+                            }
+
 						}
 						else
 						{
