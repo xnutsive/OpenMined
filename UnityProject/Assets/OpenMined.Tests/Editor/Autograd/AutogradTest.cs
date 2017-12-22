@@ -109,12 +109,11 @@ namespace OpenMined.Tests.Editor.Autograd
             float[] gradData = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             int[] gradShape = { 3, 3 };
 
-            var gradTensor = new Syft.Tensor.FloatTensor(_controller: ctrl, _data: gradData, _shape: gradShape); 
+            var gradTensor = new Syft.Tensor.FloatTensor(_controller: ctrl, _data: gradData, _shape: gradShape);
 
             sum.Backward(gradTensor);
 
             var grad = tensor.Grad;
-            Console.WriteLine(grad);
 
             float[] expectedData = { 1, 2, 3, 1, 2, 3, 1, 2, 3,
                                      4, 5, 6, 4, 5, 6, 4, 5, 6,

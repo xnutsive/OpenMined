@@ -199,19 +199,21 @@ namespace OpenMined.Syft.Tensor
 				    }
                     else if (creation_op.Contains("sum-"))
                     {
-                        FloatTensor creator = controller.getTensor(creators[0]).Copy();
-                        Console.WriteLine(creator);
+                        FloatTensor input = controller.getTensor(creators[0]).Copy();
+                        input.autograd = false;
 
-                        var dim = creator.Shape.Length - 1;
+                        var dim = input.Shape.Length - 1;
                         var split = creation_op.Split('-');
                         if (split.Length > 1)
                         {
                             dim = int.Parse(split[1]);
                         }
 
+                        // right now this function only supports grads the same size as the output
+                        // and the grad must be contiguous
                         if(grad.Shape.SequenceEqual(this.Shape) && grad.Strides.SequenceEqual(this.Strides)) {
-                            var res = SumGradient(creator, grad, dim);
-                            creator.Backward(res, this);
+                            var res = SumGradient(input, grad, dim);
+                            controller.getTensor(creators[0]).Backward(res, this);
                         } else {
                             throw new InvalidOperationException("Unable to calculate grad on output of different shape or stride");
                         }
@@ -234,8 +236,13 @@ namespace OpenMined.Syft.Tensor
             var inputShape = input.Shape;
             var stride = input.Strides;
 
-            var inputData = grad.Data;
+            var gradData = grad.Data;
             var newData = new List<float>();
+            
+            // once we have proper support for non-contiguous tensors
+            // most of this code can be replaced with a view and an expand
+            // view the grad to add a singleton dimension in the dimension
+            // of the sum and then expand it to the size of the input
 
             if (dim == 0)
             {
@@ -244,31 +251,32 @@ namespace OpenMined.Syft.Tensor
 
                 for (var i = 0; i < sh; i++)
                 {
-                    newData.AddRange(inputData);
+                    newData.AddRange(gradData);
                 }
             }
             else
             {
                 var index = 0;
 
-                var numCopies = 1;
-                for (var i = 0; i < dim; i++)
+                var totalSize = 1;
+                for (var i = 0; i < inputShape.Length; i++)
                 {
-                    numCopies *= stride[i];
+                    totalSize *= inputShape[i];
                 }
-                
-                for (var i = 0; i < numCopies / (shape[dim] * stride[dim]); i++)
+
+                for (var i = 0; i < totalSize / (inputShape[dim] * stride[dim]); i++)
                 {
                     for (var j = 0; j < inputShape[dim]; j++)
                     {
-                        var segment = new ArraySegment<float>(inputData, index, index + stride[dim]);
+                        var segment = new ArraySegment<float>(gradData, index, stride[dim]);
                         newData.AddRange(segment);
                     }
+
                     index += stride[dim];
                 }
             }
 
-            return new FloatTensor(_controller: controller, _shape: shape, _data: newData.ToArray());
+            return new FloatTensor(_controller: controller, _shape: inputShape, _data: newData.ToArray());
         }
     }
 }

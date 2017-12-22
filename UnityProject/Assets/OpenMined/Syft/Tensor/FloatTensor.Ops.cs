@@ -1296,6 +1296,9 @@ namespace OpenMined.Syft.Tensor
             var result = Reduce(dim, keepdim, (acc, val, index, arr) => acc + val, (val, len) => val);
 
             result = HookAutograd(ref result, "sum-" + dim.ToString(), false);
+            
+            // is there a better way autograd should be being turned on here????
+            result.autograd = true;
 
             return result;
         }
