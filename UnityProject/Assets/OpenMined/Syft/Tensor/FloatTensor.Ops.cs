@@ -1261,11 +1261,14 @@ namespace OpenMined.Syft.Tensor
             return Reduce(dim, keepdim, (acc, val, index, arr) => acc > val ? acc : val, (val, len) => val);
         }
 
-        public FloatTensor Sum(int dim = -1, bool keepdim = false)
+        public FloatTensor Sum(int dim = -1, bool keepdim = false, FloatTensor result = null)
         {
-            if (!IsContiguous()) {
-                throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
+            if (!IsContiguous())
+            {
+                throw new InvalidOperationException("Tensor must be contiguous, call Contiguous() to convert");
             }
+
+            result = HookAutograd(ref result, "sum-" + dim.ToString(), false);
 
             // TODO: Implement GPU op. with GPU tests.
             return Reduce(dim, keepdim, (acc, val, index, arr) => acc + val, (val, len) => val);

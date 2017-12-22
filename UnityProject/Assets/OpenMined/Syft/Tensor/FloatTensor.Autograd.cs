@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMined.Syft.NN;
+using System.Linq;
 
 namespace OpenMined.Syft.Tensor
 {
@@ -123,8 +124,68 @@ namespace OpenMined.Syft.Tensor
 
                         controller.getTensor(creators[0]).Backward(output, this);
                     }
+                    else if (creation_op.Contains("sum-"))
+                    {
+                        FloatTensor creator = controller.getTensor(creators[0]).Copy();
+
+                        var dim = creator.Shape.Length - 1;
+                        var split = creation_op.Split('-');
+                        if (split.Length > 1)
+                        {
+                            dim = int.Parse(split[1]);
+                        }
+
+                        if(grad.Shape == this.Shape && grad.Strides == this.Strides) {
+                            var res = SumGradient(creator, grad, dim);
+                            creator.Backward(res);
+                        } else {
+                            throw new InvalidOperationException("Unable to calculate grad on output of different shape or stride");
+                        }
+                    }
                 }
             }
+        }
+
+        private FloatTensor SumGradient(FloatTensor input, FloatTensor grad, int dim)
+        {
+            // want to make grad look like this
+            var inputShape = input.Shape;
+            var stride = input.Strides;
+
+            var inputData = grad.Data;
+            var newData = new List<float>();
+
+            if (dim == 0)
+            {
+                var st = stride[dim];
+                var sh = inputShape[dim];
+
+                for (var i = 0; i < sh; i++)
+                {
+                    newData.AddRange(inputData);
+                }
+            }
+            else
+            {
+                var index = 0;
+                var numCopies = 1;
+                for (var i = 0; i < dim; i++)
+                {
+                    numCopies *= stride[i];
+                }
+
+                for (var i = 0; i < numCopies; i++)
+                {
+                    for (var j = 0; j < inputShape[dim]; j++)
+                    {
+                        var segment = new ArraySegment<float>(inputData, index, index + stride[dim]);
+                        newData.AddRange(segment);
+                    }
+                    index += stride[dim];
+                }
+            }
+
+            return new FloatTensor(_controller: controller, _shape: shape, _data: newData.ToArray());
         }
     }
 }
