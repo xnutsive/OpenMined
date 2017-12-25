@@ -24,7 +24,6 @@ namespace OpenMined.Syft.Layer.Loss
 
             FloatTensor softmax = Functional.Softmax(prediction);
             FloatTensor output = ((target.Mul(softmax.Log1p())).Sum()).Mul(-1);
-
 			return output;
 		}
 

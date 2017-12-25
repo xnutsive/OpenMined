@@ -12,7 +12,7 @@ namespace OpenMined.Syft.Layer
 
         protected override string ProcessForwardMessage(Command msgObj, SyftController ctrl)
         {
-            var input = ctrl.getTensor(int.Parse(msgObj.tensorIndexParams[0]));
+            var input = ctrl.floatTensorFactory.Get(int.Parse(msgObj.tensorIndexParams[0]));
             var result = this.Forward(input);
             return result.Id + "";
         }

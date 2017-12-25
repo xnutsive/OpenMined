@@ -76,7 +76,6 @@ namespace OpenMined.Syft.Tensor
         [SerializeField] private static int SinhKernel_;
         [SerializeField] private static int TriuKernel_;
         [SerializeField] private static int TruncKernel;
-        [SerializeField] private static int ZeroKernel_;
 
         public void initShaderKernels()
         {
@@ -1083,12 +1082,6 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-
-        public void ZeroGPU_()
-        {
-            shader.SetBuffer(ZeroKernel_, "ZeroData_", dataBuffer);
-            shader.Dispatch(ZeroKernel_, this.size, 1, 1);
-        }
 
         public struct Dimensions
         {

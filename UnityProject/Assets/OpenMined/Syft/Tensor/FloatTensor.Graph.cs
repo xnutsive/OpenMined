@@ -58,13 +58,13 @@ namespace OpenMined.Syft.Tensor
 		        {
 			        for (int i = 0; i < this.children_indices.Count; i++)
 			        {
-				        FloatTensor temp = controller.getTensor(children_indices[i]);
+				        FloatTensor temp = factory.Get(children_indices[i]);
 				        
 				        if (temp.creation_op == creation_op)
 				        {
 					        if (temp.creators.Count > 1)
 					        {
-						        FloatTensor temp2 = controller.getTensor(temp.creators[1]);
+						        FloatTensor temp2 = factory.Get(temp.creators[1]);
 						        if (temp2.data[0] == x)
 						        {
 							        //if (temp2.autograd == temp.autograd)
@@ -82,14 +82,13 @@ namespace OpenMined.Syft.Tensor
 		        if (child_pre_initialized)
 		        {
 			        autograd_pre_initialized = true;
-			        result = controller.getTensor(child_index);
+			        result = factory.Get(child_index);
 			        result.Zero_();
 			        //Debug.Log("Graph:93:Fetching Tensor:" + result.id + " with creation_op:" + result.creation_op + " called under creation op:" + creation_op);
 		        }
 		        else
 		        {
-			        result = new FloatTensor(controller,
-				        _shape: this.shape,
+			        result = factory.Create(_shape: this.shape,
 				        _data: data,
 				        _dataBuffer: dataBuffer,
 				        _shapeBuffer: shapeBuffer,
@@ -99,6 +98,7 @@ namespace OpenMined.Syft.Tensor
 				        _autograd: autograd,
 				        _keepgrads: keepgrads,
 				        _creation_op: creation_op);
+			        
 			        
 			        //Debug.Log("Graph:109:Creating Tensor:" + result.id + " with creation_op:" + result.creation_op);
 		        }
@@ -116,7 +116,7 @@ namespace OpenMined.Syft.Tensor
 			        new FloatTensor(_controller: controller, _shape: , _data: new float[] {x});
 */
 
-		        FloatTensor new_child = new FloatTensor(controller,
+		        FloatTensor new_child = factory.Create(
 			        _shape: new int[] {1},
 			        _data: new float[] {x},
 			        _dataBuffer: dataBuffer,
@@ -165,7 +165,7 @@ namespace OpenMined.Syft.Tensor
 					// iterate through children
 					for (int i = 0; i < this.children_indices.Count; i++)
 					{
-						FloatTensor temp = controller.getTensor(children_indices[i]);
+						FloatTensor temp = factory.Get(children_indices[i]);
 						
 						// if a child was created using the same op as the one currently being called
 						// and the child was also created using the same tensor as x
@@ -183,7 +183,7 @@ namespace OpenMined.Syft.Tensor
 				{
 					//Debug.Log("Id:" + this.id + " Children:" + this.children_indices.Count);
 					autograd_pre_initialized = true;
-					result = controller.getTensor(child_index);
+					result = factory.Get(child_index);
 					result.Zero_();
 					//Debug.Log("Graph:148:Fetching Tensor:" + result.id + " with creation_op:" + result.creation_op + " called under creation op:" + creation_op);
 				}
@@ -192,7 +192,7 @@ namespace OpenMined.Syft.Tensor
 					if (resultShape != null)
 					{
 						// initializes an empty tensor with new shape
-						result = new FloatTensor(controller,
+						result = factory.Create(
 							_shape: resultShape,
 							_dataOnGpu: dataOnGpu,
 							_autograd: x.autograd && autograd,
@@ -203,7 +203,7 @@ namespace OpenMined.Syft.Tensor
 					else
 					{
 						// initializes an empty tensor with identical shape
-						result = new FloatTensor(controller,
+						result = factory.Create(
 							_shape: this.shape,
 							_data: data,
 							_dataBuffer: dataBuffer,
@@ -271,7 +271,7 @@ namespace OpenMined.Syft.Tensor
 				{
 					for (int i = 0; i < this.children_indices.Count; i++)
 					{
-						if (controller.getTensor(children_indices[i]).creation_op == creation_op)
+						if (factory.Get(children_indices[i]).creation_op == creation_op)
 						{
 							child_pre_initialized = true;
 							child_index = children_indices[i];
@@ -283,7 +283,7 @@ namespace OpenMined.Syft.Tensor
 				if (child_pre_initialized)
 				{
 					autograd_pre_initialized = true;
-					result = controller.getTensor(child_index);
+					result = factory.Get(child_index);
 					result.Zero_();
 					//Debug.Log("Graph:237:Fetching Tensor:" + result.id + " with creation_op:" + result.creation_op + " called under creation op:" + creation_op);
 				}
@@ -291,7 +291,7 @@ namespace OpenMined.Syft.Tensor
 				{
 					if (resultShape != null)
 					{
-						result = new FloatTensor(controller,
+						result = factory.Create(
 							_shape: resultShape,
 							_dataOnGpu: dataOnGpu,
 							_autograd: autograd,
@@ -301,7 +301,7 @@ namespace OpenMined.Syft.Tensor
 					}
 					else
 					{
-						result = new FloatTensor(controller,
+						result = factory.Create(
 							_shape: this.shape,
 							_data: data,
 							_dataBuffer: dataBuffer,

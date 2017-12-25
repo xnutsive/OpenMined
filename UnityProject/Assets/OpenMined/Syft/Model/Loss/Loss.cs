@@ -12,8 +12,8 @@ namespace OpenMined.Syft.Layer.Loss
 
         protected override string ProcessForwardMessage(Command msgObj, SyftController ctrl)
         {
-            var pred = ctrl.getTensor(int.Parse(msgObj.tensorIndexParams[0]));
-            var target = ctrl.getTensor(int.Parse(msgObj.tensorIndexParams[1]));
+            var pred = ctrl.floatTensorFactory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+            var target = ctrl.floatTensorFactory.Get(int.Parse(msgObj.tensorIndexParams[1]));
             var result = this.Forward(pred, target);
             return result.Id + "";
         }

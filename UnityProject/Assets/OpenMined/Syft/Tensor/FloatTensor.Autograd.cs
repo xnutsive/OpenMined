@@ -18,7 +18,7 @@ namespace OpenMined.Syft.Tensor
 	    {
 		    for (int i=0; i< children_counts.Count; i++)
 		    {
-			    if (children_counts[i] == 0 && controller.getTensor(children_indices[i]).autograd)
+			    if (children_counts[i] == 0 && factory.Get(children_indices[i]).autograd)
 			    {
 				    return false;
 			    }
@@ -35,7 +35,7 @@ namespace OpenMined.Syft.Tensor
 			    if (grad == null)
 			    {
 				    Debug.Log("Grad not Found... Creating Gradient of 1s");
-				    grad = this.controller.createOnesTensorLike(this);
+				    grad = this.createOnesTensorLike();
 				    grad.Autograd = false;
 			    }
 
@@ -67,7 +67,7 @@ namespace OpenMined.Syft.Tensor
 				    else
 				    {
 					    //Debug.Log("Updating For Tensor Id:" + this.id);
-					    this.Grad.Zero_();
+					    //this.Grad.Zero_();
 					    this.Grad.Add(grad, inline: true);
 				    }
 
@@ -103,22 +103,22 @@ namespace OpenMined.Syft.Tensor
 				    if (creation_op == "add_elem")
 				    {
 
-					    controller.getTensor(creators[0]).Backward(grad, this);
-					    controller.getTensor(creators[1]).Backward(grad, this);
+					    factory.Get(creators[0]).Backward(grad, this);
+					    factory.Get(creators[1]).Backward(grad, this);
 
 				    }
 				    else if (creation_op == "add_scalar")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad, this);
+					    factory.Get(creators[0]).Backward(grad, this);
 				    }
 				    else if (creation_op == "copy")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad, this);
+					    factory.Get(creators[0]).Backward(grad, this);
 				    }
 				    else if (creation_op == "div_elem")
 				    {
-					    FloatTensor x = controller.getTensor(creators[0]);
-					    FloatTensor y = controller.getTensor(creators[1]);
+					    FloatTensor x = factory.Get(creators[0]);
+					    FloatTensor y = factory.Get(creators[1]);
 
 					    x.Backward(grad.Div(y));
 
@@ -130,63 +130,66 @@ namespace OpenMined.Syft.Tensor
 				    }
 				    else if (creation_op == "div_scalar")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad.Div(controller.getTensor(creators[1]).data[0]), this);
+					    factory.Get(creators[0]).Backward(grad.Div(factory.Get(creators[1]).data[0]), this);
 				    }
 				    else if (creation_op == "mul_elem")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad.Mul(controller.getTensor(creators[1])), this);
-					    controller.getTensor(creators[1]).Backward(grad.Mul(controller.getTensor(creators[0])), this);
+					    factory.Get(creators[0]).Backward(grad.Mul(factory.Get(creators[1])), this);
+					    factory.Get(creators[1]).Backward(grad.Mul(factory.Get(creators[0])), this);
 				    }
 				    else if (creation_op == "mul_scalar")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad.Mul(controller.getTensor(creators[1]).data[0]), this);
+					    factory.Get(creators[0]).Backward(grad.Mul(factory.Get(creators[1]).data[0]), this);
 				    }
 				    else if (creation_op == "mm")
 				    {
-					    FloatTensor x = controller.getTensor(creators[1]).Transpose();
+					    FloatTensor x = factory.Get(creators[1]).Transpose();
 					    x.autograd = false;
 
-					    FloatTensor y = controller.getTensor(creators[0]).Transpose();
+					    FloatTensor y = factory.Get(creators[0]).Transpose();
 					    y.autograd = false;
 					    
-					    controller.getTensor(creators[0]).Backward(grad.MM(x), this);
-					    controller.getTensor(creators[1]).Backward(y.MM(grad), this);
+					    factory.Get(creators[0]).Backward(grad.MM(x), this);
+					    factory.Get(creators[1]).Backward(y.MM(grad), this);
 				    }
 				    else if (creation_op == "neg")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad.Neg(), this);
+					    factory.Get(creators[0]).Backward(grad.Neg(), this);
 				    }
 				    else if (creation_op == "pow_scalar")
 				    {
-					    FloatTensor x = controller.getTensor(creators[0]);
-					    x.Backward(x.Mul(grad).Mul(controller.getTensor(creators[1]).Data[0]), this);
+
+					    FloatTensor x = factory.Get(creators[0]).Copy();
+					    x.autograd = false;
+					    
+					    factory.Get(creators[0]).Backward(x.Mul(grad).Mul(factory.Get(creators[1]).Data[0]), this);
 				    }
 				    else if (creation_op == "sub_elem")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad.Copy(), this);
-					    controller.getTensor(creators[1]).Backward(grad.Neg(), this);
+					    factory.Get(creators[0]).Backward(grad, this);
+					    factory.Get(creators[1]).Backward(grad.Neg(), this);
 				    }
 				    else if (creation_op == "sub_scalar")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad, this);
+					    factory.Get(creators[0]).Backward(grad, this);
 				    }
 				    else if (creation_op == "sigmoid")
 				    {
 					    FloatTensor self_nograd = this.Copy();
 					    self_nograd.autograd = false;
 					    
-					    controller.getTensor(creators[0]).Backward(self_nograd.Neg().Add((float) 1).Mul(self_nograd).Mul(grad), this);
+					    factory.Get(creators[0]).Backward(self_nograd.Neg().Add((float) 1).Mul(self_nograd).Mul(grad), this);
 				    }
 				    else if (creation_op == "transpose")
 				    {
-					    controller.getTensor(creators[0]).Backward(grad.Transpose());
+					    factory.Get(creators[0]).Backward(grad.Transpose());
 				    }
 				    else if (creation_op == "tanh")
 				    {
 					    FloatTensor c = this.Copy();
 					    c.autograd = false;
 
-					    controller.getTensor(creators[0]).Backward(c.Pow(2).Neg().Add(1f).Mul(grad), this);
+					    factory.Get(creators[0]).Backward(c.Pow(2).Neg().Add(1f).Mul(grad), this);
 				    }
 				    else if (creation_op.Contains("softmax-"))
 				    {
@@ -194,7 +197,7 @@ namespace OpenMined.Syft.Tensor
 					    FloatTensor c = this.Copy();
 					    c.autograd = false;
 					    var dim = int.Parse(creation_op.Split('-')[1]);
-					    controller.getTensor(creators[0]).Backward(Functional.SoftmaxGradient(this, grad, dim), this);
+					    factory.Get(creators[0]).Backward(Functional.SoftmaxGradient(this, grad, dim), this);
 
 				    }
                     else if (creation_op.Contains("sum-"))

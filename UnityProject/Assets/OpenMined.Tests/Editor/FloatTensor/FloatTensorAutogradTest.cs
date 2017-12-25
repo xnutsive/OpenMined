@@ -44,16 +44,16 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void AddElemAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
-            var b = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,1,3,9,2}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var b = ctrl.floatTensorFactory.Create(_data: new float[]{5,1,3,9,2}, _shape: new int[]{5});
 
             a.Autograd = true;
             b.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{6,3,6,13,7}, _shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{6,3,6,13,7}, _shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var ab_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var ab_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
 
             var c = a.Add(b);
             c.Backward(c_grad);
@@ -110,14 +110,14 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void AddScalarAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
 
             a.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{6,7,8,9,10}, _shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{6,7,8,9,10}, _shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
 
             var c = a.Add(5);
             c.Backward(c_grad);
@@ -171,17 +171,17 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void SubElemAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
-            var b = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,1,3,9,2}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var b = ctrl.floatTensorFactory.Create(_data: new float[]{5,1,3,9,2}, _shape: new int[]{5});
 
             a.Autograd = true;
             b.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{-4,1,0,-5,3}, _shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{-4,1,0,-5,3}, _shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
-            var b_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{-1,-1,-1,-1,-1}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var b_grad = ctrl.floatTensorFactory.Create(_data: new float[]{-1,-1,-1,-1,-1}, _shape: new int[]{5});
 
             var c = a.Sub(b);
             c.Backward(c_grad);
@@ -238,14 +238,14 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void SubScalarAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
 
             a.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{-4,-3,-2,-1,0}, _shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{-4,-3,-2,-1,0}, _shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
 
             var c = a.Sub(5);
             c.Backward(c_grad);
@@ -299,17 +299,17 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void DivElemAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
-            var b = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,1,3,8,2}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var b = ctrl.floatTensorFactory.Create(_data: new float[]{5,1,3,8,2}, _shape: new int[]{5});
 
             a.Autograd = true;
             b.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{0.2f,2,1,0.5f,2.5f},_shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{0.2f,2,1,0.5f,2.5f},_shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{0.2f,1,0.3333f,0.125f,0.5f}, _shape: new int[]{5});
-            var b_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{-0.04f,-2,-0.3333f,-0.0625f,-1.25f}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{0.2f,1,0.3333f,0.125f,0.5f}, _shape: new int[]{5});
+            var b_grad = ctrl.floatTensorFactory.Create(_data: new float[]{-0.04f,-2,-0.3333f,-0.0625f,-1.25f}, _shape: new int[]{5});
 
             var c = a.Div(b);
             c.Backward(c_grad);
@@ -366,14 +366,14 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void DivScalarAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
 
             a.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{0.5f,1,1.5f,2,2.5f}, _shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{0.5f,1,1.5f,2,2.5f}, _shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{.5f,.5f,.5f,.5f,.5f}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{.5f,.5f,.5f,.5f,.5f}, _shape: new int[]{5});
 
             var c = a.Div(2);
             c.Backward(c_grad);
@@ -427,17 +427,17 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void MulElemAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
-            var b = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,1,3,8,2}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var b = ctrl.floatTensorFactory.Create(_data: new float[]{5,1,3,8,2}, _shape: new int[]{5});
 
             a.Autograd = true;
             b.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,2,9,32,10},_shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{5,2,9,32,10},_shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,1,3,8,2}, _shape: new int[]{5});
-            var b_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{5,1,3,8,2}, _shape: new int[]{5});
+            var b_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
 
             var c = a.Mul(b);
             c.Backward(c_grad);
@@ -494,14 +494,14 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void MulScalarAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
 
             a.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,10,15,20,25}, _shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{5,10,15,20,25}, _shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{5,5,5,5,5}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{5,5,5,5,5}, _shape: new int[]{5});
 
             var c = a.Mul(5);
             c.Backward(c_grad);
@@ -557,24 +557,24 @@ namespace OpenMined.Tests.Editor.FloatTensor
 
             int[] ash = new int[] {2, 5};
             float[] a_data = new float[] {1, 2, 3, 4, 5, 2, 3, 4, 5, 6};
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: a_data, _shape: ash);
+            var a = ctrl.floatTensorFactory.Create(_data: a_data, _shape: ash);
 
             int[] bs = new int[] {5,3};
             float[] b_data = new float[] {5, 2, 3, 1, 5, 5, 3, 3, 2, 8, 2, 3, 2, 5, 6};
-            var b = new Syft.Tensor.FloatTensor(ctrl, _data: b_data, _shape: bs);
+            var b = ctrl.floatTensorFactory.Create(_data: b_data, _shape: bs);
 
             a.Autograd = true;
             b.Autograd = true;
 
             int[] ces = new int[] {2,3};
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{58,54,61,77,71,80},_shape: ces);
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1,1}, _shape: new int[]{2,3});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{58,54,61,77,71,80},_shape: ces);
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1,1}, _shape: new int[]{2,3});
 
             float[] a_grad_data = new float[] {10, 11, 8, 13, 13, 10, 11, 8, 13, 13};
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: a_grad_data, _shape: ash);
+            var a_grad = ctrl.floatTensorFactory.Create(_data: a_grad_data, _shape: ash);
 
             float[] b_grad_data = new float[] {3, 3, 3, 5, 5, 5, 7, 7, 7, 9, 9, 9, 11, 11, 11};
-            var b_grad = new Syft.Tensor.FloatTensor(ctrl, _data: b_grad_data, _shape: bs);
+            var b_grad = ctrl.floatTensorFactory.Create(_data: b_grad_data, _shape: bs);
 
             var c = a.MM(b);
             c.Backward(c_grad);
@@ -654,14 +654,14 @@ namespace OpenMined.Tests.Editor.FloatTensor
         public void PowScalarAutograd()
         {
             
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
+            var a = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,3,4,5}, _shape: new int[]{5});
 
             a.Autograd = true;
             
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,4,9,16,25}, _shape: new int[]{5});
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{1,4,9,16,25}, _shape: new int[]{5});
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1}, _shape: new int[]{5});
             
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{2,4,6,8,10}, _shape: new int[]{5});
+            var a_grad = ctrl.floatTensorFactory.Create(_data: new float[]{2,4,6,8,10}, _shape: new int[]{5});
 
             var c = a.Pow(2);
             c.Backward(c_grad);
@@ -718,16 +718,16 @@ namespace OpenMined.Tests.Editor.FloatTensor
 
             int[] ash = new int[] {2, 3};
             float[] a_data = new float[] {1, 2, 3, 2, 3, 4};
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: a_data, _shape: ash);
+            var a = ctrl.floatTensorFactory.Create(_data: a_data, _shape: ash);
 
             a.Autograd = true;
 
             int[] ces = new int[] {3,2};
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,2,3,3,4},_shape: ces);
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,2,2,4,3,6}, _shape: ces);
+            var c_expected = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,2,3,3,4},_shape: ces);
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,2,2,4,3,6}, _shape: ces);
 
             float[] a_grad_data = new float[] {1,2,3,2,4,6};
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: a_grad_data, _shape: ash);
+            var a_grad = ctrl.floatTensorFactory.Create(_data: a_grad_data, _shape: ash);
 
             var c = a.Transpose();
             c.Backward(c_grad);
@@ -791,7 +791,7 @@ namespace OpenMined.Tests.Editor.FloatTensor
 
             int[] ash = new int[] {2, 5};
             float[] a_data = new float[] {1, 2, 3, 4, 5, 2, 3, 4, 5, 6};
-            var a = new Syft.Tensor.FloatTensor(ctrl, _data: a_data, _shape: ash);
+            var a = ctrl.floatTensorFactory.Create(_data: a_data, _shape: ash);
 
             a.Autograd = true;
 
@@ -799,12 +799,12 @@ namespace OpenMined.Tests.Editor.FloatTensor
             float[] c_data = new float[] {0.7310586f ,  0.88079703f,  0.95257413f,  0.98201376f,  0.99330717f,
                 0.88079703f,  0.95257413f,  0.98201376f,  0.99330717f,  0.99752742f};
 
-            var c_expected = new Syft.Tensor.FloatTensor(ctrl, _data: c_data,_shape: ces);
-            var c_grad = new Syft.Tensor.FloatTensor(ctrl, _data: new float[]{1,1,1,1,1,1,1,1,1,1}, _shape: ces);
+            var c_expected = ctrl.floatTensorFactory.Create(_data: c_data,_shape: ces);
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{1,1,1,1,1,1,1,1,1,1}, _shape: ces);
 
             float[] a_grad_data = new float[] {0.1966f,  0.1050f,  0.0452f,  0.0177f,  0.0066f,
                 0.1050f,  0.0452f,  0.0177f,  0.0066f,  0.0025f};
-            var a_grad = new Syft.Tensor.FloatTensor(ctrl, _data: a_grad_data, _shape: ash);
+            var a_grad = ctrl.floatTensorFactory.Create(_data: a_grad_data, _shape: ash);
 
             var c = a.Sigmoid();
             c.Backward(c_grad);
@@ -866,22 +866,22 @@ namespace OpenMined.Tests.Editor.FloatTensor
         {
             int[] input_shape = new int[] {4, 3};
             float[] input_data = new float[] { 0,  0,  1,  0,  1,  1,  1,  0,  1,  1,  1,  1};
-            var input = new Syft.Tensor.FloatTensor(ctrl, _data: input_data, _shape: input_shape);
+            var input = ctrl.floatTensorFactory.Create(_data: input_data, _shape: input_shape);
             input.Autograd = true;
             
             int[] target_shape = new int[] {4, 1};
             float[] target_data = new float[] { 0,0,1,1,};
-            var target = new Syft.Tensor.FloatTensor(ctrl, _data: target_data, _shape: target_shape);
+            var target = ctrl.floatTensorFactory.Create(_data: target_data, _shape: target_shape);
             target.Autograd = true;
             
             int[] grad_shape = new int[] {4, 1};
             float[] grad_data = new float[] { 1,1,1,1};
-            var grad = new Syft.Tensor.FloatTensor(ctrl, _data: grad_data, _shape: grad_shape);
+            var grad = ctrl.floatTensorFactory.Create(_data: grad_data, _shape: grad_shape);
             grad.Autograd = false;
             
             int[] weights_shape = new int[] {3, 1};
             float[] weights_data = new float[] { 0.2f,0.1f,0.3f};
-            var weights = new Syft.Tensor.FloatTensor(ctrl, _data: weights_data, _shape: weights_shape);
+            var weights = ctrl.floatTensorFactory.Create(_data: weights_data, _shape: weights_shape);
             weights.Autograd = true;
 
             var layer_1 = input.MM(weights).Sigmoid();
@@ -915,28 +915,28 @@ namespace OpenMined.Tests.Editor.FloatTensor
             
             int[] input_shape = new int[] {4, 3};
             float[] input_data = new float[] { 0,  0,  1,  0,  1,  1,  1,  0,  1,  1,  1,  1};
-            var input = new Syft.Tensor.FloatTensor(ctrl, _data: input_data, _shape: input_shape);
+            var input = ctrl.floatTensorFactory.Create(_data: input_data, _shape: input_shape);
             input.Autograd = true;
             
             int[] target_shape = new int[] {4, 1};
             float[] target_data = new float[] { 0,0,1,1,};
-            var target = new Syft.Tensor.FloatTensor(ctrl, _data: target_data, _shape: target_shape);
+            var target = ctrl.floatTensorFactory.Create(_data: target_data, _shape: target_shape);
             target.Autograd = true;
             
             int[] grad_shape = new int[] {4, 1};
             float[] grad_data = new float[] { 1,1,1,1};
-            var grad = new Syft.Tensor.FloatTensor(ctrl, _data: grad_data, _shape: grad_shape);
+            var grad = ctrl.floatTensorFactory.Create(_data: grad_data, _shape: grad_shape);
             grad.Autograd = false;
             
             int[] weights1_shape = new int[] {3, 4};
             float[] weights1_data = new float[] { 0.4170f,  0.7203f, 0.0001f,  0.3023f, 0.1468f,  0.0923f,  0.1863f, 
                 0.3456f, 0.3968f,  0.5388f,  0.4192f,  0.6852f};
-            var weights1 = new Syft.Tensor.FloatTensor(ctrl, _data: weights1_data, _shape: weights1_shape);
+            var weights1 = ctrl.floatTensorFactory.Create(_data: weights1_data, _shape: weights1_shape);
             weights1.Autograd = true;
             
             int[] weights2_shape = new int[] {4, 1};
             float[] weights2_data = new float[] { 0.2045f,0.8781f,0.0274f,0.6705f};
-            var weights2 = new Syft.Tensor.FloatTensor(ctrl, _data: weights2_data, _shape: weights2_shape);
+            var weights2 = ctrl.floatTensorFactory.Create(_data: weights2_data, _shape: weights2_shape);
             weights2.Autograd = true;
 
             var layer_1 = input.MM(weights1).Sigmoid();
