@@ -72,15 +72,23 @@ namespace OpenMined.Syft.Tensor
 			return result;
 		}
         
-		public FloatTensor Add(FloatTensor x, bool inline = false, FloatTensor result = null)
+		public FloatTensor Add(FloatTensor x, bool inline = false, FloatTensor result = null, bool override_checks= false)
 		{
 		    
-		    if (!IsContiguous() || !x.IsContiguous()) 
+		    if ((!IsContiguous() || !x.IsContiguous()) && override_checks == false) 
 		        throw new InvalidOperationException ("All tensors must be contiguous, call Contiguous() to convert");
 
-			// Check if both tensors are compatible for sum
-			SameSizeDimensionsShapeAndLocation(ref x);
-
+		    if (override_checks == false)
+		    {
+		        SameSizeDimensionsShapeAndLocation(ref x); // Check if both tensors are compatible for sum
+		    }
+		    else
+		    {
+		        if (x.size != this.size)
+		        {
+		            throw new IndexOutOfRangeException();
+		        }
+		    }
 
 		    result = HookAutograd (ref result, ref x, "add_elem", inline);
 
@@ -986,50 +994,45 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-        public FloatTensor View(int[] new_shape, bool inline = false)
+        public FloatTensor View(int[] new_shape, bool inline = false, FloatTensor result = null)
         {
             if (!IsContiguous()) {
                 throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
             }
-
-            var newSize = 1;
-            for (var i = 0; i < new_shape.Length; i++)
+            if (inline == true)
             {
-                newSize *= new_shape[i];
-            }
+                
+                this.Shape = new_shape;
 
-            var result = this;
-            if (newSize != size) return result;
-            if (dataOnGpu)
-            {
-                if (inline)
+                if (dataOnGpu)
                 {
-                    shape = new_shape;
-
                     shapeBuffer.Release();
                     shapeBuffer = new ComputeBuffer(shape.Length, sizeof(int));
                     shapeBuffer.SetData(shape);
                     
-                    setStridesAndCheckShape();
                 }
-                else
-                {
-                    result = factory.Create(_shape: new_shape, _shader: this.shader, _copyData: false);
-                }
-            }
-            else if (inline)
-            {
-                shape = new_shape;
+                
                 setStridesAndCheckShape();
+
+                return this;
+
             }
             else
             {
-                result = factory.Create(_data: data, _shape: new_shape, _shader: shader, _copyData: false);
+                result = factory.Create(
+                    _shape: new_shape,
+                    _data: data,
+                    _dataOnGpu: dataOnGpu,
+                    _autograd: autograd,
+                    _keepgrads: keepgrads,
+                    _creation_op: creation_op,
+                    _copyData:false);
+                
+                string shape_str = "";
+                for (int i = 0; i < new_shape.Length; i++) shape_str += "_" + new_shape[i];
+                return HookAutograd(ref result, creation_op:"view"+shape_str, inline:inline, resultShape:new_shape);    
             }
-
-            result = HookAutograd(ref result, "view", inline);
             
-            return result;
         }
 
         public FloatTensor Remainder(float divisor, bool inline = false)
@@ -1146,6 +1149,7 @@ namespace OpenMined.Syft.Tensor
             }
 
             FloatTensor result = this;
+            
             if (list.Count == 0)
             {
                 if (!inline)
@@ -1173,7 +1177,7 @@ namespace OpenMined.Syft.Tensor
 
             // TODO: make more complicated version which does not copy data
 		    result = HookAutograd(ref result, "expand", false, shape);
-		    result.Add(this, inline: true);
+		    result.Add(this, inline: true,override_checks:true);
 		    
 			for (int i = 0; i < shape.Length; i++) {
 				if (sizes[i] != -1 && sizes[i] != shape[i]) {

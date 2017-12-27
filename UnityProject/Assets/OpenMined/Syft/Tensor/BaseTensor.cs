@@ -165,11 +165,6 @@ namespace OpenMined.Syft.Tensor
         #endregion
         public void Zero_()
         {
-            if (!IsContiguous())
-            {
-                throw new InvalidOperationException("Tensor must be contiguous, call Contiguous() to convert");
-            }
-
             if (dataOnGpu)
             {
                 ZeroGPU_();

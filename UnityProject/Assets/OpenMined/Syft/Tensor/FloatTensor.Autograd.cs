@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenMined.Syft.NN;
-using System.Linq;
 using UnityEngine;
 
 namespace OpenMined.Syft.Tensor
@@ -94,6 +93,9 @@ namespace OpenMined.Syft.Tensor
 			    // 6) If you use a forward propagation tensor to backprop, you MUST remember to turn off autograd
 			    // when backpropagating (see "mm" below for example). Otherwise, it will cause autograd to break because
 			    // whatever child you select will think it needs to wait for another gradient before backpropagating.
+			    // 7) In the "view" backprop method, you'll notice that we set parent.grad = null. This keeps grads from
+			    // accumulating when forward and backprop is called multiple times. However, it doesn't cause any new 
+			    // memory allocation.
 			    
 			    // only continue backpropping if there's something to backprop into
 			    // only continue backpropping if all gradients (from children) are accounted for
@@ -109,6 +111,10 @@ namespace OpenMined.Syft.Tensor
 
 				    }
 				    else if (creation_op == "add_scalar")
+				    {
+					    factory.Get(creators[0]).Backward(grad, this);
+				    }
+				    else if (creation_op == "contiguous")
 				    {
 					    factory.Get(creators[0]).Backward(grad, this);
 				    }
@@ -132,6 +138,28 @@ namespace OpenMined.Syft.Tensor
 				    else if (creation_op == "div_scalar")
 				    {
 					    factory.Get(creators[0]).Backward(grad.Div(factory.Get(creators[1]).data[0]), this);
+				    }
+				    else if (creation_op == "expand")
+				    {
+					    var parent = factory.Get(creators[0]);
+					    parent.Grad = null;
+					    var grad_shape = new int[shape.Length];
+
+					    for (int i = 0; i < grad.shape.Length; i++)
+					    {
+						    grad_shape[i] = grad.shape[i];
+					    }
+
+					    for (int i = 0; i < shape.Length; i++)
+					    {
+						    grad_shape[i] = parent.shape[i];
+						    if (parent.shape[i] == 1 && shape[i] > 1)
+						    {
+							    grad = grad.Sum(i).View(grad_shape);
+						    }		    
+					    }
+					   
+					    parent.Backward(grad, this);
 				    }
 				    else if (creation_op == "mul_elem")
 				    {
@@ -234,9 +262,13 @@ namespace OpenMined.Syft.Tensor
 
 				    }
 
-				    else if (creation_op == "view")
+				    else if (creation_op.Contains("view_"))
 				    {
 					    FloatTensor parent = factory.Get(creators[0]);
+					    
+					    parent.Grad = null; // prevents gradient from simply being added to the previous gradient
+					    					// instead the backpropagated gradient is set to a new value.
+					    
 					    parent.Backward(this.Grad.View(parent.shape));
 				    }
 				    else

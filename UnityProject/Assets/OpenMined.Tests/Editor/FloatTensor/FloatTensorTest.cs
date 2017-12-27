@@ -2614,7 +2614,7 @@ namespace OpenMined.Tests.Editor.FloatTensor
 
             int[] newShape = {2, 8};
 
-            tensor.View(newShape, inline: true);
+            tensor.View(new_shape:newShape, inline: true);
 
             Assert.AreEqual(2, tensor.Shape[0]);
             Assert.AreEqual(8, tensor.Shape[1]);
