@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using OpenMined.Syft.NN;
 using System.Linq;
 using UnityEngine;
-using Vuforia;
 
 namespace OpenMined.Syft.Tensor
 {

@@ -1,8 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using OpenMined.Network.Controllers;
-using OpenMined.Syft.NN;
-using UnityEngine;
+using System.Linq;
 
 namespace OpenMined.Tests.Editor.FloatTensor
 {
@@ -976,6 +975,116 @@ namespace OpenMined.Tests.Editor.FloatTensor
             
             ctrl.allow_new_tensors = true;
 
+        }
+        
+        [Test]
+        public void TanhAutograd()
+        {
+            float[] data1 = { 1, 2, 3, 4 };
+            int[] shape1 = { 2, 2 };
+            var tensor = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1, _autograd: true);
+
+            float[] data2 = { 0.4200f, 0.0707f, 0.0099f, 0.0013f };
+            int[] shape2 = { 2, 2 };
+
+            var expectedGradTensor = ctrl.floatTensorFactory.Create( _data: data2, _shape: shape2);
+
+            float[] data3 = { 0.7616f, 0.9640f, 0.9951f, 0.9993f };
+            int[] shape3 = { 2, 2 };
+
+            var expectedTanhTensor = ctrl.floatTensorFactory.Create(_data: data3, _shape: shape3);
+
+            var tanhTensor = tensor.Tanh();
+            tanhTensor.Backward();
+
+            for (var i = 0; i < tensor.Size; i++)
+            {
+                Assert.AreEqual(expectedTanhTensor.Data[i], tanhTensor.Data[i], 1e-4);
+            }
+
+            for (var i = 0; i < tensor.Size; i++)
+            {
+                Assert.AreEqual(expectedGradTensor.Data[i], tensor.Grad.Data[i], 1e-4);
+            }
+
+            tanhTensor = tensor.Tanh();
+            tanhTensor.Backward();
+            
+            for (var i = 0; i < tensor.Size; i++)
+            {
+                Assert.AreEqual(expectedTanhTensor.Data[i], tanhTensor.Data[i], 1e-4);
+            }
+
+            for (var i = 0; i < tensor.Size; i++)
+            {
+                Assert.AreEqual(expectedGradTensor.Data[i], tensor.Grad.Data[i], 1e-4);
+            }
+
+            ctrl.allow_new_tensors = false;
+            tanhTensor = tensor.Tanh();
+            tanhTensor = tensor.Tanh();
+            tanhTensor.Backward();
+            
+            for (var i = 0; i < tensor.Size; i++)
+            {
+                Assert.AreEqual(expectedTanhTensor.Data[i], tanhTensor.Data[i], 1e-4);
+            }
+
+            for (var i = 0; i < tensor.Size; i++)
+            {
+                Assert.AreEqual(expectedGradTensor.Data[i], tensor.Grad.Data[i], 1e-4);
+            }
+
+            ctrl.allow_new_tensors = true;
+        }
+
+        [Test]
+        public void SumAutograd()
+        {
+            float[] data = { 1,  2,  3,  4,  5,  6,  7,  8,  9,
+                              10, 11, 12, 13, 14, 15, 16, 17, 18,
+                              19, 20, 21, 22, 23, 24, 25, 26, 27 };
+            int[] shape = { 3, 3, 3 };
+
+            var tensor = ctrl.floatTensorFactory.Create( _data: data, _shape: shape, _autograd: true);
+            
+            float[] gradData = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            int[] gradShape = { 3, 3 };
+
+            var gradTensor = ctrl.floatTensorFactory.Create( _data: gradData, _shape: gradShape);
+
+            var sum = tensor.Sum(1);
+            sum.Backward(gradTensor);
+
+            var grad = tensor.Grad;
+
+            float[] expectedData = { 12, 15, 18, 39, 42, 45, 66, 69, 72 };
+            float[] expectedGradData = { 1, 2, 3, 1, 2, 3, 1, 2, 3,
+                                         4, 5, 6, 4, 5, 6, 4, 5, 6,
+                                         7, 8, 9, 7, 8, 9, 7, 8, 9 };
+
+            Assert.IsTrue(expectedData.SequenceEqual(sum.Data));
+            Assert.IsTrue(expectedGradData.SequenceEqual(grad.Data));
+
+            // check that repeating doesn't break it
+            sum = tensor.Sum(1);
+            sum.Backward(gradTensor);
+
+            Assert.IsTrue(expectedData.SequenceEqual(sum.Data));
+            Assert.IsTrue(expectedGradData.SequenceEqual(grad.Data));
+
+            // see if it's allocating new tensors during the forward pass
+            ctrl.allow_new_tensors = false;
+
+            // check that repeating the forward pass doesn't break it
+            sum = tensor.Sum(1);
+            sum = tensor.Sum(1);
+            sum.Backward(gradTensor);
+            
+            Assert.IsTrue(expectedData.SequenceEqual(sum.Data));
+            Assert.IsTrue(expectedGradData.SequenceEqual(grad.Data));
+
+            ctrl.allow_new_tensors = true;
         }
     }
 }
