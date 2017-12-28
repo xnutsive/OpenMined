@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using OpenMined.Syft.NN;
 using UnityEngine;
-using Vuforia;
 
 namespace OpenMined.Syft.Tensor
 {
@@ -103,8 +102,16 @@ namespace OpenMined.Syft.Tensor
 			    // override waiting for children if "backprop" was called on this variable directly
 			    if (this.creators != null && this.creators.Count > 0 && (grad_origin == null || AllAutogradChildrenAccountedFor()))
 			    {
-				    
-				    if (creation_op == "add_elem")
+                    if (creation_op == "abs")
+                    {
+                        FloatTensor c = this.Copy();
+                        c.autograd = false;
+
+                        var parent = factory.Get(creators[0]);
+
+                        parent.Backward(parent.Div(c).Mul(grad));
+                    }
+				    else if (creation_op == "add_elem")
 				    {
 
 					    factory.Get(creators[0]).Backward(grad, this);

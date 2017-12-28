@@ -41,6 +41,62 @@ namespace OpenMined.Tests.Editor.FloatTensor
         /********************/
 
         [Test]
+        public void Abs()
+        {
+            var a = ctrl.floatTensorFactory.Create(_data: new float[] { 1, 2, 3, 4, 5, -1, -2, -3, -4, -5 }, 
+                                                   _shape: new int[] { 5, 2 }, _autograd: true);
+            float[] c_expected = { 1f, 2f, 3f, 4f, 5f, 1f, 2f, 3f, 4f, 5f };
+            var c_grad = ctrl.floatTensorFactory.Create(_data: new float[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, _shape: new int[]{ 5, 2 });
+
+            float[] a_expected_grad = { 1f, 1f, 1f, 1f, 1f, -1f, -1f, -1f, -1f, -1f };
+
+            var c = a.Abs();
+            c.Backward(c_grad);
+
+            for (int i = 0; i < a.Size; i++)
+            {
+                // sum is correct
+                Assert.AreEqual(c_expected[i],c[i]);
+                
+                // gradients are correct
+                Assert.AreEqual(a_expected_grad[i], a.Grad[i]);
+            }
+            
+            // check that repeating doesn't break it
+            c = a.Abs();
+            c.Backward(c_grad);
+
+            for (int i = 0; i < a.Size; i++)
+            {
+                // sum is correct
+                Assert.AreEqual(c_expected[i],c[i]);
+                
+                // gradients are correct
+                Assert.AreEqual(a_expected_grad[i], a.Grad[i]);
+            }
+
+            // see if it's allocating new tensors during the forward pass
+            ctrl.allow_new_tensors = false;
+            
+            // check that repeating the forward pass doesn't break it
+            c = a.Abs();
+            c = a.Abs();
+            c.Backward(c_grad);
+
+            for (int i = 0; i < a.Size; i++)
+            {
+                // sum is correct
+                Assert.AreEqual(c_expected[i],c[i]);
+                
+                // gradients are correct
+                Assert.AreEqual(a_expected_grad[i], a.Grad[i]);
+            }
+            
+            // cleanup
+            ctrl.allow_new_tensors = true;
+        }
+
+        [Test]
         public void AddElemAutograd()
         {
             

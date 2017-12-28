@@ -51,10 +51,10 @@ namespace OpenMined.Syft.Tensor
             return new_tensor;
         }
         
-		public FloatTensor Abs(bool inline = false)
+		public FloatTensor Abs(bool inline = false, FloatTensor result = null)
 		// Returns a new Tensor with the smallest integer greater than or equal to each element
 		{
-			FloatTensor result = inline ? this : this.emptyTensorCopy();
+            result = HookAutograd(ref result, "abs", inline);		
 
 			if (dataOnGpu) {
 				if (inline) { AbsGPU_ (); return this; }
