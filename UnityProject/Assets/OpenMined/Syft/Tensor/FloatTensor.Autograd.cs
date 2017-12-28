@@ -207,13 +207,15 @@ namespace OpenMined.Syft.Tensor
 					    FloatTensor self_nograd = this.Copy();
 					    self_nograd.autograd = false;
 					    
-					    factory.Get(creators[0]).Backward(self_nograd.Neg().Add((float) 1).Mul(self_nograd).Mul(grad), this);
+					    factory.Get(creators[0]).Backward(self_nograd.Neg().Add(1f).Mul(self_nograd).Mul(grad), this);
 				    }
 
  				    else if (creation_op.Contains("sum"))
  				    {
  						// TOOD: sum backprop logic   
  					    FloatTensor parent = factory.Get(creators[0]);
+
+                        parent.Grad = null;
 					    
  					    int[] view_shape = (int[])parent.shape.Clone();
  					    view_shape[int.Parse(creation_op.Split('_')[1])] = 1;

@@ -992,10 +992,12 @@ namespace OpenMined.Tests.Editor.FloatTensor
             float[] data3 = { 0.7616f, 0.9640f, 0.9951f, 0.9993f };
             int[] shape3 = { 2, 2 };
 
+            var tanhGrad = ctrl.floatTensorFactory.Create(_data: new float[] { 1, 1, 1, 1 }, _shape: new int[] { 2, 2 });
+
             var expectedTanhTensor = ctrl.floatTensorFactory.Create(_data: data3, _shape: shape3);
 
             var tanhTensor = tensor.Tanh();
-            tanhTensor.Backward();
+            tanhTensor.Backward(tanhGrad);
 
             for (var i = 0; i < tensor.Size; i++)
             {
@@ -1008,7 +1010,7 @@ namespace OpenMined.Tests.Editor.FloatTensor
             }
 
             tanhTensor = tensor.Tanh();
-            tanhTensor.Backward();
+            tanhTensor.Backward(tanhGrad);
             
             for (var i = 0; i < tensor.Size; i++)
             {
@@ -1023,7 +1025,7 @@ namespace OpenMined.Tests.Editor.FloatTensor
             ctrl.allow_new_tensors = false;
             tanhTensor = tensor.Tanh();
             tanhTensor = tensor.Tanh();
-            tanhTensor.Backward();
+            tanhTensor.Backward(tanhGrad);
             
             for (var i = 0; i < tensor.Size; i++)
             {
@@ -1046,12 +1048,12 @@ namespace OpenMined.Tests.Editor.FloatTensor
                               19, 20, 21, 22, 23, 24, 25, 26, 27 };
             int[] shape = { 3, 3, 3 };
 
-            var tensor = ctrl.floatTensorFactory.Create( _data: data, _shape: shape, _autograd: true);
-            
+            var tensor = ctrl.floatTensorFactory.Create(_data: data, _shape: shape, _autograd: true);
+
             float[] gradData = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             int[] gradShape = { 3, 3 };
 
-            var gradTensor = ctrl.floatTensorFactory.Create( _data: gradData, _shape: gradShape);
+            var gradTensor = ctrl.floatTensorFactory.Create(_data: gradData, _shape: gradShape);
 
             var sum = tensor.Sum(1);
             sum.Backward(gradTensor);
@@ -1080,11 +1082,12 @@ namespace OpenMined.Tests.Editor.FloatTensor
             sum = tensor.Sum(1);
             sum = tensor.Sum(1);
             sum.Backward(gradTensor);
-            
+
             Assert.IsTrue(expectedData.SequenceEqual(sum.Data));
             Assert.IsTrue(expectedGradData.SequenceEqual(grad.Data));
 
             ctrl.allow_new_tensors = true;
+        }
 
         public void ViewAutograd()
         {
