@@ -1212,8 +1212,9 @@ namespace OpenMined.Syft.Tensor
                 
                 string shape_str = "";
                 for (int i = 0; i < new_shape.Length; i++) shape_str += "_" + new_shape[i];
-                result =  HookAutograd(ref result, creation_op:"view"+shape_str, inline:inline, resultShape:new_shape);
+                result = HookAutograd(ref result, creation_op:"view"+shape_str, inline:inline, resultShape:new_shape);
                 result.Add(this, inline: true, override_checks:true);
+
                 return result;
 
             }
@@ -1297,7 +1298,7 @@ namespace OpenMined.Syft.Tensor
             return this.View(x.shape, inline);
         }
 
-        public FloatTensor Squeeze(int dim = -1, bool inline = false)
+        public FloatTensor Squeeze(int dim = -1, bool inline = false, FloatTensor result = null)
         {
             if (!IsContiguous()) {
                 throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
@@ -1333,28 +1334,13 @@ namespace OpenMined.Syft.Tensor
                 }
             }
 
-            FloatTensor result = this;
+            if (list.Count > 0)
+            {
+                return View(list.ToArray(), inline: inline);
+            }
             
-            if (list.Count == 0)
-            {
-                if (!inline)
-                {
-                    result = factory.Create(_data: data, _shape: shape, _shader: shader, _copyData: false);
-                }
-            }
-            else
-            {
-                if (inline)
-                {
-                    View(list.ToArray(), inline: true);
-                }
-                else
-                {
-                    result = View(list.ToArray());
-                }
-            }
-
-            return result;
+            // if shape doesn't change just call through to view to hook into autograd if need be
+            return View(Shape, inline: inline);
         }
 
 		private FloatTensor expand(int[] sizes, FloatTensor result = null)
@@ -1535,8 +1521,8 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-        public FloatTensor Unsqueeze(int dim, bool inline = false)
-        {
+        public FloatTensor Unsqueeze(int dim, bool inline = false, FloatTensor result = null)
+        {        
             int[] new_shape = new int[shape.Length + 1];
             int j = 0;
             for (int i = 0; i < new_shape.Length; i++)

@@ -2586,6 +2586,20 @@ namespace OpenMined.Tests.Editor.FloatTensor
         }
 
         [Test]
+        public void Unsqueeze()
+        {
+            float[] data1 = {1, 2, 3, 4};
+            int[] shape1 = {2, 2};
+
+            var tensor = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1);
+
+            var newTensor = tensor.Unsqueeze(1);
+
+            Assert.AreEqual(1, newTensor.Shape[1]);
+            Assert.AreEqual(3, newTensor.Shape.Length);
+        }
+
+        [Test]
         public void View()
         {
             float[] data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
