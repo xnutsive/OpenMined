@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -111,14 +111,13 @@ namespace OpenMined.Syft.Tensor
 				}
 
 			    if (child_pre_initialized)
-			    {
+			    {	
 				    autograd_pre_initialized = true;
 				    result = factory.Get(child_index);
 				    result.Zero_();
 			    }
 			    else
 			    {
-
 				    bool resultAutograd = autograd;
 				    
 				    if(tensor_inputs != null)

@@ -40,9 +40,19 @@ namespace OpenMined.Syft.Tensor
         }
         
         // parameters are overrides
-        public FloatTensor Copy(FloatTensor result = null)
+        public FloatTensor Copy(bool autograd, FloatTensor result = null)
         {
-            result = HookGraph(ref result, "copy", false);
+            if (autograd != this.Autograd)
+            {
+                result = HookGraph(ref result, "copy_autograd_flip", inline: false);
+            }
+            else
+            {
+                result = HookGraph(ref result, "copy", inline: false);
+            }
+
+            result.autograd = autograd;
+            
             result.Zero_();
             result.Add(this, inline: true);
             
@@ -650,7 +660,21 @@ namespace OpenMined.Syft.Tensor
             result.strides = newStrides;
 			
             return result;
-        }        
+        }
+
+        public FloatTensor Fill(float value, bool inline = true)
+        {
+            if (!inline || dataOnGpu)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                for (int i = 0; i < Size; i++) data[i] = value;
+                return this;
+            }
+            
+        }
 
         internal void ForEach(int dim, Action<float[], int, int> iterator)
         
@@ -1272,6 +1296,30 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
+        public FloatTensor SampleMask(int dim = -1, FloatTensor result = null)
+        {
+            if (dim != -1 || dataOnGpu)
+                throw new NotImplementedException();
+            
+            if(result == null)
+                result = this.Copy(autograd:this.Autograd);
+                
+            for (int i = 0; i < size; i++)
+            {
+                if (UnityEngine.Random.value < data[i])
+                {
+                    result.Data[i] = 1;
+                }
+                else
+                {
+                    result.Data[i] = 0;
+                }
+
+            }
+            
+            return result;
+        }
+        
         public IntTensor Sample(int dim, IntTensor result = null)
         {
             

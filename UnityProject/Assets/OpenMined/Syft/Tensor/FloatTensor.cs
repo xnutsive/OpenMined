@@ -291,7 +291,7 @@ namespace OpenMined.Syft.Tensor
                 }
                 case "copy":
                 {
-                    var result = Copy();
+                    var result = Copy(autograd:this.Autograd);
                     return result.Id.ToString();
                 }
                 case "cos":
@@ -828,7 +828,7 @@ namespace OpenMined.Syft.Tensor
                 case "triu":
                 {
                     var K = int.Parse(msgObj.tensorIndexParams[0]);
-                    var result = Copy();
+                    var result = Copy(autograd:this.Autograd);
                     result.Triu_(K);
                     return result.Id.ToString();
                 }

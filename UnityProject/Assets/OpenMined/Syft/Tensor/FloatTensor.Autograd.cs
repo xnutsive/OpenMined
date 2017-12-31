@@ -104,8 +104,7 @@ namespace OpenMined.Syft.Tensor
 			    {
                     if (creation_op == "abs")
                     {
-                        FloatTensor c = this.Copy();
-                        c.autograd = false;
+                        FloatTensor c = this.Copy(autograd:false);
 
                         var parent = factory.Get(creators[0]);
 
@@ -138,7 +137,7 @@ namespace OpenMined.Syft.Tensor
                     {
 	                    //Debug.Log("Contiguous Backpropping Grad:" + grad.Id);
 	                    //Debug.Log("Contiguous Storing Grad:" + this.Grad.Id);
-                        factory.Get(creators[0]).Backward(this.Grad.Copy(), this);
+                        factory.Get(creators[0]).Backward(this.Grad.Copy(autograd:this.Grad.Autograd), this);
                     }
                     else if (creation_op == "copy")
                     {
@@ -166,7 +165,7 @@ namespace OpenMined.Syft.Tensor
                         var parent = factory.Get(creators[0]);
                         parent.Grad = null;
 
-	                    FloatTensor local_grad = grad.Copy();
+	                    FloatTensor local_grad = grad.Copy(autograd:grad.Autograd);
 	                    
                         var grad_shape = new int[shape.Length];
 
@@ -204,8 +203,7 @@ namespace OpenMined.Syft.Tensor
                     else if (creation_op == "log")
                     {
 	                    // TOOD: sum backprop logic   
-	                    FloatTensor x = factory.Get(creators[0]).Copy();
-	                    x.autograd = false;
+	                    FloatTensor x = factory.Get(creators[0]).Copy(autograd:false);
 
 	                    factory.Get(creators[0]).Backward(grad.Mul(x.Pow(-1)), this);
                     }
@@ -236,16 +234,14 @@ namespace OpenMined.Syft.Tensor
                     else if (creation_op == "pow_scalar")
                     {
 
-                        FloatTensor x = factory.Get(creators[0]).Copy();
-                        x.autograd = false;
+                        FloatTensor x = factory.Get(creators[0]).Copy(autograd:false);
 
                         factory.Get(creators[0]).Backward(x.Mul(grad).Mul(factory.Get(creators[1]).Data[0]), this);
                     }
                     else if (creation_op == "relu")
                     {
 						// TOOD: replace with simple comparison and mulitplication (should be 2 liner)
-                        FloatTensor c = this.Copy();
-                        c.autograd = false;
+                        FloatTensor c = this.Copy(autograd:false);
 
 	                    FloatTensor output = c;
 	                    
@@ -254,7 +250,7 @@ namespace OpenMined.Syft.Tensor
 						for (var i = 0 ; i < output.Shape.Length; ++i)
 							dimSize *= output.Shape[i];
 
-						var gradInput = output.Copy();
+						var gradInput = output.Copy(autograd:false);
 						gradInput.Zero_();
 
 						var nCpu = SystemInfo.processorCount;
@@ -273,8 +269,6 @@ namespace OpenMined.Syft.Tensor
 							}
 						});
 
-						gradInput.Autograd = false;
-
                         factory.Get(creators[0]).Backward((gradInput).Mul(grad), this);
 
                     }
@@ -289,16 +283,14 @@ namespace OpenMined.Syft.Tensor
                     }
                     else if (creation_op == "sigmoid")
                     {
-                        FloatTensor self_nograd = this.Copy();
-                        self_nograd.autograd = false;
+                        FloatTensor self_nograd = this.Copy(autograd:false);
 
                         factory.Get(creators[0]).Backward(self_nograd.Neg().Add(1f).Mul(self_nograd).Mul(grad), this);
                     }
                     else if (creation_op.Contains("softmax-"))
                     {
 
-                        FloatTensor c = this.Copy();
-                        c.autograd = false;
+                        FloatTensor c = this.Copy(autograd:false);
                         var dim = int.Parse(creation_op.Split('-')[1]);
 
 	                    FloatTensor output = this;
@@ -397,8 +389,7 @@ namespace OpenMined.Syft.Tensor
                     }
                     else if (creation_op == "tanh")
                     {
-                        FloatTensor c = this.Copy();
-                        c.autograd = false;
+                        FloatTensor c = this.Copy(autograd:false);
 
                         factory.Get(creators[0]).Backward(c.Pow(2).Neg().Add(1f).Mul(grad), this);
                     }
@@ -419,7 +410,7 @@ namespace OpenMined.Syft.Tensor
 		    }
 		    else
 		    {
-			    Debug.Log("Autograd off - skipping backprop...");
+			    Debug.Log("Autograd off - skipping backprop at tensor:" + id + " with creation_op:" + creation_op);
 		    }
 	    }
         

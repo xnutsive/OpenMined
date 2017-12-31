@@ -479,7 +479,7 @@ namespace OpenMined.Tests.Editor.FloatTensor
             int[] shape = {5};
 
             var tensor = ctrl.floatTensorFactory.Create(_data: array, _shape: shape);
-            var copy = tensor.Copy();
+            var copy = tensor.Copy(tensor.Autograd);
 
             Assert.AreEqual(copy.Shape, tensor.Shape);
             Assert.AreEqual(copy.Data, tensor.Data);

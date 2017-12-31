@@ -157,55 +157,50 @@ namespace OpenMined.Network.Controllers
 						{
 							string model_type = msgObj.tensorIndexParams[0];
 
+							Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
+							
 							if (model_type == "linear")
 							{
-								Debug.LogFormat("<color=magenta>createModel:</color> {0} : {1} {2}", model_type,
-									msgObj.tensorIndexParams[1], msgObj.tensorIndexParams[2]);
-								Linear model = new Linear(this, int.Parse(msgObj.tensorIndexParams[1]), int.Parse(msgObj.tensorIndexParams[2]));
-								return model.Id.ToString();
+								return new Linear(this, int.Parse(msgObj.tensorIndexParams[1]), int.Parse(msgObj.tensorIndexParams[2])).Id.ToString();
 							}
 							else if (model_type == "relu")
 							{
-								Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
-								ReLU model = new ReLU(this);
-								return model.Id.ToString();
+								return new ReLU(this).Id.ToString();
+							}
+							else if (model_type == "dropout")
+							{
+								return new Dropout(this,float.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
 							}
 							else if (model_type == "sigmoid")
 							{
-								Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
-								Sigmoid model = new Sigmoid(this);
-								return model.Id.ToString();
+								return new Sigmoid(this).Id.ToString();
 							}
 							else if (model_type == "sequential")
 							{
-								Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
-								Sequential model = new Sequential(this);
-								return model.Id.ToString();
+								return new Sequential(this).Id.ToString();
 							}
 							else if (model_type == "policy")
 							{
-								Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
-								Policy model = new Policy(this,(Layer)getModel(int.Parse(msgObj.tensorIndexParams[1])));
-								return model.Id.ToString();
+								return new Policy(this,(Layer)getModel(int.Parse(msgObj.tensorIndexParams[1]))).Id.ToString();
 							}
                             else if (model_type == "tanh")
                             {
-                                Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
-                                Tanh model = new Tanh(this);
-                                return model.Id.ToString();
+                                return new Tanh(this).Id.ToString();
                             }
                             else if (model_type == "crossentropyloss")
                             {
-                                Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
-                                CrossEntropyLoss model = new CrossEntropyLoss(this);
-                                return model.Id.ToString();
+                                return new CrossEntropyLoss(this).Id.ToString();
                             }
                             else if (model_type == "mseloss")
-                            {
-                                Debug.LogFormat("<color=magenta>createModel:</color> {0}", model_type);
-                                MSELoss model = new MSELoss(this);
-                                return model.Id.ToString();
-                            }
+							{
+								return new MSELoss(this).Id.ToString();
+							}
+							else
+							{
+								Debug.LogFormat("<color=red>Model Type Not Found:</color> {0}", model_type);
+							}
+							
+							
 
 						}
 						else

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using OpenMined.Syft.Tensor;
@@ -10,6 +10,7 @@ namespace OpenMined.Syft.Layer
 {
     public abstract class Layer: Model
     {
+        private FloatTensor cached_ones_grad_for_backprop;
 
         public abstract FloatTensor Forward (FloatTensor input);
         
@@ -31,7 +32,6 @@ namespace OpenMined.Syft.Layer
         {
             controller.Log("Fitting...");
             
-            FloatTensor grad = null;
             FloatTensor loss = null;
             FloatTensor pred = null;
             
@@ -40,13 +40,13 @@ namespace OpenMined.Syft.Layer
                 pred = Forward(input);
                 loss = criterion.Forward(pred, target);
                 
-                if (grad == null)
+                if (cached_ones_grad_for_backprop == null || cached_ones_grad_for_backprop.Size != loss.Size)
                 {
-                    grad = loss.createOnesTensorLike();
-                    grad.Autograd = false;
+                    cached_ones_grad_for_backprop = loss.createOnesTensorLike();
+                    cached_ones_grad_for_backprop.Autograd = false;
                 }
                 
-                loss.Backward(grad);
+                loss.Backward(cached_ones_grad_for_backprop);
                 
                 optimizer.Step();
                 
