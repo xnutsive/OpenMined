@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using OpenMined.Network.Utils;
 using OpenMined.Network.Controllers;
@@ -273,6 +274,12 @@ namespace OpenMined.Syft.Tensor
                         Backward();
                     }
                     return "";
+                }
+                case "batchify":
+                {
+                    var dim = int.Parse(msgObj.tensorIndexParams[0]);
+                    var batch_size = int.Parse(msgObj.tensorIndexParams[1]);
+                    return string.Join(",", Batchify(dim, batch_size).Select(x => x.ToString()).ToArray());;
                 }
                 case "ceil":
                 {

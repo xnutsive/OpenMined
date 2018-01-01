@@ -342,6 +342,11 @@ namespace OpenMined.Syft.Tensor
 			}
 		}
 
+        public List<int> Batchify(int dim, int batch_size)
+        {
+            return Functional.Batchify(this, dim, batch_size);
+        }
+        
 		public FloatTensor Ceil(bool inline = false)
         {
             // Returns a new Tensor with the smallest integer greater than or equal to each element
@@ -708,6 +713,14 @@ namespace OpenMined.Syft.Tensor
             }
             result.Data = data.AsParallel().Select(x => (float) Math.Floor(x)).ToArray();
             return result;
+        }
+
+        public FloatTensor IndexSelect(List<int> indices, int dim, FloatTensor result = null)
+        {
+            IntTensor i = factory.ctrl.intTensorFactory.Create(_shape: new int[] {indices.Count}, _data: indices.ToArray());
+            FloatTensor subset = IndexSelect(i, dim, result);
+            factory.ctrl.intTensorFactory.Delete(i.Id);
+            return subset;
         }
         
         public FloatTensor IndexSelect(IntTensor indices, int dim, FloatTensor result = null)

@@ -6,6 +6,29 @@ namespace OpenMined.Syft.Tensor
 {
     public class Functional
     {
+        // opposite of concatenate
+        public static List<int> Batchify(FloatTensor input,int dim, int batch_size)
+        {
+            List<int> batches = new List<int>();
+            
+            List<int> indices = new List<int>();
+            for (int i = 0; i < input.Shape[dim]; i++)
+            {
+                indices.Add(i);
+            }
+
+            for (int i = 0; i < input.Shape[dim] / batch_size; i++)
+            {
+                batches.Add(input.IndexSelect(indices.GetRange(i*batch_size,batch_size),dim).Id);
+            }
+            
+            if(input.Shape[dim] % batch_size != 0)
+                batches.Add(input.IndexSelect(indices.GetRange(input.Shape[dim] - (input.Shape[dim] % batch_size),input.Shape[dim] % batch_size),dim).Id);
+
+            return batches;
+        }
+        
+        // opposite of batchify
         public static FloatTensor Concatenate(FloatTensorFactory factory, List<int> tensor_ids, int axis, FloatTensor result = null)
         {
             FloatTensor[] tensors = new FloatTensor[tensor_ids.Count-1];
