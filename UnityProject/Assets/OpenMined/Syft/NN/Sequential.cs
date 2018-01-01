@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using OpenMined.Network.Controllers;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
+using OpenMined.Syft.Tensor.Factories;
 using UnityEngine;
 
 namespace OpenMined.Syft.Layer
@@ -107,6 +108,16 @@ namespace OpenMined.Syft.Layer
                     return "Model.processMessage not Implemented:" + msgObj.functionCall;
                 }
             }
+        }
+
+        public override int getParameterCount()
+        {
+            int cnt = 0;
+            foreach (int layer_idx in layers)
+            {
+                cnt += controller.getModel(layer_idx).getParameterCount();
+            }
+            return cnt;
         }
 
     }

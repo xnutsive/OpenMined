@@ -11,7 +11,7 @@ namespace OpenMined.Syft.Layer
         {
             init("sigmoid");
             
-#pragma warning disable 420
+            #pragma warning disable 420
             id = System.Threading.Interlocked.Increment(ref nCreated);
             controller.addModel(this);
         }
@@ -24,5 +24,7 @@ namespace OpenMined.Syft.Layer
 
             return output;
         }
+        
+        public override int getParameterCount(){return 0;}
     }
 }

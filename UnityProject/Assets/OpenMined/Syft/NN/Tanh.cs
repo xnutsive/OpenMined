@@ -15,7 +15,7 @@ namespace OpenMined.Syft.Layer
             id = System.Threading.Interlocked.Increment(ref nCreated);
             controller.addModel(this);
         }
-
+    
         public override FloatTensor Forward(FloatTensor input)
         {
             FloatTensor output = input.Tanh();
@@ -23,5 +23,7 @@ namespace OpenMined.Syft.Layer
 
             return output;
         }
+        
+        public override int getParameterCount(){return 0;}
     }
 }

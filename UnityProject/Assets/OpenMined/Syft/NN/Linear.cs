@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using OpenMined.Network.Controllers;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
@@ -49,6 +49,8 @@ namespace OpenMined.Syft.Layer
 		
 			return output;
 		}
+		
+		public override int getParameterCount(){return _weights.Size + _bias.Size;}
 		
 	}
 }

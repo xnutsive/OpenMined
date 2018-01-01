@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
@@ -51,6 +51,8 @@ namespace OpenMined.Syft.Layer
             return parameters;
         }
 
+        public abstract int getParameterCount();
+        
         public string ProcessMessage (Command msgObj, SyftController ctrl)
         {
 
@@ -60,6 +62,8 @@ namespace OpenMined.Syft.Layer
                 return ProcessForwardMessage (msgObj, ctrl);
             case "params":
                 return ProcessParamsMessage (msgObj, ctrl);
+            case "param_count":
+                return getParameterCount()+"";
             case "activation":
                 {
                     return activation + "";   

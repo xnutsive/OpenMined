@@ -1,4 +1,4 @@
-using OpenMined.Network.Controllers;
+﻿using OpenMined.Network.Controllers;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
 
@@ -47,5 +47,7 @@ namespace OpenMined.Syft.Layer
                 }
             }
         }
+        
+        public override int getParameterCount(){return model.getParameterCount();}
     }
 }

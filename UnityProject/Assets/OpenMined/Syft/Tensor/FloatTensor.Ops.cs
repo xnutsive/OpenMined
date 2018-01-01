@@ -1604,14 +1604,14 @@ namespace OpenMined.Syft.Tensor
                     var inputMax = float.MinValue;
                     for (var d = 0; d < dimSize; d++)
                     {
-                        if (result.Data[d * dimStride] >= inputMax)
-                            inputMax = result.Data[d * dimStride];
+                        if (input.Data[d * dimStride] >= inputMax)
+                            inputMax = input.Data[d * dimStride];
                     }
 
                     float sum = 0;
                     for (var d = 0; d < dimSize; d++)
                     {
-                        var z = (float) Math.Exp(result.Data[index + d * dimStride] - inputMax);
+                        var z = (float) Math.Exp(input.Data[index + d * dimStride] - inputMax);
                         result.Data[index + d * dimStride] = z;
                         sum += z;
                     }

@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using OpenMined.Syft.Tensor;
 using UnityEngine;
 using OpenMined.Network.Controllers;
@@ -21,5 +21,7 @@ namespace OpenMined.Syft.Layer.Loss
             FloatTensor output = ((prediction.Sub(target)).Pow(2)).Sum(1).Div(prediction.Shape[1]).Sum(0).Div(prediction.Shape[0]);
             return output;
         }
+        
+        public override int getParameterCount(){return 0;}
     }
 }

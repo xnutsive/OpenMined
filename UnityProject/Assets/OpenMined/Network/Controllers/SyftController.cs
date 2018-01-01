@@ -179,6 +179,10 @@ namespace OpenMined.Network.Controllers
 							{
 								return new Sequential(this).Id.ToString();
 							}
+							else if (model_type == "softmax")
+							{
+								return new Softmax(this,int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
+							}
 							else if (model_type == "policy")
 							{
 								return new Policy(this,(Layer)getModel(int.Parse(msgObj.tensorIndexParams[1]))).Id.ToString();
@@ -189,7 +193,7 @@ namespace OpenMined.Network.Controllers
                             }
                             else if (model_type == "crossentropyloss")
                             {
-                                return new CrossEntropyLoss(this).Id.ToString();
+                                return new CrossEntropyLoss(this, int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
                             }
                             else if (model_type == "mseloss")
 							{
