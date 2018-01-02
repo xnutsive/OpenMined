@@ -1,4 +1,4 @@
-﻿using OpenMined.Network.Controllers;
+using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
 using UnityEngine;
 
