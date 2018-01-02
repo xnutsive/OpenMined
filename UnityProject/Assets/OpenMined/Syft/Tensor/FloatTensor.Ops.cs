@@ -877,23 +877,6 @@ namespace OpenMined.Syft.Tensor
             return result.View(original_shape, inline:inline);
         }
 
-        public bool IsContiguous()
-        {
-            long z = 1;
-            int d;
-            for(d = shape.Length-1; d >= 0; d--)
-            {
-                if(shape[d] != 1)
-                {
-                    if (strides[d] == z) {
-                        z *= shape[d];
-                    } else {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
 
         public FloatTensor Log1p(bool inline = false)
         {	

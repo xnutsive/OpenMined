@@ -180,21 +180,23 @@ namespace OpenMined.Syft.Tensor
             shader.Dispatch(ZeroKernel_, this.size, 1, 1);
         }
 
-
-
         public bool IsContiguous()
         {
-            foreach (var stride in strides)
+            long z = 1;
+            int d;
+            for(d = shape.Length-1; d >= 0; d--)
             {
-                if (stride == 0)
+                if(shape[d] != 1)
                 {
-                    return false;
+                    if (strides[d] == z) {
+                        z *= shape[d];
+                    } else {
+                        return false;
+                    }
                 }
             }
-
-            return strides[strides.Length - 1] == 1L;
+            return true;
         }
-
 
         public int DimIndices2DataIndex(ref int[] dim_indices)
         {
