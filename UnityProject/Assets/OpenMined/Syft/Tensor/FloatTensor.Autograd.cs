@@ -160,6 +160,10 @@ namespace OpenMined.Syft.Tensor
                     {
                         factory.Get(creators[0]).Backward(grad.Div(factory.Get(creators[1]).data[0]), this);
                     }
+                    else if (creation_op == "emptyTensorCopy_Hooked")
+                    {
+	                    factory.Get(creators[0]).Backward(grad, this);
+                    }
                     else if (creation_op == "expand")
                     {
                         var parent = factory.Get(creators[0]);
@@ -312,7 +316,7 @@ namespace OpenMined.Syft.Tensor
 						var dimStride = innerSize;
 						var outerStride = dimSize * dimStride;
 
-						var gradInput = output.emptyTensorCopy();
+						var gradInput = output.Copy(autograd:false);
 
 						var nCpu = SystemInfo.processorCount;
 						Parallel.For(0, nCpu, workerId =>
