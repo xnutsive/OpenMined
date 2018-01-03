@@ -937,6 +937,18 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
+        public FloatTensor LogSoftmax(int dim = -1, bool inline = false, FloatTensor result = null)
+        {
+            if(dataOnGpu)
+            {
+                throw new NotImplementedException();
+            }
+
+            result = Softmax(dim).Log();
+
+            return result;
+        }
+
         public FloatTensor Max(int dim = -1, bool keepdim = false)
         {
             if (!IsContiguous()) {
