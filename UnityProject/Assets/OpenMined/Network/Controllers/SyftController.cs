@@ -211,6 +211,10 @@ namespace OpenMined.Network.Controllers
 							{
 								return new MSELoss(this).Id.ToString();
 							}
+                            else if (model_type == "embedding")
+                            {
+                                return new Embedding(this, int.Parse(msgObj.tensorIndexParams[1]), int.Parse(msgObj.tensorIndexParams[2])).Id.ToString();
+                            }
 							else
 							{
 								Debug.LogFormat("<color=red>Model Type Not Found:</color> {0}", model_type);
