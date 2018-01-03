@@ -57,7 +57,7 @@ namespace OpenMined.Syft.Layer
 
             return output;
         }
-        
-        public override int getParameterCount(){return 0;}
+
+        public override int getParameterCount(){return _weights.Size;}
     }
 }
