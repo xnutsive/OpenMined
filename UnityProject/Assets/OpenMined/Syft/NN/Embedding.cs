@@ -31,6 +31,7 @@ namespace OpenMined.Syft.Layer
             controller.addModel(this);
         }
     
+        // TODO this should take a IntTensor
         public override FloatTensor Forward(FloatTensor input)
         {
             FloatTensor output = _weights.emptyTensorCopy();
