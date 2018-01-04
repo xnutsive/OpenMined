@@ -15,7 +15,7 @@ namespace OpenMined.Syft.Layer
     {
         private FloatTensor cached_ones_grad_for_backprop;
         private Loss.Loss _criterion;
-        private SGD _optimizer;
+        private Optimizer _optimizer;
         private int _batch_size;
         private int _input_batch_offset;
         private int _target_batch_offset;
@@ -48,7 +48,7 @@ namespace OpenMined.Syft.Layer
             }
         }
 
-        public int PrepareToFit(FloatTensor input, FloatTensor target, Loss.Loss criterion, SGD optimizer, int batch_size)
+        public int PrepareToFit(FloatTensor input, FloatTensor target, Loss.Loss criterion, Optimizer optimizer, int batch_size)
         {
 
             if(input.Shape[0] != target.Shape[0])
@@ -91,43 +91,43 @@ namespace OpenMined.Syft.Layer
             {
                 for (int batch_i = start_batch_id; batch_i < end_batch_id; batch_i++)
                 {
-                    loss += FitBatch(batch_i);       
+                    loss += FitBatch(batch_i, i + 1);       
                 }
             }
             
             return (loss/iter).ToString();
         }
 
-        public float FitBatch(int batch_i)
-    {
-        if (((batch_i + 1) * _input_batch_offset) < _input_tensor_origin.Size)
+        public float FitBatch(int batch_i, int iteration)
         {
-            last_input_buffer.Fill(_input_tensor_origin, starting_offset: batch_i * _input_batch_offset,
-                length_to_fill: _input_batch_offset);
-            last_target_buffer.Fill(_target_tensor_origin, starting_offset: batch_i * _target_batch_offset,
-                length_to_fill: _target_batch_offset);
-            
-            var pred = Forward(last_input_buffer);
-            var loss = _criterion.Forward(pred, last_target_buffer);
-
-            if (cached_ones_grad_for_backprop == null || cached_ones_grad_for_backprop.Size != loss.Size)
+            if (((batch_i + 1) * _input_batch_offset) < _input_tensor_origin.Size)
             {
-                cached_ones_grad_for_backprop = loss.createOnesTensorLike();
-                cached_ones_grad_for_backprop.Autograd = false;
+                last_input_buffer.Fill(_input_tensor_origin, starting_offset: batch_i * _input_batch_offset,
+                    length_to_fill: _input_batch_offset);
+                last_target_buffer.Fill(_target_tensor_origin, starting_offset: batch_i * _target_batch_offset,
+                    length_to_fill: _target_batch_offset);
+                
+                var pred = Forward(last_input_buffer);
+                var loss = _criterion.Forward(pred, last_target_buffer);
+
+                if (cached_ones_grad_for_backprop == null || cached_ones_grad_for_backprop.Size != loss.Size)
+                {
+                    cached_ones_grad_for_backprop = loss.createOnesTensorLike();
+                    cached_ones_grad_for_backprop.Autograd = false;
+                }
+                
+                loss.Backward(cached_ones_grad_for_backprop);
+
+                _optimizer.Step(this.last_input_buffer.Shape[0], iteration);
+
+                return loss.Data[0];
             }
-            
-            loss.Backward(cached_ones_grad_for_backprop);
+            else
+            {
+                return 0;
+            }
 
-            _optimizer.Step(this.last_input_buffer.Shape[0]);
-
-            return loss.Data[0];
         }
-        else
-        {
-            return 0;
-        }
-
-    }
         
         protected override string ProcessMessageAsLayerOrLoss (Command msgObj, SyftController ctrl)
         {
@@ -139,7 +139,7 @@ namespace OpenMined.Syft.Layer
                     FloatTensor input = ctrl.floatTensorFactory.Get(int.Parse(msgObj.tensorIndexParams[0]));
                     FloatTensor target = ctrl.floatTensorFactory.Get(int.Parse(msgObj.tensorIndexParams[1]));
                     Loss.Loss criterion = ctrl.getLoss(int.Parse(msgObj.tensorIndexParams[2]));
-                    SGD optim = ctrl.getOptimizer(int.Parse(msgObj.tensorIndexParams[3]));
+                    Optimizer optim = ctrl.getOptimizer(int.Parse(msgObj.tensorIndexParams[3]));
                     int batch_size = int.Parse(msgObj.tensorIndexParams[4]);
                     
                     return PrepareToFit(input,target,criterion,optim,batch_size).ToString();
