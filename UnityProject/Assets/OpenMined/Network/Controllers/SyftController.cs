@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using OpenMined.Syft.Tensor;
 using OpenMined.Network.Utils;
@@ -353,7 +353,16 @@ namespace OpenMined.Network.Controllers
 						}
 						return "Unity Error: SyftController.processMessage: Command not found:" + msgObj.objectType + ":" + msgObj.functionCall;
 					}
-						
+                    case "Grid":
+                        Debug.LogFormat("<color=green>SyftController.processMessage {0}</color>", json_message);
+
+                        if (msgObj.functionCall == "learn")
+                        {
+                            var ms = msgObj.configurations.Select(config => config.model).ToArray();
+                            var s = string.Join(", ", models);
+                            return "";
+                        }
+                        break;
 				default:
 						break;
 				}
