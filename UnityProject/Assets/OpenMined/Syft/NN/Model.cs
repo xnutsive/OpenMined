@@ -72,6 +72,11 @@ namespace OpenMined.Syft.Layer
                 {
                     return model_type;
                 }
+            case "zero_grad":
+                {
+                    ProcessZeroGradMessage();
+                    return "";
+                }
             }
 
             return ProcessMessageAsLayerOrLoss(msgObj, ctrl);
@@ -99,6 +104,17 @@ namespace OpenMined.Syft.Layer
 
             }
             return out_str;
+        }
+        
+        public void ProcessZeroGradMessage()
+        {
+            foreach (int param_index in parameters)
+            {
+                if(controller.floatTensorFactory.Get(param_index).Grad != null)
+                {
+                    controller.floatTensorFactory.Get(param_index).Grad.Zero_();
+                }
+            }
         }
 
         protected abstract string ProcessForwardMessage (Command msgObj, SyftController ctrl);

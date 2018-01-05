@@ -22,9 +22,10 @@ namespace OpenMined.Network.Controllers
 		public IntTensorFactory intTensorFactory;
 		
 		private Dictionary<int, Model> models;
-		private Dictionary<int, SGD> optimizers;
+		private Dictionary<int, Optimizer> optimizers;
 		
 		public bool allow_new_tensors = true;
+        public int random_seed = 0;
 
 		public SyftController (ComputeShader _shader)
 		{
@@ -34,21 +35,32 @@ namespace OpenMined.Network.Controllers
 			intTensorFactory = new IntTensorFactory(_shader);
 			
 			models = new Dictionary<int, Model> ();
-			optimizers = new Dictionary<int, SGD>();
+			optimizers = new Dictionary<int, Optimizer>();
 		}
 
 		public ComputeShader Shader {
 			get { return shader; }
 		}
 
-		public float[] RandomWeights (int length)
+		public float[] RandomWeights (int length, int inputSize=0)
 		{
-			Random.InitState (1);
-			float[] syn0 = new float[length];
-			for (int i = 0; i < length; i++) {
-				syn0 [i] = 2 * Random.value - 1;
-			}
-			return syn0;
+           float _inputSize = (float)inputSize;
+           float Xavier = (float)Math.Sqrt(1.0F / _inputSize);
+           float[] syn0 = new float[length];
+           if (random_seed > 0) { Random.InitState (random_seed); }
+            for (int i = 0; i < length; i++)
+            {
+                // Use Xavier Initialization if inputSize is given
+                if (inputSize>0)
+                {
+                    syn0 [i] = Random.Range(-Xavier, Xavier);
+                }
+                else
+                {
+                    syn0 [i] = 2 * Random.value - 1;
+                }
+            }
+		    return syn0;
 		}
 
 		public Model getModel(int index)
@@ -61,7 +73,7 @@ namespace OpenMined.Network.Controllers
 			return (Loss)models[index];
 		}
 
-		public SGD getOptimizer(int index)
+		public Optimizer getOptimizer(int index)
 		{
 			return optimizers[index];
 		}
@@ -77,7 +89,7 @@ namespace OpenMined.Network.Controllers
 			return (model.Id);
 		}
 		
-		public int addOptimizer (SGD optim)
+		public int addOptimizer (Optimizer optim)
 		{
 			optimizers.Add (optim.Id, optim);
 			return (optim.Id);
@@ -102,17 +114,40 @@ namespace OpenMined.Network.Controllers
 					{
 						if (msgObj.functionCall == "create")
 						{
+							string optimizer_type = msgObj.tensorIndexParams[0];
+
+							// Extract parameters
 							List<int> p = new List<int>();
-							for (int i = 3; i < msgObj.tensorIndexParams.Length; i++)
+							for (int i = 1; i < msgObj.tensorIndexParams.Length; i++)
 							{
 								p.Add(int.Parse(msgObj.tensorIndexParams[i]));
 							}
-							SGD optim = new SGD(this, p, float.Parse(msgObj.tensorIndexParams[0]), float.Parse(msgObj.tensorIndexParams[1]), float.Parse(msgObj.tensorIndexParams[2]));
+							List<float> hp = new List<float>();
+							for (int i = 0; i < msgObj.hyperParams.Length; i++)
+							{
+								hp.Add(float.Parse(msgObj.hyperParams[i]));
+							}
+							
+							Optimizer optim = null;
+
+							if (optimizer_type == "sgd")
+							{
+								optim = new SGD(this, p, hp[0], hp[1], hp[2]);
+							}
+							else if (optimizer_type == "rmsprop")
+							{
+								optim = new RMSProp(this, p, hp[0], hp[1], hp[2], hp[3]);
+							}
+							else if (optimizer_type == "adam")
+							{
+								optim = new Adam(this, p, hp[0], hp[1], hp[2], hp[3], hp[4]);
+							}
+							
 							return optim.Id.ToString();
 						}
 						else
 						{
-							SGD optim = this.getOptimizer(msgObj.objectIndex);
+							Optimizer optim = this.getOptimizer(msgObj.objectIndex);
 							return optim.ProcessMessage(msgObj, this);
 						}
 					}
@@ -159,7 +194,9 @@ namespace OpenMined.Network.Controllers
 							
 							if (model_type == "linear")
 							{
-								return new Linear(this, int.Parse(msgObj.tensorIndexParams[1]), int.Parse(msgObj.tensorIndexParams[2])).Id.ToString();
+								return new Linear(this, int.Parse(msgObj.tensorIndexParams[1]),
+								int.Parse(msgObj.tensorIndexParams[2]),
+								msgObj.tensorIndexParams[3]).Id.ToString();
 							}
 							else if (model_type == "relu")
 							{
@@ -209,6 +246,10 @@ namespace OpenMined.Network.Controllers
 							{
 								return new MSELoss(this).Id.ToString();
 							}
+                            else if (model_type == "embedding")
+                            {
+                                return new Embedding(this, int.Parse(msgObj.tensorIndexParams[1]), int.Parse(msgObj.tensorIndexParams[2])).Id.ToString();
+                            }
 							else
 							{
 								Debug.LogFormat("<color=red>Model Type Not Found:</color> {0}", model_type);
@@ -254,7 +295,12 @@ namespace OpenMined.Network.Controllers
 						{
 							FloatTensor tensor = floatTensorFactory.Create(filepath: msgObj.tensorIndexParams[0], _shader:this.Shader);
 							return tensor.Id.ToString();
-						} 
+						}
+						else if (msgObj.functionCall == "set_seed")
+						{
+                             random_seed = int.Parse(msgObj.tensorIndexParams[0]);
+                             return "Random seed set!";
+						}
 						else if (msgObj.functionCall == "concatenate")
 						{
 							List<int> tensor_ids = new List<int>();
@@ -282,7 +328,7 @@ namespace OpenMined.Network.Controllers
 							{
 								dims[i] = int.Parse(msgObj.tensorIndexParams[i]);
 							}
-							FloatTensor result = Functional.Randn(floatTensorFactory, dims);
+							FloatTensor result = Functional.Randn(floatTensorFactory, dims, random_seed);
 							return result.Id.ToString();
 						}
 						else if (msgObj.functionCall == "random")
@@ -292,7 +338,7 @@ namespace OpenMined.Network.Controllers
 							{
 								dims[i] = int.Parse(msgObj.tensorIndexParams[i]);
 							}
-							FloatTensor result = Functional.Random(floatTensorFactory, dims);
+							FloatTensor result = Functional.Random(floatTensorFactory, dims, random_seed);
 							return result.Id.ToString();
 						}
 						else if (msgObj.functionCall == "zeros")

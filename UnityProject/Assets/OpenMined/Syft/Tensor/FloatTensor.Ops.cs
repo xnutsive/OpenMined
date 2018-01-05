@@ -937,6 +937,18 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
+        public FloatTensor LogSoftmax(int dim = -1, bool inline = false, FloatTensor result = null)
+        {
+            if(dataOnGpu)
+            {
+                throw new NotImplementedException();
+            }
+
+            result = Softmax(dim).Log();
+
+            return result;
+        }
+
         public FloatTensor Max(int dim = -1, bool keepdim = false)
         {
             if (!IsContiguous()) {
@@ -1128,14 +1140,24 @@ namespace OpenMined.Syft.Tensor
             return Reduce(dim, keepdim, (acc, val, index, arr) => acc * val, (val, len) => val, creation_op:"prod_"+dim);
         }
 
-        public FloatTensor Random(int[] dims, bool inline = true)
+        public FloatTensor Random(int[] dims, float start = 0F, float? to = null, bool inline = true)
         {
+            // when "to" is not set use 2^mantissa as max value to ensure every value is representable
+            // Reference: http://pytorch.org/docs/master/tensors.html#torch.Tensor.random_
+            float to_ = 0F;
+            if (to == null)
+            {
+                to_ = (float)Mathf.Pow(2F, 24F);
+            }
+            else
+            {
+                to_ = (float)to;
+            }
             int[] dims_prod = {1};
             foreach (int dim in dims)
             {
                 dims_prod[0] *= dim;
             }
-
             if (dataOnGpu)
             {
                 throw new NotImplementedException();
@@ -1143,7 +1165,7 @@ namespace OpenMined.Syft.Tensor
             FloatTensor result = inline ? this : factory.ctrl.floatTensorFactory.Create(dims);
             for (int i = 0; i < dims_prod[0]; i++)
             {
-                result.Data[i] = UnityEngine.Random.value;
+                result.Data[i] = UnityEngine.Random.Range(start, to_);
             }
             return result;
         }
@@ -1881,15 +1903,15 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
-        public FloatTensor Transpose()
+        public FloatTensor Transpose(bool inline = false)
         {
             if (shape.Length != 2)
                 throw new InvalidOperationException("Need to specify parameters for tensors with more than 2 dims.");
 
-            return Transpose(0, 1);
+            return Transpose(0, 1, inline:inline);
         }
 
-        public FloatTensor Transpose(int dimension1, int dimension2, FloatTensor result = null)
+        public FloatTensor Transpose(int dimension1, int dimension2, FloatTensor result = null, bool inline = false)
         {
             if (!IsContiguous()) {
                 throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
@@ -1912,7 +1934,7 @@ namespace OpenMined.Syft.Tensor
             newShape[dimension2] = tmpDim;
 
             //var result = new FloatTensor(_controller: controller, _shape: newShape, _shader: this.shader);
-            result = HookGraph(ref result, creation_op:"transpose", inline:false, resultShape:newShape);
+            result = HookGraph(ref result, creation_op:"transpose", inline:inline, resultShape:newShape);
   
             var nCpu = SystemInfo.processorCount;
             Parallel.For(0, nCpu, workerId =>
@@ -1986,6 +2008,22 @@ namespace OpenMined.Syft.Tensor
                 : Enumerable.Range(0, shape.Min()).AsParallel().Select(i => this[i * stride]).Sum();
         }
 
+        public FloatTensor Uniform(int[] dims, float start = 0.0F, float to = 1.0F, bool inline = false)
+        {
+            int dims_prod = 1;
+            foreach (int dim in dims)
+            {
+                dims_prod *= dim;
+            }
+            if (dataOnGpu) throw new NotImplementedException();
+            FloatTensor result = inline ? this : factory.ctrl.floatTensorFactory.Create(dims);
+            for (int i = 0; i < dims_prod; i++)
+            {
+                result.Data[i] = UnityEngine.Random.Range(start, to);
+            }
+            return result;
+        }
+
         public FloatTensor Unsqueeze(int dim, bool inline = false)
         {
             int[] new_shape = new int[shape.Length + 1];
@@ -2011,6 +2049,25 @@ namespace OpenMined.Syft.Tensor
             if (!IsContiguous()) {
                 throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
             }
+
+            // support -1 in new_shape
+            var index = Array.IndexOf(new_shape, -1);
+            if(index != -1) 
+            {
+                int tempSize = 1;
+                Console.WriteLine(new_shape.Length);
+                foreach(var s in new_shape)
+                {
+                    Console.WriteLine(s);
+                    if(s != -1)
+                    {
+                        tempSize *= s;
+                    }
+                }
+
+                new_shape[index] = size / tempSize;
+            }
+            
             if (inline == true)
             {
                 
