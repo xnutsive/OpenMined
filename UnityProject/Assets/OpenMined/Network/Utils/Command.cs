@@ -24,8 +24,6 @@ namespace OpenMined.Network.Utils
 		public string[] hyperParams;
 
         //grid
-        public string input;
-        public string target;
         public List<GridConfiguration> configurations;
 	}
 }
