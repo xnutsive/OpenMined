@@ -21,14 +21,12 @@ namespace OpenMined.Network.Utils
 		public int[] shape;
 
 		public string[] tensorIndexParams;
-<<<<<<< Updated upstream
-=======
+
 		public string[] hyperParams;
 
         //grid
         public string input;
         public string target;
         public List<GridConfiguration> configurations;
->>>>>>> Stashed changes
 	}
 }

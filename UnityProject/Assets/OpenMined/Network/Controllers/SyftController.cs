@@ -312,12 +312,9 @@ namespace OpenMined.Network.Controllers
 
                         if (msgObj.functionCall == "learn")
                         {
-                            Debug.Log(msgObj.input);
-                            Debug.Log(msgObj.target);
-                            Debug.Log(msgObj.configurations.Count);
                             var ms = msgObj.configurations.Select(config => config.model).ToArray();
                             var s = string.Join(", ", models);
-                            return String.Format("LEARNING!!!!! {0}", s);
+                            return "";
                         }
                         break;
 				default:
