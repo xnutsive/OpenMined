@@ -704,6 +704,16 @@ namespace OpenMined.Syft.Tensor
                     var result = Softmax(dim);
                     return result.id + "";
                 }
+                case "log_softmax":
+                {
+                    var dim = -1;
+                    if (msgObj.tensorIndexParams.Length > 0)
+                    {
+                        dim = int.Parse(msgObj.tensorIndexParams[0]);
+                    }
+                    var result = LogSoftmax(dim);
+                    return result.id + "";
+                }
                 case "sub_elem":
                 {
                     var tensor_1 = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));

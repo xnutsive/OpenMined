@@ -937,6 +937,18 @@ namespace OpenMined.Syft.Tensor
             return result;
         }
 
+        public FloatTensor LogSoftmax(int dim = -1, bool inline = false, FloatTensor result = null)
+        {
+            if(dataOnGpu)
+            {
+                throw new NotImplementedException();
+            }
+
+            result = Softmax(dim).Log();
+
+            return result;
+        }
+
         public FloatTensor Max(int dim = -1, bool keepdim = false)
         {
             if (!IsContiguous()) {
@@ -2011,6 +2023,25 @@ namespace OpenMined.Syft.Tensor
             if (!IsContiguous()) {
                 throw new InvalidOperationException ("Tensor must be contiguous, call Contiguous() to convert");
             }
+
+            // support -1 in new_shape
+            var index = Array.IndexOf(new_shape, -1);
+            if(index != -1) 
+            {
+                int tempSize = 1;
+                Console.WriteLine(new_shape.Length);
+                foreach(var s in new_shape)
+                {
+                    Console.WriteLine(s);
+                    if(s != -1)
+                    {
+                        tempSize *= s;
+                    }
+                }
+
+                new_shape[index] = size / tempSize;
+            }
+            
             if (inline == true)
             {
                 
