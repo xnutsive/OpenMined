@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.Networking;
+using OpenMined.Network.Utils;
 
 namespace OpenMined.Network.Servers
 {
@@ -105,6 +105,11 @@ namespace OpenMined.Network.Servers
 
         public static IEnumerator GetModel(MonoBehaviour owner, int modelId)
         {
+            /*var keccak = new Sha3Keccack();
+
+            var d = keccak.CalculateHash("getModel(uint256)");
+
+            Debug.Log(d);*/
             
             // TODO: convert "getModel" and modelId to hex.
             string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
@@ -113,7 +118,79 @@ namespace OpenMined.Network.Servers
             yield return req.coroutine;
 
             Request.Call response = req.result as Request.Call;
-            Debug.LogFormat("\nModel {0}: {1}", modelId, response.result);
+            Debug.LogFormat("Model 1 {0}", response.result);
+
+            var address = Request.GetAddress(response.result);
+            var bounty = Request.GetBounty(response.result);
+            var initialError = Request.GetInitialError(response.result);
+            var targetError = Request.GetTargetError(response.result);
+
+            Debug.LogFormat("address {0}, bounty {1}, initialError {2}, targetError {3}", address, bounty, initialError, targetError);
+            
+            //var addresses = Request.getWeightAddresses();
+        }
+
+        public static string GetAddress(string hexString)
+        {
+            var parameter = Request.GetParameter(hexString, 0);
+
+            return parameter;
+        }
+
+        public static uint GetBounty(string hexString)
+        {
+            var parameter = Request.GetParameter(hexString, 1);
+            Debug.Log(parameter);
+
+            uint decval = System.Convert.ToUInt32(parameter, 16);
+
+            return decval;
+        }
+
+        public static uint GetInitialError(string hexString)
+        {
+            var parameter = Request.GetParameter(hexString, 2);
+            Debug.Log(parameter);
+
+            uint decval = System.Convert.ToUInt32(parameter, 16);
+
+            return decval;
+        }
+
+        public static uint GetTargetError(string hexString)
+        {
+            var parameter = Request.GetParameter(hexString, 3);
+            Debug.Log(parameter);
+
+            uint decval = System.Convert.ToUInt32(parameter, 16);
+
+            return decval;
+        }
+
+        public static string GetParameter(string hexString, int parameter)
+        {
+            var hs = hexString.Substring(64 * parameter + 2, 64);
+            Debug.LogFormat("bleh {0}, {1}", 64 * parameter + 2, 64 * parameter + 64 + 2);
+            Debug.Log(hs);
+
+            hs = Request.StripPadding(hs);
+
+            return hs;
+        }
+
+        public static string StripPadding(string hexString)
+        {
+            var index = 0;
+            for (int j = 0; j < hexString.Length; j++)
+            {
+                if (hexString[j] != '0')
+                {
+                    index = j;
+                    break;
+                }
+            }
+                        
+            return hexString.Remove(0, index);
         }
     }
 }

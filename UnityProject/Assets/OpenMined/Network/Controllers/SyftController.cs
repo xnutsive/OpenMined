@@ -12,6 +12,7 @@ using OpenMined.Syft.Tensor.Factories;
 using Random = UnityEngine.Random;
 using OpenMined.Syft.NN.RL;
 using Agent = OpenMined.Syft.NN.RL.Agent;
+using OpenMined.Network.Servers;
 
 
 namespace OpenMined.Network.Controllers
