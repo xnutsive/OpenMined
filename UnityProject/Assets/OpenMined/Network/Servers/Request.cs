@@ -18,8 +18,14 @@ namespace OpenMined.Network.Servers
             public string result;
         }
 
-        public static string infura_URL = "https://api.infura.io/v1/jsonrpc/";
-        public static string infura_network = "rinkeby/";
+        public class call : EthResponse
+        {
+            public string result;
+        }
+
+        public static string contractAddress = "0xd60e1a150b59a89a8e6e6ff2c03ffb6cb4096205";
+        public static string infuraURL = "https://api.infura.io/v1/jsonrpc/";
+        public static string infuraNetwork = "rinkeby/";
 
         public Coroutine coroutine { get; private set; }
         public object result;
@@ -40,9 +46,13 @@ namespace OpenMined.Network.Servers
             }
         }
 
-        public static IEnumerator Get<T>(string method) where T : EthResponse
+        public static IEnumerator Get<T>(string method, string data = "") where T : EthResponse
         {
-            string URL = infura_URL + infura_network + method;
+            string URL = infuraURL + infuraNetwork + method;
+
+            if (data != "") {
+                URL += "?params=" + data;
+            }
 
             Debug.LogFormat("Request.Get {0}", URL);
             UnityWebRequest www = UnityWebRequest.Get(URL);
@@ -72,6 +82,38 @@ namespace OpenMined.Network.Servers
             Request.blockNumber response = req.result as Request.blockNumber;
             int result = (int)new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
             Debug.LogFormat("\nCurrent Rinkeby Block Number: {0}", result.ToString("N"));
+        }
+
+        private static string encodeData(string data)
+        {
+            string encodedData = WWW.EscapeURL("[{\"to\":\"" + contractAddress + "\",\"data\":\"" + data + "\"},\"latest\"]");
+            return encodedData;
+        }
+
+        public static IEnumerator GetNumModels(MonoBehaviour owner)
+        {
+            // TODO: convert "getNumModels" to hex.
+            string data = encodeData("0x3c320cc2");
+
+            Request req = new Request(owner, Request.Get<Request.call>("eth_call", data));
+            yield return req.coroutine;
+
+            Request.call response = req.result as Request.call;
+            int result = (int)new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
+            Debug.LogFormat("\nNum Models: {0}", result.ToString("N"));
+        }
+
+        public static IEnumerator GetModel(MonoBehaviour owner, int modelId)
+        {
+            
+            // TODO: convert "getModel" and modelId to hex.
+            string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
+
+            Request req = new Request(owner, Request.Get<Request.call>("eth_call", data));
+            yield return req.coroutine;
+
+            Request.call response = req.result as Request.call;
+            Debug.LogFormat("\nModel {0}: {1}", modelId, response.result);
         }
     }
 }

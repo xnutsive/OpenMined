@@ -5,45 +5,49 @@ using System.Collections;
 
 namespace OpenMined.Network.Servers
 {
-    public class SyftServer : MonoBehaviour
-    {
-        public bool Connected;
-        private NetMqPublisher _netMqPublisher;
-        private string _response;
 
-        private SyftController controller;
+	public class SyftServer : MonoBehaviour
+	{
+		public bool Connected;
+		private NetMqPublisher _netMqPublisher;
+		private string _response;
 
-        [SerializeField] private ComputeShader shader;
+		public SyftController controller;
 
-        private IEnumerator Start()
-        {
-            _netMqPublisher = new NetMqPublisher(HandleMessage);
-            _netMqPublisher.Start();
+		[SerializeField] private ComputeShader shader;
 
-            controller = new SyftController(shader);
+		private IEnumerator Start()
+		{
+			_netMqPublisher = new NetMqPublisher(HandleMessage);
+			_netMqPublisher.Start();
+
+			controller = new SyftController(shader);
 
             yield return Request.GetBlockNumber(this);
-        }
 
-        private void Update()
-        {
-            _netMqPublisher.Update();
-        }
+            yield return Request.GetNumModels(this);
 
-        private string HandleMessage(string message)
-        {
-            //Debug.LogFormat("HandleMessage... {0}", message);
-            return controller.processMessage(message);
-        }
+            yield return Request.GetModel(this, 1);
+		}
 
-        private void OnDestroy()
-        {
-            _netMqPublisher.Stop();
-        }
+		private void Update()
+		{
+			_netMqPublisher.Update();
+		}
 
-        public ComputeShader Shader
-        {
-            get { return shader; }
-        }
-    }
+		private string HandleMessage(string message)
+		{
+			//Debug.LogFormat("HandleMessage... {0}", message);
+			return controller.processMessage(message);
+		}
+
+		private void OnDestroy()
+		{
+			_netMqPublisher.Stop();
+		}
+
+		public ComputeShader Shader {
+			get { return shader; }
+		}
+	}
 }

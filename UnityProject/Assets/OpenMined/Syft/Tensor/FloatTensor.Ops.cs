@@ -770,9 +770,57 @@ namespace OpenMined.Syft.Tensor
             factory.ctrl.intTensorFactory.Delete(i.Id);
             return subset;
         }
+
+        
+        // this probably isn't the best/right name for this function
+        // but basically the normal indexselect requies you to pass in a list of indices
+        // that is exactly one dimension (a list) and a separate parameter that selects
+        // which dim the list of indices should be applied to. In this one, however, indices
+        // is has to same shape as the tensor itx indexing into except for the last dimension, which
+        // indices must not have as a dimension (that's the one being indexed).
+        public FloatTensor ShapedIndexSelect(IntTensor indices, FloatTensor result = null)
+        {
+            if(indices.Shape.Length != shape.Length-1)
+                throw new Exception("Indices must have exactly one dimension less than tensor");
+                
+            for (int i = 0; i < shape.Length-1; i++)
+            {
+                if (shape[i] != indices.Shape[i])
+                {
+                    throw new Exception(
+                        "If you index select with -1, indices shape must match tensor shape for all dims except the last");
+                }
+            }
+                
+            int[] flat_left = new int[2];
+            flat_left[1] = shape[shape.Length - 1];
+            flat_left[0] = 1;
+            for (int i = 0; i < shape.Length - 1; i++) flat_left[i] *= shape[i];
+            
+            int[] slice_off_right = new int[shape.Length - 1];
+            for (int i = 0; i < slice_off_right.Length; i++) slice_off_right[i] = shape[i];
+            
+                
+            result = HookGraph(ref result, "shaped_index_select_" + indices.Id, inline:false, resultShape:slice_off_right, indices:new IntTensor[1]{indices});
+
+            
+            for (int i = 0; i < result.Size; i++)
+            {
+                result.data[i] = this.Data[i * flat_left[1] + indices.Data[i]];
+            }
+
+            return result;
+        }
+        
         
         public FloatTensor IndexSelect(IntTensor indices, int dim, FloatTensor result = null)
         {
+
+            if (dim == -1)
+            {
+                return ShapedIndexSelect(indices);
+            }
+            
             if (DataOnGpu)
             {
                 throw new NotImplementedException();
@@ -837,9 +885,51 @@ namespace OpenMined.Syft.Tensor
             
             return result.View(result_dim);
         }
+        
+        
+        // regular index add expects a single list as a tensor - and you select which dimension that list is
+        // used to index into in a different parameter. In this method, the shape of indices itself is instead used
+        // to index into the tensor - ShapedIndexSelect has a similar relationship to IndexSelect as this method has
+        // to IndexAdd
+        public FloatTensor ShapedIndexAdd(IntTensor indices, FloatTensor x, bool inline = false, FloatTensor result = null)
+        {
+            if(indices.Shape.Length != shape.Length-1)
+                throw new Exception("Indices must have exactly one dimension less than tensor");
+                
+            for (int i = 0; i < shape.Length-1; i++)
+            {
+                if (shape[i] != indices.Shape[i])
+                {
+                    throw new Exception(
+                        "If you index select with -1, indices shape must match tensor shape for all dims except the last");
+                }
+            }
+
+            int[] flat_left = this.Shape;
+            
+            result = HookGraph(ref result, "shaped_index_add_" + indices.Id + "_" + x.id, inline:inline, resultShape:this.Shape, indices:new IntTensor[1]{indices});
+ 
+            /*for (int i = 0; i < result.Size; i++)
+            {
+                result.data[i] = this.Data[i * flat_left[1] + indices.Data[i]];
+            }*/
+            
+            int j = 0;
+            for (int i = 0; i < indices.Size; i++)
+            {
+                result.Data[i * flat_left[1] + indices.Data[i]] += x.Data[i];
+            }
+
+            return result;
+        }
 
         public FloatTensor IndexAdd(IntTensor indices, int dim, FloatTensor x, FloatTensor result = null, bool inline = false)
         {
+            if (dim == -1)
+            {
+                return ShapedIndexAdd(indices, x, inline:inline);
+            }
+            
             if (DataOnGpu)
             {
                 throw new NotImplementedException();

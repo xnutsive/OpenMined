@@ -10,6 +10,8 @@ using OpenMined.Syft.Layer.Loss;
 using OpenMined.Syft.Optim;
 using OpenMined.Syft.Tensor.Factories;
 using Random = UnityEngine.Random;
+using OpenMined.Syft.NN.RL;
+using Agent = OpenMined.Syft.NN.RL.Agent;
 
 
 namespace OpenMined.Network.Controllers
@@ -22,10 +24,10 @@ namespace OpenMined.Network.Controllers
 		public IntTensorFactory intTensorFactory;
 		
 		private Dictionary<int, Model> models;
+		private Dictionary<int, Syft.NN.RL.Agent> agents;
 		private Dictionary<int, Optimizer> optimizers;
 		
 		public bool allow_new_tensors = true;
-        public int random_seed = 0;
 
 		public SyftController (ComputeShader _shader)
 		{
@@ -35,6 +37,7 @@ namespace OpenMined.Network.Controllers
 			intTensorFactory = new IntTensorFactory(_shader);
 			
 			models = new Dictionary<int, Model> ();
+			agents = new Dictionary<int, Syft.NN.RL.Agent>();
 			optimizers = new Dictionary<int, Optimizer>();
 		}
 
@@ -47,7 +50,7 @@ namespace OpenMined.Network.Controllers
            float _inputSize = (float)inputSize;
            float Xavier = (float)Math.Sqrt(1.0F / _inputSize);
            float[] syn0 = new float[length];
-           if (random_seed > 0) { Random.InitState (random_seed); }
+           
             for (int i = 0; i < length; i++)
             {
                 // Use Xavier Initialization if inputSize is given
@@ -65,7 +68,14 @@ namespace OpenMined.Network.Controllers
 
 		public Model getModel(int index)
 		{
-			return models[index];
+			if (models.ContainsKey(index))
+			{
+				return models[index];
+			}
+			else
+			{
+				return null;
+			}
 		}
 
 		public Loss getLoss(int index)
@@ -82,11 +92,62 @@ namespace OpenMined.Network.Controllers
 		{
 			return shader;
 		}
+
+		public int addAgent(Syft.NN.RL.Agent agent)
+		{
+			agents.Add (agent.Id, agent);
+			return (agent.Id);
+		}
+
+		public Syft.NN.RL.Agent getAgent(int agent_id)
+		{
+			if(agents.ContainsKey(agent_id))
+				return agents[agent_id];
+			return null;
+		}
+		
+		public void setAgentId(int old_id, int new_id)
+		{
+			Syft.NN.RL.Agent old = getAgent(old_id);
+			
+			if (agents.ContainsKey(new_id))
+			{
+				models.Remove(new_id);
+			}
+			
+			agents.Add(new_id, old);
+
+			if (old_id != new_id)
+			{
+				agents.Remove(old_id);
+				agents.Add(old_id, null);
+			}
+			
+		}
 		
 		public int addModel (Model model)
 		{
 			models.Add (model.Id, model);
 			return (model.Id);
+		}
+
+		public void setModelId(int old_id, int new_id)
+		{
+			Model old = getModel(old_id);
+			
+			if (models.ContainsKey(new_id))
+			{
+				models.Remove(new_id);
+			}
+			
+			models.Add(new_id, old);
+
+			if (old_id != new_id)
+			{
+				models.Remove(old_id);
+				models.Add(old_id, null);
+			}
+			
 		}
 		
 		public int addOptimizer (Optimizer optim)
@@ -184,6 +245,21 @@ namespace OpenMined.Network.Controllers
 							return tensor.ProcessMessage(msgObj, this);
 						}
 					}
+					case "agent":
+					{
+						if (msgObj.functionCall == "create")
+						{
+							Layer model = (Layer) getModel(int.Parse(msgObj.tensorIndexParams[0]));
+							Optimizer optimizer = optimizers[int.Parse(msgObj.tensorIndexParams[1])];
+							return new Syft.NN.RL.Agent(this, model, optimizer).Id.ToString();
+						}
+						
+						//Debug.Log("Getting Model:" + msgObj.objectIndex);
+						Syft.NN.RL.Agent agent = this.getAgent(msgObj.objectIndex);
+						return agent.ProcessMessageLocal(msgObj, this);
+					
+
+					}
 					case "model":
 					{
 						if (msgObj.functionCall == "create")
@@ -226,10 +302,6 @@ namespace OpenMined.Network.Controllers
 							{
 								return new LogSoftmax(this,int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
 							}
-							else if (model_type == "policy")
-							{
-								return new Policy(this,(Layer)getModel(int.Parse(msgObj.tensorIndexParams[1]))).Id.ToString();
-							}
                             else if (model_type == "tanh")
                             {
                                 return new Tanh(this).Id.ToString();
@@ -254,12 +326,10 @@ namespace OpenMined.Network.Controllers
 							{
 								Debug.LogFormat("<color=red>Model Type Not Found:</color> {0}", model_type);
 							}
-							
-							
-
 						}
 						else
 						{
+							//Debug.Log("Getting Model:" + msgObj.objectIndex);
 							Model model = this.getModel(msgObj.objectIndex);
 							return model.ProcessMessage(msgObj, this);
 						}
@@ -298,7 +368,7 @@ namespace OpenMined.Network.Controllers
 						}
 						else if (msgObj.functionCall == "set_seed")
 						{
-                             random_seed = int.Parse(msgObj.tensorIndexParams[0]);
+							 Random.InitState (int.Parse(msgObj.tensorIndexParams[0]));
                              return "Random seed set!";
 						}
 						else if (msgObj.functionCall == "concatenate")
@@ -328,7 +398,7 @@ namespace OpenMined.Network.Controllers
 							{
 								dims[i] = int.Parse(msgObj.tensorIndexParams[i]);
 							}
-							FloatTensor result = Functional.Randn(floatTensorFactory, dims, random_seed);
+							FloatTensor result = Functional.Randn(floatTensorFactory, dims);
 							return result.Id.ToString();
 						}
 						else if (msgObj.functionCall == "random")
@@ -338,7 +408,7 @@ namespace OpenMined.Network.Controllers
 							{
 								dims[i] = int.Parse(msgObj.tensorIndexParams[i]);
 							}
-							FloatTensor result = Functional.Random(floatTensorFactory, dims, random_seed);
+							FloatTensor result = Functional.Random(floatTensorFactory, dims);
 							return result.Id.ToString();
 						}
 						else if (msgObj.functionCall == "zeros")
@@ -354,12 +424,10 @@ namespace OpenMined.Network.Controllers
 						return "Unity Error: SyftController.processMessage: Command not found:" + msgObj.objectType + ":" + msgObj.functionCall;
 					}
                     case "Grid":
-                        Debug.LogFormat("<color=green>SyftController.processMessage {0}</color>", json_message);
-
                         if (msgObj.functionCall == "learn")
                         {
-                            var ms = msgObj.configurations.Select(config => config.model).ToArray();
-                            var s = string.Join(", ", models);
+                            var inputId = int.Parse(msgObj.tensorIndexParams[0]);
+                            var targetId = int.Parse(msgObj.tensorIndexParams[1]);
                             return "";
                         }
                         break;
