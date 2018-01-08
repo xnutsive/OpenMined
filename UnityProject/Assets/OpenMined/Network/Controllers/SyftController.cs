@@ -326,9 +326,6 @@ namespace OpenMined.Network.Controllers
 							{
 								Debug.LogFormat("<color=red>Model Type Not Found:</color> {0}", model_type);
 							}
-							
-							
-
 						}
 						else
 						{
@@ -427,12 +424,10 @@ namespace OpenMined.Network.Controllers
 						return "Unity Error: SyftController.processMessage: Command not found:" + msgObj.objectType + ":" + msgObj.functionCall;
 					}
                     case "Grid":
-                        Debug.LogFormat("<color=green>SyftController.processMessage {0}</color>", json_message);
-
                         if (msgObj.functionCall == "learn")
                         {
-                            var ms = msgObj.configurations.Select(config => config.model).ToArray();
-                            var s = string.Join(", ", models);
+                            var inputId = int.Parse(msgObj.tensorIndexParams[0]);
+                            var targetId = int.Parse(msgObj.tensorIndexParams[1]);
                             return "";
                         }
                         break;
