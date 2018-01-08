@@ -428,6 +428,10 @@ namespace OpenMined.Network.Controllers
                         {
                             var inputId = int.Parse(msgObj.tensorIndexParams[0]);
                             var targetId = int.Parse(msgObj.tensorIndexParams[1]);
+
+                            var g = new Grid(this);
+                            g.Run(inputId, targetId, msgObj.configurations);
+
                             return "";
                         }
                         break;
