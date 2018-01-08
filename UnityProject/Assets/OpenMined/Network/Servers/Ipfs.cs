@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.Networking;
 using System;
+using OpenMined.Syft.Tensor;
 
 
 namespace OpenMined.Network.Servers
@@ -12,9 +13,16 @@ namespace OpenMined.Network.Servers
         public static string POST_URL = "https://ipfs.infura.io:5001/api/v0/add?stream-channels=true";
         public static string GET_URL = "https://ipfs.infura.io/ipfs";
 
-        public static IEnumerator WriteIpfs<T>(T data)
+        public static IEnumerator WriteIpfs<T>(T data) where T: IpfsTensor
         {
             var serializedData = JsonUtility.ToJson(data);
+
+            /**
+             * The blob that has to go over the line.
+             * 
+             * Basically this is what happens in HTTP when you PUT a file with
+             * content-type multipart/form-data
+             */
             var stringData = "--------------------------30a67cb5e62650e3\r\nContent-Disposition: form-data; name=\"file\"; filename=\"model\";\r\n";
             stringData    += "Content-Type: application/octet-stream\r\n\r\n";
             stringData    += serializedData + "\r\n";
@@ -63,5 +71,18 @@ namespace OpenMined.Network.Servers
         public string Name;
         public string Hash;
         public string Size;
+    }
+
+    [Serializable]
+    public class IpfsTensor
+    {
+        [SerializeField] public float[] tensor;
+        [SerializeField] public int[] shape;
+
+        public IpfsTensor(FloatTensor t)
+        {
+            this.tensor = t.Data;
+            this.shape = t.Shape;
+        }
     }
 }

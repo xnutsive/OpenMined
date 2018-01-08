@@ -2,6 +2,8 @@ using UnityEngine;
 using OpenMined.Network.Controllers;
 using UnityEngine.Networking;
 using System.Collections;
+using OpenMined.Syft.Tensor;
+using OpenMined.Syft.Tensor.Factories;
 
 namespace OpenMined.Network.Servers
 {
@@ -29,7 +31,13 @@ namespace OpenMined.Network.Servers
 
             yield return Request.GetModel(this, 1);
 
-            yield return Ipfs.WriteIpfs();
+            float[] data = { 0.5f, 1f, 2f, 3f, 0.434343f };
+            int[] shape = { 5 };
+            var t = controller.floatTensorFactory.Create(_shape: shape, _data: data, _shader: controller.Shader);
+            var ipfsReq = new IpfsTensor(t);
+            yield return Ipfs.WriteIpfs(ipfsReq);
+
+            // yield return Ipfs.WriteIpfs();
 
             // yield return Ipfs.GetIpfs();
 		}
