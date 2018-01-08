@@ -12,14 +12,15 @@ namespace OpenMined.Network.Servers
         public static string POST_URL = "https://ipfs.infura.io:5001/api/v0/add?stream-channels=true";
         public static string GET_URL = "https://ipfs.infura.io/ipfs";
 
-        public static IEnumerator WriteIpfs()
+        public static IEnumerator WriteIpfs<T>(T data)
         {
             // easy string test
+            var serializedData = JsonUtility.ToJson(data);
             var stringData = "--------------------------30a67cb5e62650e3\r\nContent-Disposition: form-data; name=\"file\"; filename=\"model\";\r\n";
             stringData += "Content-Type: application/octet-stream\r\n\r\n";
 
             // replace with real data
-            stringData += "HELLO OPENMINED!  I uploaded this file from Unity! :)\r\n";
+            stringData += serializedData + "\r\n";
             stringData += "--------------------------30a67cb5e62650e3--\r\n";
             var bytes = System.Text.Encoding.UTF8.GetBytes(stringData);
 
