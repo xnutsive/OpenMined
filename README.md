@@ -68,7 +68,7 @@ The steps come in two parts:
 **Jupyter Setup**
 
 1. Run `jupyter notebook` from you openmined directory
-2. Open [Syft Tensor Example Notebook.ipynb](https://github.com/OpenMined/OpenMined/blob/master/notebooks/Syft%20Tensor%20Example%20Notebook.ipynb)
+2. Open [Syft Tensor Example Notebook.ipynb](https://github.com/OpenMined/OpenMined/blob/master/notebooks/demos/Syft%20Tensor%20Example%20Notebook.ipynb)
 3. Run the notebook
 
 ### For OSX (High Sierra)
