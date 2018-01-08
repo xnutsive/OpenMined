@@ -28,6 +28,10 @@ namespace OpenMined.Network.Servers
             yield return Request.GetNumModels(this);
 
             yield return Request.GetModel(this, 1);
+
+            yield return Ipfs.WriteIpfs();
+
+            // yield return Ipfs.GetIpfs();
 		}
 
 		private void Update()

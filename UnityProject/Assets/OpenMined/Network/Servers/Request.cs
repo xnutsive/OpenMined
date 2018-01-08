@@ -13,12 +13,12 @@ namespace OpenMined.Network.Servers
             public int id;
         }
 
-        public class blockNumber : EthResponse
+        public class BlockNumber : EthResponse
         {
             public string result;
         }
 
-        public class call : EthResponse
+        public class Call : EthResponse
         {
             public string result;
         }
@@ -76,11 +76,11 @@ namespace OpenMined.Network.Servers
 
         public static IEnumerator GetBlockNumber(MonoBehaviour owner)
         {
-            Request req = new Request(owner, Request.Get<Request.blockNumber>("eth_blockNumber"));
+            Request req = new Request(owner, Request.Get<Request.BlockNumber>("eth_blockNumber"));
             yield return req.coroutine;
 
-            Request.blockNumber response = req.result as Request.blockNumber;
-            int result = (int)new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
+            Request.BlockNumber response = req.result as Request.BlockNumber;
+            int result = (int) new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
             Debug.LogFormat("\nCurrent Rinkeby Block Number: {0}", result.ToString("N"));
         }
 
@@ -95,10 +95,10 @@ namespace OpenMined.Network.Servers
             // TODO: convert "getNumModels" to hex.
             string data = encodeData("0x3c320cc2");
 
-            Request req = new Request(owner, Request.Get<Request.call>("eth_call", data));
+            Request req = new Request(owner, Request.Get<Request.Call>("eth_call", data));
             yield return req.coroutine;
 
-            Request.call response = req.result as Request.call;
+            Request.Call response = req.result as Request.Call;
             int result = (int)new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
             Debug.LogFormat("\nNum Models: {0}", result.ToString("N"));
         }
@@ -109,10 +109,10 @@ namespace OpenMined.Network.Servers
             // TODO: convert "getModel" and modelId to hex.
             string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
 
-            Request req = new Request(owner, Request.Get<Request.call>("eth_call", data));
+            Request req = new Request(owner, Request.Get<Request.Call>("eth_call", data));
             yield return req.coroutine;
 
-            Request.call response = req.result as Request.call;
+            Request.Call response = req.result as Request.Call;
             Debug.LogFormat("\nModel {0}: {1}", modelId, response.result);
         }
     }
