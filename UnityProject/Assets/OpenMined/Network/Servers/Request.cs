@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Networking;
+using System.Collections.Generic;
+using System;
 using OpenMined.Network.Utils;
 
 namespace OpenMined.Network.Servers
@@ -21,6 +23,40 @@ namespace OpenMined.Network.Servers
         public class Call : EthResponse
         {
             public string result;
+        }
+        
+        public class GetModelResponse
+        {
+            public String address = "";
+            public Int32 bounty = 0;
+            public Int32 initialError = 0;
+            public Int32 targetError = 0;
+            public String inputAddress = "";
+            public String targetAddress = "";
+
+            private int numParameters = 6;
+
+            private readonly List<System.Type> types;
+
+            public GetModelResponse(string hexString)
+            {
+                types = new List<System.Type>
+                {
+                    address.GetType(),
+                    bounty.GetType(),
+                    initialError.GetType(),
+                    targetError.GetType(),
+                    inputAddress.GetType(),
+                    targetError.GetType()
+                };
+
+                var objects = EthereumAbiUtil.GetParametersHex(hexString, numParameters, types);
+
+                address = (String)objects[0];
+                bounty = (Int32)objects[1];
+                initialError = (Int32)objects[2];
+                targetError = (Int32)objects[3];
+            }
         }
 
         public static string contractAddress = "0xd60e1a150b59a89a8e6e6ff2c03ffb6cb4096205";
@@ -105,11 +141,11 @@ namespace OpenMined.Network.Servers
 
         public static IEnumerator GetModel(MonoBehaviour owner, int modelId)
         {
-            /*var keccak = new Sha3Keccack();
+            var keccak = new Sha3Keccack();
 
             var d = keccak.CalculateHash("getModel(uint256)");
 
-            Debug.Log(d);*/
+            Debug.LogFormat("keccak {0}", d);
             
             // TODO: convert "getModel" and modelId to hex.
             string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
@@ -118,79 +154,11 @@ namespace OpenMined.Network.Servers
             yield return req.coroutine;
 
             Request.Call response = req.result as Request.Call;
-            Debug.LogFormat("Model 1 {0}", response.result);
+            Debug.Log(response.result);
 
-            var address = Request.GetAddress(response.result);
-            var bounty = Request.GetBounty(response.result);
-            var initialError = Request.GetInitialError(response.result);
-            var targetError = Request.GetTargetError(response.result);
+            var modelResponse = new GetModelResponse(response.result);
 
-            Debug.LogFormat("address {0}, bounty {1}, initialError {2}, targetError {3}", address, bounty, initialError, targetError);
-            
-            //var addresses = Request.getWeightAddresses();
-        }
-
-        public static string GetAddress(string hexString)
-        {
-            var parameter = Request.GetParameter(hexString, 0);
-
-            return parameter;
-        }
-
-        public static uint GetBounty(string hexString)
-        {
-            var parameter = Request.GetParameter(hexString, 1);
-            Debug.Log(parameter);
-
-            uint decval = System.Convert.ToUInt32(parameter, 16);
-
-            return decval;
-        }
-
-        public static uint GetInitialError(string hexString)
-        {
-            var parameter = Request.GetParameter(hexString, 2);
-            Debug.Log(parameter);
-
-            uint decval = System.Convert.ToUInt32(parameter, 16);
-
-            return decval;
-        }
-
-        public static uint GetTargetError(string hexString)
-        {
-            var parameter = Request.GetParameter(hexString, 3);
-            Debug.Log(parameter);
-
-            uint decval = System.Convert.ToUInt32(parameter, 16);
-
-            return decval;
-        }
-
-        public static string GetParameter(string hexString, int parameter)
-        {
-            var hs = hexString.Substring(64 * parameter + 2, 64);
-            Debug.LogFormat("bleh {0}, {1}", 64 * parameter + 2, 64 * parameter + 64 + 2);
-            Debug.Log(hs);
-
-            hs = Request.StripPadding(hs);
-
-            return hs;
-        }
-
-        public static string StripPadding(string hexString)
-        {
-            var index = 0;
-            for (int j = 0; j < hexString.Length; j++)
-            {
-                if (hexString[j] != '0')
-                {
-                    index = j;
-                    break;
-                }
-            }
-                        
-            return hexString.Remove(0, index);
+            Debug.LogFormat("Model {0}, {1}. {2}, {3}, {4}, {5}", modelResponse.address, modelResponse.bounty, modelResponse.initialError, modelResponse.targetError, modelResponse.inputAddress, modelResponse.targetAddress);
         }
     }
 }
