@@ -16,14 +16,18 @@ namespace OpenMined.Network.Servers
 
 		[SerializeField] private ComputeShader shader;
 
-		private void Start()
+		private IEnumerator Start()
 		{
 			_netMqPublisher = new NetMqPublisher(HandleMessage);
 			_netMqPublisher.Start();
 
 			controller = new SyftController(shader);
 
-      yield return Request.GetBlockNumber(this);
+            yield return Request.GetBlockNumber(this);
+
+            yield return Request.GetNumModels(this);
+
+            yield return Request.GetModel(this, 1);
 		}
 
 		private void Update()
