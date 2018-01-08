@@ -14,16 +14,13 @@ namespace OpenMined.Network.Servers
 
         public static IEnumerator WriteIpfs<T>(T data)
         {
-            // easy string test
             var serializedData = JsonUtility.ToJson(data);
             var stringData = "--------------------------30a67cb5e62650e3\r\nContent-Disposition: form-data; name=\"file\"; filename=\"model\";\r\n";
-            stringData += "Content-Type: application/octet-stream\r\n\r\n";
+            stringData    += "Content-Type: application/octet-stream\r\n\r\n";
+            stringData    += serializedData + "\r\n";
+            stringData    += "--------------------------30a67cb5e62650e3--\r\n";
 
-            // replace with real data
-            stringData += serializedData + "\r\n";
-            stringData += "--------------------------30a67cb5e62650e3--\r\n";
             var bytes = System.Text.Encoding.UTF8.GetBytes(stringData);
-
             UnityWebRequest www = UnityWebRequest.Put(Ipfs.POST_URL, bytes);
             www.SetRequestHeader("Content-Type", "multipart/form-data; boundary=------------------------30a67cb5e62650e3");
             yield return www.SendWebRequest();
