@@ -1,15 +1,18 @@
 ﻿using System;
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
+using UnityEngine;
 
 namespace OpenMined.Syft.Layer
 {
-    public class Log : Layer
+    public class Log : Layer, LayerDefinition
     {
+
+        [SerializeField] public string name = "log";
 
         public Log(SyftController controller)
         {
-            init("log");
+            init(this.name);
 
 #pragma warning disable 420
             id = System.Threading.Interlocked.Increment(ref nCreated);
@@ -25,5 +28,10 @@ namespace OpenMined.Syft.Layer
         }
         
         public override int getParameterCount(){return 0;}
+
+        public string GetLayerDefinition()
+        {
+            return JsonUtility.ToJson(this);
+        }
     }
 }

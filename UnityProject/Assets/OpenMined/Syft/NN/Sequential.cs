@@ -33,7 +33,7 @@ namespace OpenMined.Syft.Layer
             throw new ArgumentOutOfRangeException("Sub-layer " + i + " does not exist.");
         }
 
-        private List<int> getLayers()
+        public List<int> getLayers()
         {
             return this.layers;
         }

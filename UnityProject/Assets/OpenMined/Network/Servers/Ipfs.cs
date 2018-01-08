@@ -13,7 +13,7 @@ namespace OpenMined.Network.Servers
         public static string POST_URL = "https://ipfs.infura.io:5001/api/v0/add?stream-channels=true";
         public static string GET_URL = "https://ipfs.infura.io/ipfs";
 
-        public IpfsResponse Write<T>(T data) where T: IpfsTensor
+        public IpfsResponse Write<T>(T data)
         {
             var serializedData = JsonUtility.ToJson(data);
 
@@ -32,8 +32,10 @@ namespace OpenMined.Network.Servers
             UnityWebRequest www = UnityWebRequest.Put(Ipfs.POST_URL, bytes);
             www.SetRequestHeader("Content-Type", "multipart/form-data; boundary=------------------------30a67cb5e62650e3");
             var op = www.SendWebRequest();
+
             while (!op.isDone)
             {
+                // wait for operation to finish
             }
 
             if (www.isHttpError || www.isNetworkError)

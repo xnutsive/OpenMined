@@ -1,17 +1,19 @@
 ﻿using System;
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
+using UnityEngine;
 
 namespace OpenMined.Syft.Layer
 {
-    public class Softmax : Layer
+    public class Softmax : Layer, LayerDefinition
     {
 
-        private int dim = 0;
-        
+        [SerializeField] public string name = "softmax";
+        [SerializeField] private int dim = 0;
+    
         public Softmax(SyftController controller, int dim)
         {
-            init("softmax");
+            init(this.name);
 
             this.dim = dim;
             
@@ -29,5 +31,10 @@ namespace OpenMined.Syft.Layer
         }
         
         public override int getParameterCount(){return 0;}
+
+        public string GetLayerDefinition()
+        {
+            return JsonUtility.ToJson(this);
+        }
     }
 }
