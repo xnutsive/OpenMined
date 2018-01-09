@@ -12,6 +12,7 @@ using OpenMined.Syft.Tensor.Factories;
 using Random = UnityEngine.Random;
 using OpenMined.Syft.NN.RL;
 using Agent = OpenMined.Syft.NN.RL.Agent;
+using OpenMined.Network.Servers;
 
 
 namespace OpenMined.Network.Controllers
@@ -428,6 +429,10 @@ namespace OpenMined.Network.Controllers
                         {
                             var inputId = int.Parse(msgObj.tensorIndexParams[0]);
                             var targetId = int.Parse(msgObj.tensorIndexParams[1]);
+
+                            var g = new Grid(this);
+                            g.Run(inputId, targetId, msgObj.configurations);
+
                             return "";
                         }
                         break;

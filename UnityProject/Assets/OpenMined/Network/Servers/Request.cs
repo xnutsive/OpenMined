@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.Networking;
+using System.Collections.Generic;
+using System;
+using OpenMined.Network.Utils;
 
 namespace OpenMined.Network.Servers
 {
@@ -21,6 +23,40 @@ namespace OpenMined.Network.Servers
         public class Call : EthResponse
         {
             public string result;
+        }
+        
+        public class GetModelResponse
+        {
+            public String address = "";
+            public Int32 bounty = 0;
+            public Int32 initialError = 0;
+            public Int32 targetError = 0;
+            public String inputAddress = "";
+            public String targetAddress = "";
+
+            private int numParameters = 6;
+
+            private readonly List<System.Type> types;
+
+            public GetModelResponse(string hexString)
+            {
+                types = new List<System.Type>
+                {
+                    address.GetType(),
+                    bounty.GetType(),
+                    initialError.GetType(),
+                    targetError.GetType(),
+                    inputAddress.GetType(),
+                    targetError.GetType()
+                };
+
+                var objects = EthereumAbiUtil.GetParametersHex(hexString, numParameters, types);
+
+                address = (String)objects[0];
+                bounty = (Int32)objects[1];
+                initialError = (Int32)objects[2];
+                targetError = (Int32)objects[3];
+            }
         }
 
         public static string identityURL = "http://localhost:3000/";
@@ -128,6 +164,11 @@ namespace OpenMined.Network.Servers
 
         public static IEnumerator GetModel(MonoBehaviour owner, int modelId)
         {
+            var keccak = new Sha3Keccack();
+
+            var d = keccak.CalculateHash("getModel(uint256)");
+
+            Debug.LogFormat("keccak {0}", d);
             
             // TODO: convert "getModel" and modelId to hex.
             string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
@@ -136,7 +177,11 @@ namespace OpenMined.Network.Servers
             yield return req.coroutine;
 
             Request.Call response = req.result as Request.Call;
-            Debug.LogFormat("\nModel {0}: {1}", modelId, response.result);
+            Debug.Log(response.result);
+
+            var modelResponse = new GetModelResponse(response.result);
+
+            Debug.LogFormat("Model {0}, {1}. {2}, {3}, {4}, {5}", modelResponse.address, modelResponse.bounty, modelResponse.initialError, modelResponse.targetError, modelResponse.inputAddress, modelResponse.targetAddress);
         }
     }
 }

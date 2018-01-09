@@ -7,6 +7,8 @@ using OpenMined.Network.Utils;
 
 namespace OpenMined.Syft.Tensor
 {
+
+    [Serializable]
     public abstract partial class BaseTensor<T>
     {
         #region Statics 
@@ -18,11 +20,11 @@ namespace OpenMined.Syft.Tensor
 
         #region Members
 
-        protected T[] data;
+        [SerializeField] protected T[] data;
         protected int id;
-        protected int[] strides;
-        protected int[] shape;
-        protected int size;
+        [SerializeField] protected int[] strides;
+        [SerializeField] protected int[] shape;
+        [SerializeField] protected int size;
 
         protected ComputeShader shader;
 

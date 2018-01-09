@@ -31,15 +31,15 @@ namespace OpenMined.Network.Servers
 
             yield return Request.GetModel(this, 1);
 
-            float[] data = { 0.5f, 1f, 2f, 3f, 0.434343f };
-            int[] shape = { 5 };
-            var t = controller.floatTensorFactory.Create(_shape: shape, _data: data, _shader: controller.Shader);
-            var ipfsReq = new IpfsTensor(t);
-            yield return Ipfs.WriteIpfs(ipfsReq);
-
             // yield return Ipfs.WriteIpfs();
 
-            // yield return Ipfs.GetIpfs();
+            var tensor = Ipfs.Get("QmWi4Y2qyBTuztP3RP7AgEMX9p2mb4VsX1mS3EPvTedvZV");
+            if (tensor != null) 
+            {
+                Debug.Log("Got the thing: " + tensor);
+            }
+
+
 		}
 
 		private void Update()

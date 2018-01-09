@@ -3,17 +3,17 @@ using System.Collections;
 using UnityEngine.Networking;
 using System;
 using OpenMined.Syft.Tensor;
-
+using System.Threading.Tasks;
 
 namespace OpenMined.Network.Servers
 {
-    public static class Ipfs
+    public class Ipfs
     {
 
         public static string POST_URL = "https://ipfs.infura.io:5001/api/v0/add?stream-channels=true";
         public static string GET_URL = "https://ipfs.infura.io/ipfs";
 
-        public static IEnumerator WriteIpfs<T>(T data) where T: IpfsTensor
+        public IpfsResponse Write<T>(T data)
         {
             var serializedData = JsonUtility.ToJson(data);
 
@@ -31,58 +31,48 @@ namespace OpenMined.Network.Servers
             var bytes = System.Text.Encoding.UTF8.GetBytes(stringData);
             UnityWebRequest www = UnityWebRequest.Put(Ipfs.POST_URL, bytes);
             www.SetRequestHeader("Content-Type", "multipart/form-data; boundary=------------------------30a67cb5e62650e3");
-            yield return www.SendWebRequest();
+            var op = www.SendWebRequest();
+
+            while (!op.isDone)
+            {
+                // wait for operation to finish
+            }
+
             if (www.isHttpError || www.isNetworkError)
             {
                 Debug.Log("Error making IPFS request: " + www.error);
-                yield return null;
+                return null;
             }
-            else 
+            else
             {
                 string json = www.downloadHandler.text;
-                IpfsResponse response = JsonUtility.FromJson<IpfsResponse>(json);
+                var response = JsonUtility.FromJson<IpfsResponse>(json);
                 Debug.Log("Got Ipfs response: " + response);
-                yield return response;
-            }
+                return response;
+            }    
         }
 
-        public static IEnumerator GetIpfs (string path)
+        public static FloatTensor Get (string path)
         {
             var www = UnityWebRequest.Get(GET_URL + "/" + path);
-            yield return www.SendWebRequest();
+            var op = www.SendWebRequest();
+            while (!op.isDone)
+            {
+                // wait for operation to finish
+            }
+
             if (www.isHttpError || www.isNetworkError)
             {
                 Debug.Log("Error getting IPFS data: " + www.error);
-                yield return null;
+                return null;
             }
             else
             {
                 var json = www.downloadHandler.text;
-                Debug.Log("Got Ipfs response: " + json);
+                var tensor = JsonUtility.FromJson<FloatTensor>(json);
 
-                yield return json;
+                return tensor;
             }
-        }
-    }
-
-    [Serializable]
-    public class IpfsResponse
-    {
-        public string Name;
-        public string Hash;
-        public string Size;
-    }
-
-    [Serializable]
-    public class IpfsTensor
-    {
-        [SerializeField] public float[] tensor;
-        [SerializeField] public int[] shape;
-
-        public IpfsTensor(FloatTensor t)
-        {
-            this.tensor = t.Data;
-            this.shape = t.Shape;
         }
     }
 }

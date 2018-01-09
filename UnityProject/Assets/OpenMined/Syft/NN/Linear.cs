@@ -1,22 +1,23 @@
-﻿using JetBrains.Annotations;
-using OpenMined.Network.Controllers;
-using OpenMined.Network.Utils;
+﻿using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
+using UnityEngine;
+using OpenMined.Network.Servers;
 
 namespace OpenMined.Syft.Layer
 {
-	public class Linear: Layer
+    
+    public class Linear: Layer, LayerDefinition
 	{
-
 		private int _input;
 		private int _output;
 
-		private readonly FloatTensor _weights;
-		private FloatTensor _bias;
+        [SerializeField] string name = "linear";
+        [SerializeField] readonly FloatTensor _weights;
+        [SerializeField] FloatTensor _bias;
 		
 		public Linear (SyftController _controller, int input, int output, string initializer="Xavier")
 		{
-			init("linear");
+            init(this.name);
 
 			this.controller = _controller;
 			
@@ -49,9 +50,13 @@ namespace OpenMined.Syft.Layer
 		
 			return output;
 		}
-		
-		public override int getParameterCount(){return _weights.Size + _bias.Size;}
-		
-	}
+
+        public string GetLayerDefinition()
+        {
+            return JsonUtility.ToJson(this);
+        }
+
+        public override int getParameterCount(){return _weights.Size + _bias.Size;}
+    }
 }
 
