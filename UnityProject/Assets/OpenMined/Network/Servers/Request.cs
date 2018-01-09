@@ -84,9 +84,18 @@ namespace OpenMined.Network.Servers
             }
         }
 
-        public static IEnumerator GetIdentity(string method)
+        public static IEnumerator GetIdentity(string method, 
+                                              string inputAddress = "", 
+                                              string targetAddress = "")                                
         {
             string URL = identityURL;
+            
+            if(method.Length > 0)
+            {
+                var input = WWW.EscapeURL(inputAddress);
+                var target = WWW.EscapeURL(targetAddress);
+                URL += "/" + method + "?input=" + input + "&target=" + target;
+            } 
 
             Debug.LogFormat("Request.GetIdentity {0}", URL);
             UnityWebRequest www = UnityWebRequest.Get(URL);
@@ -182,6 +191,15 @@ namespace OpenMined.Network.Servers
             var modelResponse = new GetModelResponse(response.result);
 
             Debug.LogFormat("Model {0}, {1}. {2}, {3}, {4}, {5}", modelResponse.address, modelResponse.bounty, modelResponse.initialError, modelResponse.targetError, modelResponse.inputAddress, modelResponse.targetAddress);
+        }
+        
+        
+        public static IEnumerator AddModel(MonoBehaviour owner)
+        {
+            Request req = new Request(owner, Request.GetIdentity("addModel", "bleh", "bleh2"));
+            yield return req.coroutine;
+
+            Debug.LogFormat("response {0}", req.result);
         }
     }
 }

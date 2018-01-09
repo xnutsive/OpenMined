@@ -50,7 +50,7 @@ namespace OpenMined.Network.Servers
 		private string HandleMessage(string message)
 		{
 			//Debug.LogFormat("HandleMessage... {0}", message);
-			return controller.processMessage(message);
+			return controller.processMessage(message, this);
 		}
 
 		private void OnDestroy()

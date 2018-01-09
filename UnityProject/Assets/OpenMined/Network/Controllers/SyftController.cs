@@ -162,7 +162,7 @@ namespace OpenMined.Network.Controllers
 			Debug.LogFormat(message);
 		}
 		
-		public string processMessage (string json_message)
+		public string processMessage (string json_message, MonoBehaviour owner)
 		{
 			//Debug.LogFormat("<color=green>SyftController.processMessage {0}</color>", json_message);
 
@@ -431,7 +431,7 @@ namespace OpenMined.Network.Controllers
                             var targetId = int.Parse(msgObj.tensorIndexParams[1]);
 
                             var g = new Grid(this);
-                            g.Run(inputId, targetId, msgObj.configurations);
+                            g.Run(inputId, targetId, msgObj.configurations, owner);
 
                             return "";
                         }

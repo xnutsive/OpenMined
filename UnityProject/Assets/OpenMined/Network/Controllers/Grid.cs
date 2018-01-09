@@ -19,7 +19,7 @@ namespace OpenMined.Network.Controllers
             this.controller = controller;
         }
 
-        public void Run(int inputId, int targetId, List<GridConfiguration> configurations)
+        public void Run(int inputId, int targetId, List<GridConfiguration> configurations, MonoBehaviour owner)
         {
             var inputTensor = controller.floatTensorFactory.Get(inputId);
             var targetTensor = controller.floatTensorFactory.Get(targetId);
@@ -53,6 +53,8 @@ namespace OpenMined.Network.Controllers
 
                 Debug.Log("Model: " + response.Hash);
             });
+
+            owner.StartCoroutine(Request.AddModel(owner));
         }
     }
 
