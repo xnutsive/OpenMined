@@ -2,6 +2,7 @@
 using OpenMined.Network.Controllers;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Syft.Layer
 {
@@ -51,7 +52,50 @@ namespace OpenMined.Syft.Layer
 		}
 		
 		public override int getParameterCount(){return _weights.Size + _bias.Size;}
-		
+
+		public override JToken GetConfig()
+    {
+    		var _this = this;
+				var config = new JObject
+				{
+						{ "name", "linear_" + _this.Id.ToString() },
+						{ "trainable", true },
+						{ "dtype", "float32" }, 
+						{ "units", _output },
+						{ "activation", "linear" },
+						{ "use_bias", true },
+						{
+								"kernel_initializer", new JObject
+								{
+						  			{ "class_name", "VarianceScaling" },
+						  			{ 
+						  					"config", new JObject
+						  					{
+							  						{ "scale", 1.0 },
+							  						{ "mode", "fan_avg" },
+							  						{ "distribution", "uniform" },
+							  						{ "seed", null }
+						  					}
+						  			}
+						  	}
+						},
+						{ 
+								"bias_initializer", new JObject
+								{
+		          			{ "class_name", "Zeros"},
+		          			{ "config", new JObject() }
+		          	}
+		        },
+						{ "kernel_regularizer", null },
+		        { "bias_regularizer", null },
+		        { "activity_regularizer", null },
+		        { "kernel_constraint", null },
+		        { "bias_constraint", null }
+				};
+
+				return config;
+		}
+
 	}
 }
 
