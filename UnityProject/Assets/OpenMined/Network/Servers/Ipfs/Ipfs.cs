@@ -52,7 +52,7 @@ namespace OpenMined.Network.Servers
             }    
         }
 
-        public static IpfsTensor Get (string path)
+        public static FloatTensor Get (string path)
         {
             var www = UnityWebRequest.Get(GET_URL + "/" + path);
             var op = www.SendWebRequest();
@@ -69,31 +69,10 @@ namespace OpenMined.Network.Servers
             else
             {
                 var json = www.downloadHandler.text;
-                var tensor = JsonUtility.FromJson<IpfsTensor>(json);
+                var tensor = JsonUtility.FromJson<FloatTensor>(json);
 
                 return tensor;
             }
-        }
-    }
-
-    [Serializable]
-    public class IpfsResponse
-    {
-        public string Name;
-        public string Hash;
-        public string Size;
-    }
-
-    [Serializable]
-    public class IpfsTensor
-    {
-        [SerializeField] public float[] tensor;
-        [SerializeField] public int[] shape;
-
-        public IpfsTensor(FloatTensor t)
-        {
-            this.tensor = t.Data;
-            this.shape = t.Shape;
         }
     }
 }

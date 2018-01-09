@@ -21,8 +21,8 @@ namespace OpenMined.Network.Controllers
 
         public void Run(int inputId, int targetId, List<GridConfiguration> configurations)
         {
-            var inputTensor = new IpfsTensor(controller.floatTensorFactory.Get(inputId));
-            var targetTensor = new IpfsTensor(controller.floatTensorFactory.Get(targetId));
+            var inputTensor = controller.floatTensorFactory.Get(inputId);
+            var targetTensor = controller.floatTensorFactory.Get(targetId);
 
             // write the input and target tensors to Ipfs
             var inputJob = new Ipfs();

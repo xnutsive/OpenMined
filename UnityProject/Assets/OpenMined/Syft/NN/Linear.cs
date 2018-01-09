@@ -12,11 +12,8 @@ namespace OpenMined.Syft.Layer
 		private int _output;
 
         [SerializeField] string name = "linear";
-        readonly FloatTensor _weights;
-        FloatTensor _bias;
-
-        [SerializeField] IpfsTensor Weights;
-        [SerializeField] IpfsTensor Bias;
+        [SerializeField] readonly FloatTensor _weights;
+        [SerializeField] FloatTensor _bias;
 		
 		public Linear (SyftController _controller, int input, int output, string initializer="Xavier")
 		{
@@ -56,8 +53,6 @@ namespace OpenMined.Syft.Layer
 
         public string GetLayerDefinition()
         {
-            this.Weights = new IpfsTensor(_weights);
-            this.Bias = new IpfsTensor(_bias);
             return JsonUtility.ToJson(this);
         }
 
