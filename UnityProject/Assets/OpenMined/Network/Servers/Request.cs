@@ -23,6 +23,8 @@ namespace OpenMined.Network.Servers
             public string result;
         }
 
+        public static string identityURL = "http://localhost:3000/";
+
         public static string contractAddress = "0xd60e1a150b59a89a8e6e6ff2c03ffb6cb4096205";
         public static string infuraURL = "https://api.infura.io/v1/jsonrpc/";
         public static string infuraNetwork = "rinkeby/";
@@ -43,6 +45,27 @@ namespace OpenMined.Network.Servers
             {
                 result = target.Current;
                 yield return result;
+            }
+        }
+
+        public static IEnumerator GetIdentity(string method)
+        {
+            string URL = identityURL;
+
+            Debug.LogFormat("Request.GetIdentity {0}", URL);
+            UnityWebRequest www = UnityWebRequest.Get(URL);
+            www.SetRequestHeader("accept", "text/plain");
+
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+                yield return null;
+            }
+            else
+            {
+                yield return www.downloadHandler.text;
             }
         }
 
