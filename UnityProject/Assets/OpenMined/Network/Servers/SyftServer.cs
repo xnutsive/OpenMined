@@ -33,7 +33,14 @@ namespace OpenMined.Network.Servers
 
             // yield return Ipfs.WriteIpfs();
 
-            // yield return Ipfs.GetIpfs();
+            var tensor = Ipfs.Get("QmWi4Y2qyBTuztP3RP7AgEMX9p2mb4VsX1mS3EPvTedvZV");
+            if (tensor != null) 
+            {
+                var fTensor = controller.floatTensorFactory.Create(_shape: tensor.shape, _data: tensor.tensor, _shader: controller.Shader);    
+                Debug.Log("Got the thing: " + fTensor);
+            }
+
+
 		}
 
 		private void Update()

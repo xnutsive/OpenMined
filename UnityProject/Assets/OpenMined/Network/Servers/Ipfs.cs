@@ -52,23 +52,28 @@ namespace OpenMined.Network.Servers
             }    
         }
 
-        //public static IpfsResponse GetIpfs (string path)
-        //{
-        //    var www = UnityWebRequest.Get(GET_URL + "/" + path);
-        //    yield return www.SendWebRequest();
-        //    if (www.isHttpError || www.isNetworkError)
-        //    {
-        //        Debug.Log("Error getting IPFS data: " + www.error);
-        //        yield return null;
-        //    }
-        //    else
-        //    {
-        //        var json = www.downloadHandler.text;
-        //        Debug.Log("Got Ipfs response: " + json);
+        public static IpfsTensor Get (string path)
+        {
+            var www = UnityWebRequest.Get(GET_URL + "/" + path);
+            var op = www.SendWebRequest();
+            while (!op.isDone)
+            {
+                // wait for operation to finish
+            }
 
-        //        yield return json;
-        //    }
-        //}
+            if (www.isHttpError || www.isNetworkError)
+            {
+                Debug.Log("Error getting IPFS data: " + www.error);
+                return null;
+            }
+            else
+            {
+                var json = www.downloadHandler.text;
+                var tensor = JsonUtility.FromJson<IpfsTensor>(json);
+
+                return tensor;
+            }
+        }
     }
 
     [Serializable]
