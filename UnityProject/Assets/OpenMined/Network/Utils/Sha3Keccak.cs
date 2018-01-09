@@ -6,7 +6,7 @@ using System.Text;
 
 namespace OpenMined.Network.Servers
 {
-    public class Sha3Keccack
+    public class Sha3Keccak
     {
         public string CalculateHash(string value)
         {
