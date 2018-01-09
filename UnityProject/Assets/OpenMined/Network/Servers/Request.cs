@@ -164,7 +164,7 @@ namespace OpenMined.Network.Servers
 
         public static IEnumerator GetModel(MonoBehaviour owner, int modelId)
         {
-            var keccak = new Sha3Keccack();
+            var keccak = new Sha3Keccak();
 
             var d = keccak.CalculateHash("getModel(uint256)");
 
