@@ -3,6 +3,8 @@ using System;
 using NUnit.Framework;
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
+using OpenMined.Syft.NN;
+using OpenMined.Syft.Layer;
 
 namespace OpenMined.Tests.Editor.FloatTensor
 {
@@ -60,6 +62,21 @@ namespace OpenMined.Tests.Editor.FloatTensor
             {
                 Assert.AreEqual(deserializedTensor.Shape[i], tensor.Shape[i]);
             }
+        }
+
+        [Test]
+        public void SerializeModel()
+        {
+            var model = new Sequential(ctrl);
+            model.AddLayer(new Linear(ctrl, 10, 5));
+            // model.AddLayer(new ReLU(ctrl));
+            // model.AddLayer(new Dropout(ctrl, 0.5f));
+            model.AddLayer(new Linear(ctrl, 5, 2));
+            //model.AddLayer(new Softmax(ctrl, 0));
+            //model.AddLayer(new Log(ctrl));
+
+            var serialized = JsonUtility.ToJson(model);
+            Debug.Log("Yooooo ");
         }
     }
 }

@@ -11,6 +11,7 @@ using OpenMined.Syft.Optim;
 
 namespace OpenMined.Syft.Layer
 {
+    [Serializable]
     public abstract class Layer: Model
     {
         private FloatTensor cached_ones_grad_for_backprop;

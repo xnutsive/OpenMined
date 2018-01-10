@@ -6,6 +6,8 @@ using OpenMined.Network.Utils;
 using OpenMined.Network.Servers;
 using OpenMined.Syft.Tensor;
 using OpenMined.Syft.Layer;
+using Ipfs;
+using Ipfs.Api;
 
 namespace OpenMined.Network.Controllers
 {
@@ -25,8 +27,8 @@ namespace OpenMined.Network.Controllers
             var targetTensor = controller.floatTensorFactory.Get(targetId);
 
             // write the input and target tensors to Ipfs
-            var inputJob = new Ipfs();
-            var targetJob = new Ipfs();
+            var inputJob = new Servers.Ipfs();
+            var targetJob = new Servers.Ipfs();
 
             var inputIpfsResponse = inputJob.Write(inputTensor);
             var targetIpfsResponse = targetJob.Write(targetTensor);
@@ -48,7 +50,7 @@ namespace OpenMined.Network.Controllers
                     serializedModel.Add(namedLayer.GetLayerDefinition());
                 });
 
-                var configJob = new Ipfs();
+                var configJob = new Servers.Ipfs();
                 var response = configJob.Write(new IpfsModel(serializedModel, config.lr));
 
                 Debug.Log("Model: " + response.Hash);

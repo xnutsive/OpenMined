@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using System.Collections;
 using OpenMined.Syft.Tensor;
 using OpenMined.Syft.Tensor.Factories;
+using Ipfs.Api;
 
 namespace OpenMined.Network.Servers
 {
@@ -32,6 +33,9 @@ namespace OpenMined.Network.Servers
             yield return Request.GetModel(this, 1);
 
             // yield return Ipfs.WriteIpfs();
+
+            var x = new IpfsClient();
+            Debug.Log("Loaded IpfsClient: " + x.ApiUri + "...");
 
             var tensor = Ipfs.Get("QmWi4Y2qyBTuztP3RP7AgEMX9p2mb4VsX1mS3EPvTedvZV");
             if (tensor != null) 

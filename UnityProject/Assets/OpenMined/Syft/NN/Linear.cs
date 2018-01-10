@@ -1,11 +1,13 @@
 ﻿using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
 using UnityEngine;
+using System;
 using OpenMined.Network.Servers;
+using Newtonsoft.Json;
 
 namespace OpenMined.Syft.Layer
 {
-    
+    [Serializable]
     public class Linear: Layer, LayerDefinition
 	{
 		private int _input;

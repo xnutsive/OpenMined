@@ -7,13 +7,18 @@ using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
 using OpenMined.Syft.Tensor.Factories;
 using UnityEngine;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace OpenMined.Syft.Layer
 {
-    public class Sequential: Layer
+    [Serializable]
+    public class Sequential: Layer, ISerializationCallbackReceiver
     {
         // indices for layers used in forward prediction (which themselves can contain weights)
         private List<int> layers = new List<int>();
+
+        [SerializeField] public string __layers;
         		
         public Sequential (SyftController _controller)
         {
@@ -120,6 +125,22 @@ namespace OpenMined.Syft.Layer
             return cnt;
         }
 
+        public void OnBeforeSerialize()
+        {
+            var items = new List<string>();
+            layers.ForEach((layer) =>
+            {
+                var l = controller.getModel(layer);
+                items.Add(JsonUtility.ToJson(l));
+            });
+            var x = JsonUtility.ToJson(items);
+            this.__layers = x;
+        }
+
+        public void OnAfterDeserialize()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

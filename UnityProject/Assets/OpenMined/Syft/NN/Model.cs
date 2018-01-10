@@ -5,16 +5,19 @@ using JetBrains.Annotations;
 using OpenMined.Network.Controllers;
 using OpenMined.Network.Utils;
 using OpenMined.Syft.Tensor;
+using UnityEngine;
+
 
 namespace OpenMined.Syft.Layer
 {
+    [Serializable]
     public abstract class Model
     {
         
         protected static volatile int nCreated = 0;
         
         // unique identifier held by SyftController
-        protected int id;
+        [SerializeField] protected int id;
         public int Id => id;
 
         // indices for weights used in forward prediction (not inluding those in models array)
