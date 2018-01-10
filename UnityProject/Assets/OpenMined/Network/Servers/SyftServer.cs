@@ -29,7 +29,7 @@ namespace OpenMined.Network.Servers
 
             yield return Request.GetNumModels(this);
 
-            yield return Request.GetModel(this, 1);
+            yield return Request.GetModel(this, 13);
 
             // yield return Ipfs.WriteIpfs();
 
@@ -39,6 +39,11 @@ namespace OpenMined.Network.Servers
                 Debug.Log("Got the thing: " + tensor);
             }
 
+            IpfsModel model = Ipfs.GetModel("QmRDrHMEd7F4Ueoh5pWm97FZnQorjkneyHcEk9NcBPQZg9");
+            if (model != null)
+            {
+                Debug.Log("Got the IpfsModel: " + model);
+            }
 
 		}
 

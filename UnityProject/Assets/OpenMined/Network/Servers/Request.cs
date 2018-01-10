@@ -84,18 +84,19 @@ namespace OpenMined.Network.Servers
             }
         }
 
-        public static IEnumerator GetIdentity(string method, 
-                                              string inputAddress = "", 
-                                              string targetAddress = "")                                
+        public static IEnumerator GetIdentity(string method,
+                                              string modelAddress = "")
         {
             string URL = identityURL;
             
             if(method.Length > 0)
             {
-                var input = WWW.EscapeURL(inputAddress);
-                var target = WWW.EscapeURL(targetAddress);
-                URL += "/" + method + "?input=" + input + "&target=" + target;
-            } 
+                var model = WWW.EscapeURL(modelAddress);
+                //var input = WWW.EscapeURL(inputAddress);
+                //var target = WWW.EscapeURL(targetAddress);
+                //URL += "/" + method + "?input=" + input + "&target=" + target;
+                URL += "/" + method + "?model=" + model;
+            }
 
             Debug.LogFormat("Request.GetIdentity {0}", URL);
             UnityWebRequest www = UnityWebRequest.Get(URL);
@@ -178,9 +179,12 @@ namespace OpenMined.Network.Servers
             var d = keccak.CalculateHash("getModel(uint256)");
 
             Debug.LogFormat("keccak {0}", d);
-            
+
+            d = d.Substring(0, 8);
+
             // TODO: convert "getModel" and modelId to hex.
-            string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
+            string data = encodeData("0x" + d + "000000000000000000000000000000000000000000000000000000000000000" + "c");
+            //string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
 
             Request req = new Request(owner, Request.Get<Request.Call>("eth_call", data));
             yield return req.coroutine;
@@ -192,11 +196,10 @@ namespace OpenMined.Network.Servers
 
             Debug.LogFormat("Model {0}, {1}. {2}, {3}, {4}, {5}", modelResponse.address, modelResponse.bounty, modelResponse.initialError, modelResponse.targetError, modelResponse.inputAddress, modelResponse.targetAddress);
         }
-        
-        
-        public static IEnumerator AddModel(MonoBehaviour owner)
+
+        public static IEnumerator AddModel(MonoBehaviour owner, string ipfsHash)
         {
-            Request req = new Request(owner, Request.GetIdentity("addModel", "bleh", "bleh2"));
+            Request req = new Request(owner, Request.GetIdentity("addModel", ipfsHash));
             yield return req.coroutine;
 
             Debug.LogFormat("response {0}", req.result);

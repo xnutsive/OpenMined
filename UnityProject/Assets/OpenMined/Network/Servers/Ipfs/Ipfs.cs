@@ -5,6 +5,8 @@ using System;
 using OpenMined.Syft.Tensor;
 using System.Threading.Tasks;
 
+using OpenMined.Network.Controllers;
+
 namespace OpenMined.Network.Servers
 {
     public class Ipfs
@@ -74,5 +76,27 @@ namespace OpenMined.Network.Servers
                 return tensor;
             }
         }
+
+        public static IpfsModel GetModel(string path)
+        {
+            var www = UnityWebRequest.Get(GET_URL + "/" + path);
+            var op = www.SendWebRequest();
+            while (!op.isDone)
+            {
+                // wait for operation to finish
+            }
+
+            if (www.isHttpError || www.isNetworkError)
+            {
+                Debug.Log("Error getting IPFS data: " + www.error);
+                return null;
+            }
+            else
+            {
+                var json = www.downloadHandler.text;
+                return JsonUtility.FromJson<IpfsModel>(json);
+            }
+        }
+
     }
 }

@@ -21,18 +21,22 @@ namespace OpenMined.Network.Controllers
 
         public void Run(int inputId, int targetId, List<GridConfiguration> configurations, MonoBehaviour owner)
         {
+            Debug.Log("Grid.Run");
+
+            string ipfsHash = "";
+
             var inputTensor = controller.floatTensorFactory.Get(inputId);
             var targetTensor = controller.floatTensorFactory.Get(targetId);
 
             // write the input and target tensors to Ipfs
-            var inputJob = new Ipfs();
-            var targetJob = new Ipfs();
+            //var inputJob = new Ipfs();
+            //var targetJob = new Ipfs();
 
-            var inputIpfsResponse = inputJob.Write(inputTensor);
-            var targetIpfsResponse = targetJob.Write(targetTensor);
+            //var inputIpfsResponse = inputJob.Write(inputTensor);
+            //var targetIpfsResponse = targetJob.Write(targetTensor);
 
-            Debug.Log("Input Hash: " + inputIpfsResponse.Hash);
-            Debug.Log("Target Hash: " + targetIpfsResponse.Hash);
+            //Debug.Log("Input Hash: " + inputIpfsResponse.Hash);
+            //Debug.Log("Target Hash: " + targetIpfsResponse.Hash);
 
             configurations.ForEach((config) => {
                 var model = controller.getModel(config.model) as Sequential;
@@ -49,12 +53,13 @@ namespace OpenMined.Network.Controllers
                 });
 
                 var configJob = new Ipfs();
-                var response = configJob.Write(new IpfsModel(serializedModel, config.lr));
+                var response = configJob.Write(new IpfsModel(inputTensor, targetTensor, serializedModel, config.lr));
 
-                Debug.Log("Model: " + response.Hash);
+                ipfsHash = response.Hash;
+                Debug.Log("Model Hash: " + ipfsHash);
             });
 
-            owner.StartCoroutine(Request.AddModel(owner));
+            owner.StartCoroutine(Request.AddModel(owner, ipfsHash));
         }
     }
 
@@ -64,11 +69,15 @@ namespace OpenMined.Network.Controllers
 
     [Serializable]
     public class IpfsModel {
+        FloatTensor input;
+        FloatTensor target;
         [SerializeField] List<String> Model;
         [SerializeField] float lr;
 
-        public IpfsModel (List<String> model, float lr)
+        public IpfsModel (FloatTensor input, FloatTensor target, List<String> model, float lr)
         {
+            this.input = input;
+            this.target = target;
             this.Model = model;
             this.lr = lr;
         }
