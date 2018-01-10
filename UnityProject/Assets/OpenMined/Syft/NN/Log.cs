@@ -2,6 +2,7 @@
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
 using UnityEngine;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Syft.Layer
 {

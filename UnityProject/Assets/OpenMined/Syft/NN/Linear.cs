@@ -61,38 +61,38 @@ namespace OpenMined.Syft.Layer
 
 	   	public override JToken GetConfig()
         {
-    		var _this = this;
 		    var config = new JObject
 			{
-						{ "name", "linear_" + _this.Id.ToString() },
-						{ "trainable", true },
-						{ "dtype", "float32" }, 
-						{ "units", _output },
-						{ "activation", "linear" },
-						{ "use_bias", true },
-						{
-								"kernel_initializer", new JObject
-								{
-						  			{ "class_name", "VarianceScaling" },
-						  			{ 
-						  					"config", new JObject
-						  					{
-							  						{ "scale", 1.0 },
-							  						{ "mode", "fan_avg" },
-							  						{ "distribution", "uniform" },
-							  						{ "seed", null }
-						  					}
-						  			}
-						  	}
-						},
+			    { "name", "linear" },
+				{ "trainable", true },
+				{ "dtype", "float32" }, 
+				{ "output", _output },
+                { "input", _input },
+				{ "activation", "linear" },
+				{ "use_bias", true },
+				{
+				    "kernel_initializer", new JObject
+					{
+					    { "class_name", "VarianceScaling" },
 						{ 
-								"bias_initializer", new JObject
-								{
-		          			{ "class_name", "Zeros"},
-		          			{ "config", new JObject() }
+						    "config", new JObject
+						  	{
+							    { "scale", 1.0 },
+							  	{ "mode", "fan_avg" },
+							  	{ "distribution", "uniform" },
+							  	{ "seed", null }
+						  	}
+						}
+					}
+				},
+				{ 
+				    "bias_initializer", new JObject
+					{
+		          	    { "class_name", "Zeros"},
+		          		{ "config", new JObject() }
 		          	}
 		        },
-						{ "kernel_regularizer", null },
+				{ "kernel_regularizer", null },
 		        { "bias_regularizer", null },
 		        { "activity_regularizer", null },
 		        { "kernel_constraint", null },

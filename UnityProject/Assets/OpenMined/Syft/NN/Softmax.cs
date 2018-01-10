@@ -2,6 +2,7 @@
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
 using UnityEngine;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Syft.Layer
 {
@@ -35,6 +36,17 @@ namespace OpenMined.Syft.Layer
         public string GetLayerDefinition()
         {
             return JsonUtility.ToJson(this);
+        }
+
+        public override JToken GetConfig()
+        {
+            var config = new JObject
+            {
+                { "name", name },
+                { "dim", dim }
+            };
+
+            return config;
         }
     }
 }

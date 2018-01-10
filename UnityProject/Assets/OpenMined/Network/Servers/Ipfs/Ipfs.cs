@@ -18,6 +18,7 @@ namespace OpenMined.Network.Servers
         public IpfsResponse Write<T>(T data)
         {
             var serializedData = JsonUtility.ToJson(data);
+            Debug.Log(serializedData);
 
             /**
              * The blob that has to go over the line.

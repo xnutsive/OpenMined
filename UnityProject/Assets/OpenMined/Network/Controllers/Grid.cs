@@ -6,6 +6,8 @@ using OpenMined.Network.Utils;
 using OpenMined.Network.Servers;
 using OpenMined.Syft.Tensor;
 using OpenMined.Syft.Layer;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Network.Controllers
 {
@@ -29,14 +31,14 @@ namespace OpenMined.Network.Controllers
             var targetTensor = controller.floatTensorFactory.Get(targetId);
 
             // write the input and target tensors to Ipfs
-            //var inputJob = new Ipfs();
-            //var targetJob = new Ipfs();
+            var inputJob = new Ipfs();
+            var targetJob = new Ipfs();
 
-            //var inputIpfsResponse = inputJob.Write(inputTensor);
-            //var targetIpfsResponse = targetJob.Write(targetTensor);
+            var inputIpfsResponse = inputJob.Write(inputTensor);
+            var targetIpfsResponse = targetJob.Write(targetTensor);
 
-            //Debug.Log("Input Hash: " + inputIpfsResponse.Hash);
-            //Debug.Log("Target Hash: " + targetIpfsResponse.Hash);
+            Debug.Log("Input Hash: " + inputIpfsResponse.Hash);
+            Debug.Log("Target Hash: " + targetIpfsResponse.Hash);
 
             configurations.ForEach((config) => {
                 var model = controller.getModel(config.model) as Sequential;
@@ -46,20 +48,34 @@ namespace OpenMined.Network.Controllers
 
                 layers.ForEach((layerId) => {
                     var layer = controller.getModel(layerId);
-                    var namedLayer = layer as LayerDefinition;
-                    if (namedLayer == null) return;
+                    var json = layer.GetConfig().ToString(Formatting.None);
 
-                    serializedModel.Add(namedLayer.GetLayerDefinition());
+                    serializedModel.Add(json);
                 });
 
                 var configJob = new Ipfs();
-                var response = configJob.Write(new IpfsModel(inputTensor, targetTensor, serializedModel, config.lr));
+                var response = configJob.Write(new IpfsModel(inputIpfsResponse.Hash, targetIpfsResponse.Hash, serializedModel, config.lr));
 
                 ipfsHash = response.Hash;
                 Debug.Log("Model Hash: " + ipfsHash);
             });
 
             owner.StartCoroutine(Request.AddModel(owner, ipfsHash));
+        }
+
+        public void TrainModel(IpfsModel model)
+        {
+            foreach (var m in model.Model)
+            {
+                var config = JObject.Parse(m);
+
+                if ((string)config["name"] == "linear")
+                {
+                    var seq = new Sequential(controller);
+                    var linear = new Linear(controller, (int)config["input"], (int)config["output"]);
+                    seq.AddLayer(linear);
+                }
+            }
         }
     }
 
@@ -68,13 +84,14 @@ namespace OpenMined.Network.Controllers
     }
 
     [Serializable]
-    public class IpfsModel {
-        FloatTensor input;
-        FloatTensor target;
-        [SerializeField] List<String> Model;
-        [SerializeField] float lr;
+    public class IpfsModel
+    {
+        [SerializeField] public string input;
+        [SerializeField] public string target;
+        [SerializeField] public List<String> Model;
+        [SerializeField] public float lr;
 
-        public IpfsModel (FloatTensor input, FloatTensor target, List<String> model, float lr)
+        public IpfsModel (string input, string target, List<String> model, float lr)
         {
             this.input = input;
             this.target = target;

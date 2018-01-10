@@ -1,6 +1,8 @@
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
 using UnityEngine;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Syft.Layer
 {
@@ -9,7 +11,7 @@ namespace OpenMined.Syft.Layer
 
         [SerializeField] public string name = "dropout";
         [SerializeField] private FloatTensor _mask_source;
-        [SerializeField] private readonly float rate;
+        [SerializeField] private float rate;
 
 		public Dropout(SyftController _controller, float _rate)
 		{
@@ -43,6 +45,17 @@ namespace OpenMined.Syft.Layer
         public string GetLayerDefinition()
         {
             return JsonUtility.ToJson(this);
+        }
+
+        public override JToken GetConfig()
+        {
+            var config = new JObject
+            {
+                { "name", "dropout" },
+                { "rate" , rate }
+            };
+
+            return config;
         }
 	}
 }

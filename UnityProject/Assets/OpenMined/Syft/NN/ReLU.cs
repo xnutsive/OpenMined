@@ -1,7 +1,7 @@
-using System;
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Tensor;
 using UnityEngine;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Syft.Layer
 {
@@ -14,7 +14,7 @@ namespace OpenMined.Syft.Layer
         {
             init(this.name);
 
-            #pragma warning disable 420
+#pragma warning disable 420
             id = System.Threading.Interlocked.Increment(ref nCreated);
             controller.addModel(this);
         }
@@ -32,6 +32,16 @@ namespace OpenMined.Syft.Layer
             return JsonUtility.ToJson(this);
         }
 
-        public override int getParameterCount(){return 0;}
+        public override int getParameterCount() { return 0; }
+
+        public override JToken GetConfig()
+        {
+            var config = new JObject
+            {
+                { "name", name }           
+            };
+            
+            return config;
+        }
     }
 }

@@ -39,12 +39,14 @@ namespace OpenMined.Network.Servers
                 Debug.Log("Got the thing: " + tensor);
             }
 
-            IpfsModel model = Ipfs.GetModel("QmRDrHMEd7F4Ueoh5pWm97FZnQorjkneyHcEk9NcBPQZg9");
+            IpfsModel model = Ipfs.GetModel("Qmefkq6zNpNUdiiekhFeFxadXbfAESRPB4iSMj64B8Wnzy");
             if (model != null)
             {
-                Debug.Log("Got the IpfsModel: " + model);
+                Debug.Log("Got the IpfsModel: " + model.input);
+                
+                var g = new Controllers.Grid(controller);
+                g.TrainModel(model);
             }
-
 		}
 
 		private void Update()
