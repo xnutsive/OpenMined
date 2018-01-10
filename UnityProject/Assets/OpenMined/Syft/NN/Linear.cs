@@ -13,7 +13,7 @@ namespace OpenMined.Syft.Layer
 		private int _output;
 
         [SerializeField] string name = "linear";
-        [SerializeField] readonly FloatTensor _weights;
+        [SerializeField] public readonly FloatTensor _weights;
         [SerializeField] FloatTensor _bias;
 		
 		public Linear (SyftController _controller, int input, int output, string initializer="Xavier")

@@ -39,7 +39,7 @@ namespace OpenMined.Network.Servers
                 Debug.Log("Got the thing: " + tensor);
             }
 
-            IpfsModel model = Ipfs.GetModel("Qmefkq6zNpNUdiiekhFeFxadXbfAESRPB4iSMj64B8Wnzy");
+            IpfsModel model = Ipfs.GetModel("QmetoximrDhXCpGCWfZJE4YzwkB6CJhXcdk8nqL7jS53Vb");
             if (model != null)
             {
                 Debug.Log("Got the IpfsModel: " + model.input);

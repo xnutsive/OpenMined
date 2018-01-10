@@ -64,18 +64,64 @@ namespace OpenMined.Network.Controllers
         }
 
         public void TrainModel(IpfsModel model)
-        {
+        {             
+            // TODO just assumes it is all in a seq model the seq model should probably
+            // be in the JSON????      
+            var seq = new Sequential(controller);
+
             foreach (var m in model.Model)
             {
                 var config = JObject.Parse(m);
-
-                if ((string)config["name"] == "linear")
+                Layer layer = null;
+                switch ((string)config["name"])
                 {
-                    var seq = new Sequential(controller);
-                    var linear = new Linear(controller, (int)config["input"], (int)config["output"]);
-                    seq.AddLayer(linear);
+                    case "linear":
+                        layer = new Linear(controller, (int)config["input"], (int)config["output"]);
+                        break;
+                    case "softmax":
+                        layer = new Softmax(controller, (int)config["dim"]);
+                        break;
+                    case "relu":
+                        layer = new ReLU(controller);
+                        break;
+                    case "log":
+                        layer = new Log(controller);
+                        break;
+                    case "dropout":
+                        layer = new Dropout(controller, (float)config["rate"]);
+                        break;
                 }
+                seq.AddLayer(layer);
+
             }
+            var tmpInput = Ipfs.Get(model.input);
+            var tmpTarget = Ipfs.Get(model.target);
+
+            var input = controller.floatTensorFactory.Create(_data: tmpInput.Data, 
+                                                             _shape: tmpInput.Shape,
+                                                             _autograd: true);
+            var target = controller.floatTensorFactory.Create(_data: tmpTarget.Data,
+                                                              _shape: tmpTarget.Shape,
+                                                              _autograd: true);
+
+            var grad = controller.floatTensorFactory.Create(_data: new float[] { 1, 1, 1, 1 }, 
+                                                            _shape: new int[] { 4, 1 });
+
+            var pred = seq.Forward(input);
+
+            var loss = pred.Sub(target).Pow(2);
+            loss.Backward(grad);
+
+            foreach (var p in seq.getParameters())
+            {
+                var pTensor = controller.floatTensorFactory.Get(p);
+                pTensor.Sub(pTensor.Grad, inline: true);
+            }
+
+            var layerIdxs = seq.getLayers();
+            Linear lin = (Linear)controller.getModel(layerIdxs[0]);
+
+            Debug.Log(string.Join(",", loss.Data));
         }
     }
 

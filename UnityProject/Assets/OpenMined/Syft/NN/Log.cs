@@ -34,5 +34,15 @@ namespace OpenMined.Syft.Layer
         {
             return JsonUtility.ToJson(this);
         }
+        
+        public override JToken GetConfig()
+        {
+            var config = new JObject
+            {
+                { "name", name }
+            };
+
+            return config;
+        }
     }
 }
