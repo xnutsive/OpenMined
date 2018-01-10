@@ -272,46 +272,44 @@ namespace OpenMined.Network.Controllers
 							
 							if (model_type == "linear")
 							{
-								return new Linear(this, int.Parse(msgObj.tensorIndexParams[1]),
-								int.Parse(msgObj.tensorIndexParams[2]),
-								msgObj.tensorIndexParams[3]).Id.ToString();
+								return this.BuildLinear(msgObj.tensorIndexParams).Id.ToString();
 							}
 							else if (model_type == "relu")
 							{
-								return new ReLU(this).Id.ToString();
+								return this.BuildReLU().Id.ToString();
 							}
 							else if (model_type == "log")
 							{
-								return new Log(this).Id.ToString();
+								return this.BuildLog().Id.ToString();
 							}
 							else if (model_type == "dropout")
 							{
-								return new Dropout(this,float.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
+								return this.BuildDropout(msgObj.tensorIndexParams).Id.ToString();
 							}
 							else if (model_type == "sigmoid")
 							{
-								return new Sigmoid(this).Id.ToString();
+								return this.BuildSigmoid().Id.ToString();
 							}
 							else if (model_type == "sequential")
 							{
-								return new Sequential(this).Id.ToString();
+								return this.BuildSequential().Id.ToString();
 							}
 							else if (model_type == "softmax")
 							{
-								return new Softmax(this,int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
+								return this.BuildSoftmax(msgObj.tensorIndexParams).Id.ToString();
 							}
 							else if (model_type == "logsoftmax")
 							{
-								return new LogSoftmax(this,int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
+								return this.BuildLogSoftmax(msgObj.tensorIndexParams).Id.ToString();
 							}
-                            else if (model_type == "tanh")
-                            {
-                                return new Tanh(this).Id.ToString();
-                            }
-                            else if (model_type == "crossentropyloss")
-                            {
-                                return new CrossEntropyLoss(this, int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
-                            }
+              else if (model_type == "tanh")
+              {
+                  return new Tanh(this).Id.ToString();
+              }
+              else if (model_type == "crossentropyloss")
+              {
+                  return new CrossEntropyLoss(this, int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
+              }
 							else if (model_type == "nllloss")
 							{
 								return new NLLLoss(this).Id.ToString();
@@ -432,16 +430,11 @@ namespace OpenMined.Network.Controllers
 							var json_str = msgObj.tensorIndexParams[0];
 							var config = JObject.Parse(json_str);
 
-							Model model;
+							Sequential model;
 
 							if ((string)config["class_name"] == "Sequential")
 							{
-								Command cmd = new Command();
-								cmd.objectType = "model";
-								cmd.functionCall = "create";
-								cmd.tensorIndexParams = new string[] {"sequential"};
-								int model_id = Int32.Parse(this.processMessage(JsonUtility.ToJson(cmd)));
-								model = this.getModel(model_id);
+								model = this.BuildSequential();
 							}
 							else
 							{
@@ -450,58 +443,48 @@ namespace OpenMined.Network.Controllers
 
 							for (int i = 0; i < config["config"].ToList().Count; i++)
 							{
-								var layer = config["config"][i];
-								var layer_config = layer["config"];
+								var layer_desc = config["config"][i];
+								var layer_config_desc = layer_desc["config"];
 
-								if ((string) layer["class_name"] == "Linear"){	
+								if ((string) layer_desc["class_name"] == "Linear"){	
 									int previous_output_dim;
 
 									if (i == 0)
 									{
-										previous_output_dim = (int) layer_config["batch_input_shape"][layer_config["batch_input_shape"].ToList().Count - 1];
+										previous_output_dim = (int) layer_config_desc["batch_input_shape"][layer_config_desc["batch_input_shape"].ToList().Count - 1];
 									}
 									else
 									{
-										previous_output_dim = (int) layer_config["units"];
+										previous_output_dim = (int) layer_config_desc["units"];
 									}
-									Command cmd = new Command();
-									cmd.objectType = "model";
-									cmd.functionCall = "create";
-									cmd.tensorIndexParams = new string[] {"linear", previous_output_dim.ToString(), layer_config["units"].ToString(), "Xavier"};
-									int layer_id = Int32.Parse(this.processMessage(JsonUtility.ToJson(cmd)));
 
-									Command model_cmd = new Command();
-									model_cmd.objectType = "model";
-									model_cmd.functionCall = "add";
-									model_cmd.tensorIndexParams = new string[] {layer_id.ToString()};
-									model.ProcessMessage(model_cmd, this);
+									string[] parameters = new string[] {"linear", previous_output_dim.ToString(), layer_config_desc["units"].ToString(), "Xavier"};
+									Layer layer = this.BuildLinear(parameters);
+									model.AddLayer(layer);
 
-									string activation_name = layer_config["activation"].ToString();
+									string activation_name = layer_config_desc["activation"].ToString();
 									if (activation_name != "linear")
 									{
-										Command activation_cmd = new Command();
-										activation_cmd.objectType = "model";
-										activation_cmd.functionCall = "create";
+										Layer activation;
 										if (activation_name == "softmax")
 										{
-											activation_cmd.tensorIndexParams = new string[] { activation_name, "1" };
+											parameters = new string[] { activation_name, "1" };
+											activation = this.BuildSoftmax(parameters);
+										}
+										else if (activation_name == "relu")
+										{
+											activation = this.BuildReLU();
 										}
 										else
 										{
-											activation_cmd.tensorIndexParams = new string[] { activation_name };	
+											return "Unity Error: SyftController.processMessage: while Loading activations, Activation :" + activation_name + " is not implemented";
 										}
-										int activation_id = Int32.Parse(this.processMessage(JsonUtility.ToJson(activation_cmd)));
-
-										Command model_activation_cmd = new Command();
-										model_activation_cmd.objectType = "model";
-										model_activation_cmd.functionCall = "add";
-										model_activation_cmd.tensorIndexParams = new string[] { activation_id.ToString()};
-										model.ProcessMessage(model_activation_cmd, this);
+										model.AddLayer(activation);
 									}
 								}
 								else
 								{
-									return "Unity Error: SyftController.processMessage: while Loading layers, Layer :" + layer["class_name"] + " is not implemented";
+									return "Unity Error: SyftController.processMessage: while Loading layers, Layer :" + layer_desc["class_name"] + " is not implemented";
 								}
 							}
 							
@@ -522,6 +505,54 @@ namespace OpenMined.Network.Controllers
 
 			// If not executing createTensor or tensor function, return default error.
 			return "Unity Error: SyftController.processMessage: Command not found:" + msgObj.objectType + ":" + msgObj.functionCall;            
+		}
+
+		private Sequential BuildSequential()
+		{
+			return new Sequential(this);
+		}
+
+		private Linear BuildLinear(string[] Params)
+		{
+			int input = int.Parse(Params[1]);
+			int output = int.Parse(Params[2]);
+			string initializer =  Params[3];
+
+			return new Linear(this, input, output, initializer);
+		}
+
+		private Dropout BuildDropout(string[] Params)
+		{
+			float rate = float.Parse(Params[1]);
+			
+			return new Dropout(this, rate);
+		}
+
+		private ReLU BuildReLU()
+		{
+			return new ReLU(this);	
+		}
+
+		private Log BuildLog()
+		{
+			return new Log(this);	
+		}
+
+		private Sigmoid BuildSigmoid()
+		{
+			return new Sigmoid(this);	
+		}
+
+		private Softmax BuildSoftmax(string[] Params)
+		{
+			int reduction_dim = int.Parse(Params[1]);
+			return new Softmax(this, reduction_dim);	
+		}
+
+		private LogSoftmax BuildLogSoftmax(string[] Params)
+		{
+			int reduction_dim = int.Parse(Params[1]);
+			return new LogSoftmax(this, reduction_dim);	
 		}
 	}
 }
