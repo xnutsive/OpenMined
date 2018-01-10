@@ -13,7 +13,8 @@ using Random = UnityEngine.Random;
 using OpenMined.Syft.NN.RL;
 using Agent = OpenMined.Syft.NN.RL.Agent;
 using OpenMined.Network.Servers;
-
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Network.Controllers
 {
@@ -421,6 +422,87 @@ namespace OpenMined.Network.Controllers
 							}
 							FloatTensor result = Functional.Zeros(floatTensorFactory, dims);
 							return result.Id.ToString();
+						}
+						else if (msgObj.functionCall == "model_from_json")
+						{
+							Debug.Log("Loading Model from JSON:");
+							var json_str = msgObj.tensorIndexParams[0];
+							var config = JObject.Parse(json_str);
+
+							Model model;
+
+							if ((string)config["class_name"] == "Sequential")
+							{
+								Command cmd = new Command();
+								cmd.objectType = "model";
+								cmd.functionCall = "create";
+								cmd.tensorIndexParams = new string[] {"sequential"};
+								int model_id = Int32.Parse(this.processMessage(JsonUtility.ToJson(cmd), owner));
+								model = this.getModel(model_id);
+							}
+							else
+							{
+								return "Unity Error: SyftController.processMessage: while Loading model, Class :" + config["class_name"] + " is not implemented";
+							}
+
+							for (int i = 0; i < config["config"].ToList().Count; i++)
+							{
+								var layer = config["config"][i];
+								var layer_config = layer["config"];
+
+								if ((string) layer["class_name"] == "Linear"){	
+									int previous_output_dim;
+
+									if (i == 0)
+									{
+										previous_output_dim = (int) layer_config["batch_input_shape"][layer_config["batch_input_shape"].ToList().Count - 1];
+									}
+									else
+									{
+										previous_output_dim = (int) layer_config["units"];
+									}
+									Command cmd = new Command();
+									cmd.objectType = "model";
+									cmd.functionCall = "create";
+									cmd.tensorIndexParams = new string[] {"linear", previous_output_dim.ToString(), layer_config["units"].ToString(), "Xavier"};
+									int layer_id = Int32.Parse(this.processMessage(JsonUtility.ToJson(cmd), owner));
+
+									Command model_cmd = new Command();
+									model_cmd.objectType = "model";
+									model_cmd.functionCall = "add";
+									model_cmd.tensorIndexParams = new string[] {layer_id.ToString()};
+									model.ProcessMessage(model_cmd, this);
+
+									string activation_name = layer_config["activation"].ToString();
+									if (activation_name != "linear")
+									{
+										Command activation_cmd = new Command();
+										activation_cmd.objectType = "model";
+										activation_cmd.functionCall = "create";
+										if (activation_name == "softmax")
+										{
+											activation_cmd.tensorIndexParams = new string[] { activation_name, "1" };
+										}
+										else
+										{
+											activation_cmd.tensorIndexParams = new string[] { activation_name };	
+										}
+										int activation_id = Int32.Parse(this.processMessage(JsonUtility.ToJson(activation_cmd), owner));
+
+										Command model_activation_cmd = new Command();
+										model_activation_cmd.objectType = "model";
+										model_activation_cmd.functionCall = "add";
+										model_activation_cmd.tensorIndexParams = new string[] { activation_id.ToString()};
+										model.ProcessMessage(model_activation_cmd, this);
+									}
+								}
+								else
+								{
+									return "Unity Error: SyftController.processMessage: while Loading layers, Layer :" + layer["class_name"] + " is not implemented";
+								}
+							}
+							
+							return model.Id.ToString();
 						}
 						return "Unity Error: SyftController.processMessage: Command not found:" + msgObj.objectType + ":" + msgObj.functionCall;
 					}

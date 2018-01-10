@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 using JetBrains.Annotations;
 using OpenMined.Syft.Tensor;
 using OpenMined.Network.Utils;
 using OpenMined.Network.Controllers;
 using OpenMined.Syft.Optim;
+using Newtonsoft.Json.Linq;
 
 namespace OpenMined.Syft.Layer
 {
@@ -161,6 +163,19 @@ namespace OpenMined.Syft.Layer
         protected virtual string ProcessMessageAsLayerObject (Command msgObj, SyftController ctrl) 
         {   
             return "Model.processMessage not Implemented:" + msgObj.functionCall;
+        }
+
+        public override JToken GetConfig()
+        {
+            var _this = this;
+
+            UnityEngine.Debug.LogFormat("<color=yellow>Layer {0} GetConfig</color>", this.GetType().Name);
+            var config = new JObject
+            {
+                { "name", _this.model_type + "_" + _this.Id.ToString()}
+            };
+
+            return config;
         }
     }
 }
