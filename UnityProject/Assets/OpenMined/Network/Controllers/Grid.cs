@@ -64,36 +64,9 @@ namespace OpenMined.Network.Controllers
         }
 
         public void TrainModel(IpfsModel model)
-        {             
-            // TODO just assumes it is all in a seq model the seq model should probably
-            // be in the JSON????      
-            var seq = new Sequential(controller);
+        {
+            var seq = CreateSequential(model.Model);
 
-            foreach (var m in model.Model)
-            {
-                var config = JObject.Parse(m);
-                Layer layer = null;
-                switch ((string)config["name"])
-                {
-                    case "linear":
-                        layer = new Linear(controller, (int)config["input"], (int)config["output"]);
-                        break;
-                    case "softmax":
-                        layer = new Softmax(controller, (int)config["dim"]);
-                        break;
-                    case "relu":
-                        layer = new ReLU(controller);
-                        break;
-                    case "log":
-                        layer = new Log(controller);
-                        break;
-                    case "dropout":
-                        layer = new Dropout(controller, (float)config["rate"]);
-                        break;
-                }
-                seq.AddLayer(layer);
-
-            }
             var tmpInput = Ipfs.Get(model.input);
             var tmpTarget = Ipfs.Get(model.target);
 
@@ -122,6 +95,40 @@ namespace OpenMined.Network.Controllers
             Linear lin = (Linear)controller.getModel(layerIdxs[0]);
 
             Debug.Log(string.Join(",", loss.Data));
+        }
+
+        private Sequential CreateSequential(List<String> model)
+        {
+            // TODO just assumes it is all in a seq model the seq model should probably
+            // be in the JSON????      
+            var seq = new Sequential(controller);
+
+            foreach (var l in model)
+            {
+                var config = JObject.Parse(l);
+                Layer layer = null;
+                switch ((string)config["name"])
+                {
+                    case "linear":
+                        layer = new Linear(controller, (int)config["input"], (int)config["output"]);
+                        break;
+                    case "softmax":
+                        layer = new Softmax(controller, (int)config["dim"]);
+                        break;
+                    case "relu":
+                        layer = new ReLU(controller);
+                        break;
+                    case "log":
+                        layer = new Log(controller);
+                        break;
+                    case "dropout":
+                        layer = new Dropout(controller, (float)config["rate"]);
+                        break;
+                }
+                seq.AddLayer(layer);
+            }
+
+            return seq;
         }
     }
 
