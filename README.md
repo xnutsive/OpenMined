@@ -46,7 +46,7 @@ More about this in the [corresponding file](https://github.com/OpenMined/OpenMin
 
 Note: If you do not already have one, you will have to create a Unity account when you open the Application for the first time. For new users, a Personal account should be ok.
 
-2. Open project in Unity `[File -> Open Project -> Directory/To/OpenMined`]
+2. Open project in Unity `[Open(Top Right of Home Screen) -> Directory/To/OpenMined -> /UnityProject]`
 
 3. Open Juptyer Notebooks in the `notebooks` directory.  
 
@@ -61,7 +61,7 @@ The steps come in two parts:
 **Unity Setup**  
 
 1. Download Unity from [here](https://store.unity.com/) or [here](http://beta.unity3d.com/download/ee86734cf592/public_download.html)(linux)  
-2. Open project in Unity `[Open(Top Right of Home Screen) -> Directory/To/OpenMined`]
+2. Open project in Unity `[Open(Top Right of Home Screen) -> Directory/To/OpenMined -> /UnityProject]`
 3. In the Project Pane (usually below), double click OpenMinedMain. If you can't find the file for some reason, check the trouble shooting section.
 4. Hit `Play` on the Unity Editor
 
