@@ -67,7 +67,7 @@ namespace OpenMined.Network.Servers
                 var secondHalf = hexAddress[1].HexToUTF8String();
 
                 configAddress = firstHalf + secondHalf;
-                configAddress.Substring(0, 46);
+                configAddress = configAddress.Substring(0, 46);
             }
         }
 
