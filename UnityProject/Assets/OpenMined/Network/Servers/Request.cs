@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using System.Collections.Generic;
 using System;
 using OpenMined.Network.Utils;
+using OpenMined.Hex.HexConvertors.Extensions;
 
 namespace OpenMined.Network.Servers
 {
@@ -28,26 +29,26 @@ namespace OpenMined.Network.Servers
         public class GetModelResponse
         {
             public String address = "";
-            public Int32 bounty = 0;
-            public Int32 initialError = 0;
-            public Int32 targetError = 0;
-            public String inputAddress = "";
-            public String targetAddress = "";
+            public Int32 bounty;
+            public Int32 initialError;
+            public Int32 targetError;
+            public List<String> hexAddress;
+            
+            public String configAddress = "";
 
-            private int numParameters = 6;
-
-            private readonly List<System.Type> types;
+            int numParameters = 5;
+            readonly List<Type> types;
 
             public GetModelResponse(string hexString)
             {
-                types = new List<System.Type>
+                hexAddress = new List<String>();
+                types = new List<Type>
                 {
                     address.GetType(),
                     bounty.GetType(),
                     initialError.GetType(),
                     targetError.GetType(),
-                    inputAddress.GetType(),
-                    targetError.GetType()
+                    hexAddress.GetType()
                 };
 
                 var objects = EthereumAbiUtil.GetParametersHex(hexString, numParameters, types);
@@ -56,6 +57,17 @@ namespace OpenMined.Network.Servers
                 bounty = (Int32)objects[1];
                 initialError = (Int32)objects[2];
                 targetError = (Int32)objects[3];
+                hexAddress = (List<String>)objects[4];
+                MakeIPFSHash();
+            }
+
+            private void MakeIPFSHash()
+            {
+                var firstHalf = hexAddress[0].HexToUTF8String();
+                var secondHalf = hexAddress[1].HexToUTF8String();
+
+                configAddress = firstHalf + secondHalf;
+                configAddress.Substring(0, 46);
             }
         }
 
@@ -65,14 +77,19 @@ namespace OpenMined.Network.Servers
         public static string infuraURL = "https://api.infura.io/v1/jsonrpc/";
         public static string infuraNetwork = "rinkeby/";
 
-        public Coroutine coroutine { get; private set; }
+        public int numModels;
+        public GetModelResponse modelResponse;
+
+        public Coroutine Coroutine { get; private set; }
         public object result;
         private IEnumerator target;
+
+        public Request() { }
 
         public Request(MonoBehaviour owner, IEnumerator target)
         {
             this.target = target;
-            this.coroutine = owner.StartCoroutine(Run());
+            this.Coroutine = owner.StartCoroutine(Run());
         }
 
         private IEnumerator Run()
@@ -84,7 +101,7 @@ namespace OpenMined.Network.Servers
             }
         }
 
-        public static IEnumerator GetIdentity(string method,
+        public IEnumerator GetIdentity(string method,
                                               string modelAddress = "")
         {
             string URL = identityURL;
@@ -92,9 +109,6 @@ namespace OpenMined.Network.Servers
             if(method.Length > 0)
             {
                 var model = WWW.EscapeURL(modelAddress);
-                //var input = WWW.EscapeURL(inputAddress);
-                //var target = WWW.EscapeURL(targetAddress);
-                //URL += "/" + method + "?input=" + input + "&target=" + target;
                 URL += "/" + method + "?model=" + model;
             }
 
@@ -115,7 +129,7 @@ namespace OpenMined.Network.Servers
             }
         }
 
-        public static IEnumerator Get<T>(string method, string data = "") where T : EthResponse
+        public IEnumerator Get<T>(string method, string data = "") where T : EthResponse
         {
             string URL = infuraURL + infuraNetwork + method;
 
@@ -143,64 +157,63 @@ namespace OpenMined.Network.Servers
             }
         }
 
-        public static IEnumerator GetBlockNumber(MonoBehaviour owner)
+        public IEnumerator GetBlockNumber(MonoBehaviour owner)
         {
-            Request req = new Request(owner, Request.Get<Request.BlockNumber>("eth_blockNumber"));
-            yield return req.coroutine;
+            Request req = new Request(owner, Get<BlockNumber>("eth_blockNumber"));
+            yield return req.Coroutine;
 
-            Request.BlockNumber response = req.result as Request.BlockNumber;
-            int result = (int) new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
-            Debug.LogFormat("\nCurrent Rinkeby Block Number: {0}", result.ToString("N"));
+            Request.BlockNumber response = req.result as BlockNumber;
+            int res = (int) new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
+            Debug.LogFormat("\nCurrent Rinkeby Block Number: {0}", res.ToString("N"));
         }
 
-        private static string encodeData(string data)
+        private string EncodeData(string data)
         {
             string encodedData = WWW.EscapeURL("[{\"to\":\"" + contractAddress + "\",\"data\":\"" + data + "\"},\"latest\"]");
             return encodedData;
         }
 
-        public static IEnumerator GetNumModels(MonoBehaviour owner)
+        public IEnumerator GetNumModels(MonoBehaviour owner)
         {
             // TODO: convert "getNumModels" to hex.
-            string data = encodeData("0x3c320cc2");
+            string data = EncodeData("0x3c320cc2");
+            Request req = new Request(owner, Get<Call>("eth_call", data));
+            yield return req.Coroutine;
 
-            Request req = new Request(owner, Request.Get<Request.Call>("eth_call", data));
-            yield return req.coroutine;
-
-            Request.Call response = req.result as Request.Call;
-            int result = (int)new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
-            Debug.LogFormat("\nNum Models: {0}", result.ToString("N"));
+            Call response = req.result as Call;
+            numModels = (int)new System.ComponentModel.Int32Converter().ConvertFromString(response.result);
+            Debug.LogFormat("\nNum Models: {0}", numModels.ToString("N"));
         }
 
-        public static IEnumerator GetModel(MonoBehaviour owner, int modelId)
+        public IEnumerator GetModel(MonoBehaviour owner)
         {
+            yield return GetNumModels(owner);
+       
             var keccak = new Sha3Keccak();
-
             var d = keccak.CalculateHash("getModel(uint256)");
-
-            Debug.LogFormat("keccak {0}", d);
-
             d = d.Substring(0, 8);
 
-            // TODO: convert "getModel" and modelId to hex.
-            string data = encodeData("0x" + d + "000000000000000000000000000000000000000000000000000000000000000" + "c");
-            //string data = encodeData("0x6d3616940000000000000000000000000000000000000000000000000000000000000001");
+            // get latest model
+            var value = EthereumAbiUtil.EncodeInt32(numModels - 1);
 
-            Request req = new Request(owner, Request.Get<Request.Call>("eth_call", data));
-            yield return req.coroutine;
+            string data = EncodeData("0x" + d + value);
 
-            Request.Call response = req.result as Request.Call;
-            Debug.Log(response.result);
+            Request req = new Request(owner, Get<Call>("eth_call", data));
+            yield return req.Coroutine;
 
-            var modelResponse = new GetModelResponse(response.result);
+            Call response = req.result as Call;
 
-            Debug.LogFormat("Model {0}, {1}. {2}, {3}, {4}, {5}", modelResponse.address, modelResponse.bounty, modelResponse.initialError, modelResponse.targetError, modelResponse.inputAddress, modelResponse.targetAddress);
+            modelResponse = new GetModelResponse(response.result);
+
+            Debug.LogFormat("Model {0}, {1}. {2}, {3}, {4}", modelResponse.address, 
+                            modelResponse.bounty, modelResponse.initialError, modelResponse.targetError, 
+                            modelResponse.configAddress);
         }
 
-        public static IEnumerator AddModel(MonoBehaviour owner, string ipfsHash)
+        public IEnumerator AddModel(MonoBehaviour owner, string ipfsHash)
         {
-            Request req = new Request(owner, Request.GetIdentity("addModel", ipfsHash));
-            yield return req.coroutine;
+            Request req = new Request(owner, GetIdentity("addModel", ipfsHash));
+            yield return req.Coroutine;
 
             Debug.LogFormat("response {0}", req.result);
         }

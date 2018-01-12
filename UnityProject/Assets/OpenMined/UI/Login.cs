@@ -28,7 +28,7 @@ namespace OpenMined.UI
             return writer.Write(textForEncoding);
         }
 
-        public Texture2D generateQR(string text)
+        public Texture2D GenerateQR(string text)
         {
             var encoded = new Texture2D(256, 256);
             var color32 = Encode(text, encoded.width, encoded.height);

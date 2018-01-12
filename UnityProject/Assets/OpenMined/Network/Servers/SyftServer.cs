@@ -25,27 +25,21 @@ namespace OpenMined.Network.Servers
 
 			controller = new SyftController(shader);
 
-            yield return Request.GetBlockNumber(this);
+            var request = new Request();
 
-            yield return Request.GetNumModels(this);
+            yield return request.GetBlockNumber(this);
 
-            yield return Request.GetModel(this, 13);
+            yield return request.GetModel(this);
 
-            // yield return Ipfs.WriteIpfs();
+            var ipfsAddress = request.modelResponse.configAddress;
 
-            var tensor = Ipfs.Get("QmWi4Y2qyBTuztP3RP7AgEMX9p2mb4VsX1mS3EPvTedvZV");
-            if (tensor != null) 
-            {
-                Debug.Log("Got the thing: " + tensor);
-            }
-
-            IpfsModel model = Ipfs.GetModel("QmetoximrDhXCpGCWfZJE4YzwkB6CJhXcdk8nqL7jS53Vb");
+            IpfsModel model = Ipfs.GetModel(ipfsAddress);
             if (model != null)
             {
                 Debug.Log("Got the IpfsModel: " + model.input);
                 
                 var g = new Controllers.Grid(controller);
-                g.TrainModel(model);
+                //g.TrainModel(model);
             }
 		}
 
