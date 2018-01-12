@@ -4,6 +4,7 @@ using OpenMined.Network.Utils;
 using OpenMined.Network.Controllers;
 using System.Collections.Generic;
 using OpenMined.Syft.Tensor.Factories;
+using System.Linq;
 
 namespace OpenMined.Syft.Tensor
 {
@@ -153,7 +154,10 @@ namespace OpenMined.Syft.Tensor
                 throw new NotImplementedException();
             }
 
-            throw new NotImplementedException();
+            IntTensor result = factory.Create(this.shape);
+            result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a + b).ToArray();
+
+            return result;
         }
 
         public IntTensor Add(int value, bool inline = false)
@@ -163,7 +167,10 @@ namespace OpenMined.Syft.Tensor
                 throw new NotImplementedException();
             }
 
-            throw new NotImplementedException();
+            IntTensor result = factory.Create(this.shape);
+            result.Data = data.AsParallel().Select(x => x + value).ToArray();
+
+            return result;
         }
 
         public IntTensor View(int[] new_shape, bool inline = true, FloatTensor result = null)
