@@ -60,7 +60,8 @@ namespace OpenMined.Network.Controllers
                 Debug.Log("Model Hash: " + ipfsHash);
             });
 
-            owner.StartCoroutine(Request.AddModel(owner, ipfsHash));
+            var request = new Request();
+            owner.StartCoroutine(request.AddModel(owner, ipfsHash));
         }
 
         public void TrainModel(IpfsModel model)
