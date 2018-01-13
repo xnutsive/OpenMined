@@ -310,6 +310,10 @@ namespace OpenMined.Network.Controllers
                             {
                                 return new CrossEntropyLoss(this, int.Parse(msgObj.tensorIndexParams[1])).Id.ToString();
                             }
+                            else if (model_type == "categorical_crossentropy")
+                            {
+                                return new CategoricalCrossEntropyLoss(this).Id.ToString();
+                            }
 							else if (model_type == "nllloss")
 							{
 								return new NLLLoss(this).Id.ToString();

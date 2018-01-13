@@ -653,6 +653,42 @@ namespace OpenMined.Tests.Editor.FloatTensorTests
             AssertEqualTensorsData(tensor2, tensor1);
         }
 
+		[Test]
+		public void DivisionElementwiseBySelf_()
+		{
+			float[] data1 = {-10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue / 50, float.MinValue / 50};
+			int[] shape1 = {2, 4};
+			var tensor1 = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1);
+			tensor1.Gpu(shader);
+
+			float[] data2 = {1, 1, 1, 1, 1, 1, 1, 1};
+			int[] shape2 = {2, 4};
+			var tensor2 = ctrl.floatTensorFactory.Create(_data: data2, _shape: shape2);
+			tensor2.Gpu(shader);
+
+			tensor1.Div(tensor1, inline: true);
+
+			AssertEqualTensorsData(tensor2, tensor1);
+		}
+
+		[Test]
+		public void DivisionElementwiseBySelf()
+		{
+			float[] data1 = {-10, -1.5f, 0, 1.5f, 10, 20, float.MaxValue / 50, float.MinValue / 50};
+			int[] shape1 = {2, 4};
+			var tensor1 = ctrl.floatTensorFactory.Create(_data: data1, _shape: shape1);
+			tensor1.Gpu(shader);
+
+			float[] data2 = {1, 1, 1, 1, 1, 1, 1, 1};
+			int[] shape2 = {2, 4};
+			var tensor2 = ctrl.floatTensorFactory.Create(_data: data2, _shape: shape2);
+			tensor2.Gpu(shader);
+
+			var tensor3 = tensor1.Div(tensor1);
+
+			AssertEqualTensorsData(tensor2, tensor3);
+		}
+
         [Test]
         public void DivisionElementwiseUnequalDimensions()
         {

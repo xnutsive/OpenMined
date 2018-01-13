@@ -361,9 +361,16 @@ namespace OpenMined.Syft.Tensor
 
             if (dataOnGpu)
             {
-                shader.SetBuffer(DivElemKernel_, "DivElemDataA_", dataBuffer);
-                shader.SetBuffer(DivElemKernel_, "DivElemDataB_", tensor.dataBuffer);
-                shader.Dispatch(DivElemKernel_, this.size, 1, 1);
+				if (tensor.id != this.id) {
+					shader.SetBuffer (DivElemKernel_, "DivElemDataA_", dataBuffer);
+					shader.SetBuffer (DivElemKernel_, "DivElemDataB_", tensor.dataBuffer);
+					shader.Dispatch (DivElemKernel_, this.size, 1, 1);
+				}
+				else
+				{
+					this.ZeroGPU_ ();
+					this.AddScalarGPU_ ((float)1);
+				}
             }
         }
 
@@ -399,7 +406,8 @@ namespace OpenMined.Syft.Tensor
                 }
                 else
                 {
-                    result.Add(1, inline: true);
+					result.ZeroGPU_ ();
+					result.AddScalarGPU_ ((float)1);
                     return result;
                 }
             }
