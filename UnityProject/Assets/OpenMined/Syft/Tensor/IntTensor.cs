@@ -154,18 +154,23 @@ namespace OpenMined.Syft.Tensor
         {
             IntTensor result = factory.Create(this.shape);
             
-            
-            AddElemIntKernel = shader.FindKernel("AddElemInt");
-            
             if (dataOnGpu)
             {
+                // move result tensor to GPU - TODO: init on gpu instead
                 result.Gpu(shader);
+             
+                // find kernel - TOOD: find all kernels in factory
+                int kernel_id = shader.FindKernel("AddElemInt");
                 
-                shader.SetBuffer(AddElemIntKernel, "AddElemIntDataA", this.DataBuffer);
-                shader.SetBuffer(AddElemIntKernel, "AddElemIntDataB", x.DataBuffer);
-                shader.SetBuffer(AddElemIntKernel, "AddElemIntDataResult", result.DataBuffer);
-                shader.Dispatch(AddElemIntKernel, this.size, 1, 1);
+                // set function parameters for kernel
+                shader.SetBuffer(kernel_id, "AddElemIntDataA", this.DataBuffer);
+                shader.SetBuffer(kernel_id, "AddElemIntDataB", x.DataBuffer);
+                shader.SetBuffer(kernel_id, "AddElemIntDataResult", result.DataBuffer);
                 
+                // execute kernel
+                shader.Dispatch(kernel_id, this.size, 1, 1);
+                
+                // return result
                 return result;
             }
 
