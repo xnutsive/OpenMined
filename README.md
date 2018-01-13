@@ -53,7 +53,7 @@ The steps come in two parts:
 **Unity Setup**  
 
 1. Download Unity from [here](https://store.unity.com/) or [here](http://beta.unity3d.com/download/ee86734cf592/public_download.html)(linux)  
-2. Open project in Unity `[Open(Top Right of Home Screen) -> Directory/To/OpenMined`]
+2. Open project in Unity `[Open(Top Right of Home Screen) -> Directory/To/OpenMined -> /UnityProject]`
 3. In the Project Pane (usually below), double click OpenMinedMain. If you can't find the file for some reason, check the trouble shooting section.
 4. Hit `Play` on the Unity Editor
 
