@@ -152,31 +152,49 @@ namespace OpenMined.Syft.Tensor
 
         public IntTensor Add(IntTensor x, bool inline = false)
         {
-            IntTensor result = factory.Create(this.shape);
-            
+            IntTensor result;
+
             if (dataOnGpu)
             {
-                // move result tensor to GPU - TODO: init on gpu instead
-                result.Gpu(shader);
-             
-                // find kernel - TOOD: find all kernels in factory
-                int kernel_id = shader.FindKernel("AddElemInt");
-                
-                // set function parameters for kernel
-                shader.SetBuffer(kernel_id, "AddElemIntDataA", this.DataBuffer);
-                shader.SetBuffer(kernel_id, "AddElemIntDataB", x.DataBuffer);
-                shader.SetBuffer(kernel_id, "AddElemIntDataResult", result.DataBuffer);
-                
-                // execute kernel
-                shader.Dispatch(kernel_id, this.size, 1, 1);
-                
-                // return result
+                if (!inline)
+                {
+                    result = factory.Create(this.shape);
+
+                    result.Gpu(shader);
+
+                    int kernel_id = shader.FindKernel("AddElemInt");
+
+                    shader.SetBuffer(kernel_id, "AddElemIntDataA", this.DataBuffer);
+                    shader.SetBuffer(kernel_id, "AddElemIntDataB", x.DataBuffer);
+                    shader.SetBuffer(kernel_id, "AddElemIntDataResult", result.DataBuffer);
+
+                    shader.Dispatch(kernel_id, this.size, 1, 1);
+
+                    return result;
+                }
+                else
+                {
+                    result = this;
+                    
+                    int kernel_id = shader.FindKernel("AddElemInt_");
+
+                    shader.SetBuffer(kernel_id, "AddElemIntDataA_", this.DataBuffer);
+                    shader.SetBuffer(kernel_id, "AddElemIntDataB_", x.DataBuffer);
+
+                    shader.Dispatch(kernel_id, this.size, 1, 1);
+       
+                    return result;
+                }
+            }
+            else
+            {
+                result = factory.Create(this.shape);
+                // run Addition on the CPU
+                result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a + b).ToArray();
+
                 return result;
             }
-
-            result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a + b).ToArray();
-
-            return result;
+              
         }
 
         public IntTensor Add(int value, bool inline = false)
