@@ -336,6 +336,18 @@ namespace OpenMined.Syft.Tensor
                     var result = this.Abs(inline:true);
                     return result.id + "";
                 }
+                case "lt":
+                {
+                    var compareToTensor = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+                    var result = this.Lt(compareToTensor);
+                    return result.id + "";
+                }
+                case "lt_":
+                {
+                    var compareToTensor = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+                    this.Lt(compareToTensor, inline: true);
+                    return this.id + "";
+                } 
                 case "add_elem":
                 {
                     Debug.LogFormat("add_elem");
