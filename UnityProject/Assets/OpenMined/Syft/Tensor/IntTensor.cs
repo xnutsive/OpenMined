@@ -304,6 +304,11 @@ namespace OpenMined.Syft.Tensor
                     var result = this.Abs();
                     return result.id + "";
                 }
+                case "abs_":
+                {
+                    var result = this.Abs(inline:true);
+                    return result.id + "";
+                }
                 case "add_elem":
                 {
                     Debug.LogFormat("add_elem");
