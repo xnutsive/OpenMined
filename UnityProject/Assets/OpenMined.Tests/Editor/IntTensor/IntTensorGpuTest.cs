@@ -72,6 +72,42 @@ namespace OpenMined.Tests.Editor.IntTensorTests
         /********************/
 
         [Test]
+        public void Abs()
+        {
+            int[] shape1 = { 2, 5 };
+            int[] data1 = { -1, -2, -3, -4, 5, 6, 7, 8, -999, 10 };
+            var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape1);
+            tensor1.Gpu(shader);
+
+            int[] expectedData1 = { 1, 2, 3, 4, 5, 6, 7, 8, 999, 10 };
+            int[] shape2 = { 2, 5 };
+            var expectedTensor1 = ctrl.intTensorFactory.Create(_data: expectedData1, _shape: shape2);
+            expectedTensor1.Gpu(shader);
+
+            var absTensor1 = tensor1.Abs();
+
+            AssertEqualTensorsData(expectedTensor1, absTensor1);
+        }
+
+        [Test]
+        public void Abs_()
+        {
+            int[] shape1 = { 2, 5 };
+            int[] data1 = { -1, -2, -3, -4, 5, 6, 7, 8, -999, 10 };
+            var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape1);
+            tensor1.Gpu(shader);
+
+            int[] expectedData1 = { 1, 2, 3, 4, 5, 6, 7, 8, 999, 10 };
+            int[] shape2 = { 2, 5 };
+            var expectedTensor1 = ctrl.intTensorFactory.Create(_data: expectedData1, _shape: shape2);
+            expectedTensor1.Gpu(shader);
+
+            tensor1.Abs(inline: true);
+
+            AssertEqualTensorsData(expectedTensor1, tensor1);
+        }
+
+        [Test]
         public void Add()
         {
             int[] data1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};

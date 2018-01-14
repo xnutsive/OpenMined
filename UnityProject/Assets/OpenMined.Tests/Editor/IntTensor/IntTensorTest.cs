@@ -58,6 +58,25 @@ namespace OpenMined.Tests.Editor.IntTensorTests
         }
 
         [Test]
+        public void Abs_()
+        {
+            int[] shape1 = { 2, 5 };
+            int[] data1 = { -1, -2, -3, -4, 5, 6, 7, 8, -999, 10 };
+            var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape1);
+
+            int[] expectedData1 = { 1, 2, 3, 4, 5, 6, 7, 8, 999, 10 };
+            int[] shape2 = { 2, 5 };
+            var expectedTensor1 = ctrl.intTensorFactory.Create(_data: expectedData1, _shape: shape2);
+
+            var actualTensorAbs1 = tensor1.Abs(inline: true);
+
+            for (int i = 0; i < actualTensorAbs1.Size; i++)
+            {
+                Assert.AreEqual(expectedTensor1[i], actualTensorAbs1[i]);
+            }
+        }
+
+        [Test]
         public void Add()
         {
             float[] data1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

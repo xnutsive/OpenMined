@@ -148,6 +148,29 @@ void AddElemInt_ (uint3 id: SV_DispatchThreadID) {
 	AddElemIntDataA_[id.x] += AddElemIntDataB_[id.x];
 }
 
+#pragma kernel AbsElemInt
+
+StructuredBuffer<int> AbsElemIntData;
+RWStructuredBuffer<int> AbsElemIntDataResult;
+
+[numthreads(4,1,1)]
+void AbsElemInt (uint3 id: SV_DispatchThreadID) {
+
+    AbsElemIntDataResult[id.x] = abs(AbsElemIntData[id.x]);
+}
+
+#pragma kernel AbsElemInt_
+
+RWStructuredBuffer<int> AbsElemIntData_;
+
+[numthreads(4,1,1)]
+void AbsElemInt_ (uint3 id: SV_DispatchThreadID) {
+
+    if(AbsElemIntData_[id.x] < 0) {
+        AbsElemIntData_[id.x] = -AbsElemIntData_[id.x];
+    }
+}
+
 #pragma kernel AddMM_
 
 RWStructuredBuffer<float> AddmmDataA_;

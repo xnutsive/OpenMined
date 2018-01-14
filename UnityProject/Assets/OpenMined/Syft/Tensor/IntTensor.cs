@@ -136,8 +136,6 @@ namespace OpenMined.Syft.Tensor
                 shader = factory.GetShader();
                 initShaderKernels();
             }
-            
-            
         }
 
         public void initShaderKernels()
@@ -150,15 +148,46 @@ namespace OpenMined.Syft.Tensor
             throw new NotImplementedException();
         }
 
-        public IntTensor Abs()
+        public IntTensor Abs(bool inline = false)
         {
             if (dataOnGpu) {
-                throw new NotImplementedException();
+                if (inline)
+                {
+                    int kernel_id = shader.FindKernel("AbsElemInt_");
+
+                    shader.SetBuffer(kernel_id, "AbsElemIntData_", this.DataBuffer);
+
+                    shader.Dispatch(kernel_id, this.size, 1, 1);
+
+                    return this;
+                }
+                else
+                {
+                    IntTensor result = factory.Create(this.shape);
+                    result.Gpu(shader);
+
+                    int kernel_id = shader.FindKernel("AbsElemInt");
+
+                    shader.SetBuffer(kernel_id, "AbsElemIntData", this.DataBuffer);
+                    shader.SetBuffer(kernel_id, "AbsElemIntDataResult", result.DataBuffer);
+
+                    shader.Dispatch(kernel_id, this.size, 1, 1);
+
+                    return result;
+                }
             }
 
-            IntTensor result = factory.Create(this.shape);
-            result.Data = data.AsParallel().Select(x => Math.Abs (x)).ToArray();
-            return result;
+            if(inline) {
+                this.Data = data.AsParallel().Select(x => Math.Abs(x)).ToArray();
+                return this;
+            }
+            else
+            {
+                IntTensor result = factory.Create(this.shape);
+                result.Data = data.AsParallel().Select(x => Math.Abs(x)).ToArray();
+                return result;
+            }
+
         }
 
         public IntTensor Add(IntTensor x, bool inline = false)
