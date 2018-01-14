@@ -138,6 +138,48 @@ namespace OpenMined.Tests.Editor.IntTensorTests
                 Throws.TypeOf<InvalidOperationException>());
         }
 
+        [Test]
+        public void Lt()
+        {
+            int[] data1 = { 1, 2, 3, 4 };
+            int[] shape = { 2, 2 };
+            var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape);
+
+            int[] data2 = { 2, 2, 1, 2 };
+            var tensor2 = ctrl.intTensorFactory.Create(_data: data2, _shape: shape);
+
+            int[] expectedData = { 1, 0, 0, 0 };
+            var expectedOutput = ctrl.intTensorFactory.Create(_data: expectedData, _shape: shape);
+
+            var ltOutput = tensor1.Lt(tensor2);
+
+            for (int i = 0; i < expectedOutput.Size; i++)
+            {
+                Assert.AreEqual(expectedOutput[i], ltOutput[i]);
+            }
+        }
+
+        [Test]
+        public void Lt_()
+        {
+            int[] data1 = { 1, 2, 3, 4 };
+            int[] shape = { 2, 2 };
+            var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape);
+
+            int[] data2 = { 2, 2, 1, 2 };
+            var tensor2 = ctrl.intTensorFactory.Create(_data: data2, _shape: shape);
+
+            int[] expectedData = { 1, 0, 0, 0 };
+            var expectedOutput = ctrl.intTensorFactory.Create(_data: expectedData, _shape: shape);
+
+            tensor1.Lt(tensor2, inline:true);
+
+            for (int i = 0; i < expectedOutput.Size; i++)
+            {
+                Assert.AreEqual(expectedOutput[i], tensor1[i]);
+            }
+        }
+
         /* closes class and namespace */
     }
 }
