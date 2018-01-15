@@ -153,6 +153,88 @@ namespace OpenMined.Tests.Editor.IntTensorTests
             AssertEqualTensorsData(expectedTensor, tensor1);
         }
 
+        [Test]
+        public void Sub()
+        {
+            int[] data1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            int[] shape1 = {2, 5};
+            var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape1);
+            tensor1.Gpu(shader);
+
+            int[] data2 = {3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
+            int[] shape2 = {2, 5};
+            var tensor2 = ctrl.intTensorFactory.Create(_data: data2, _shape: shape2);
+            tensor2.Gpu(shader);
+
+            int[] data3 = {-2,  0, -3, -5, -5,  5,  3,  0,  4,  3};
+            int[] shape3 = {2, 5};
+            var expectedTensor = ctrl.intTensorFactory.Create(_data: data3, _shape: shape3);
+            expectedTensor.Gpu(shader);
+
+            var tensorDiff = tensor1.Sub(tensor2);
+
+            AssertEqualTensorsData(expectedTensor, tensorDiff);
+        }
+
+        [Test]
+        public void Sub_()
+        {
+            int[] data1 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+            int[] shape1 = {2, 5};
+            var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape1);
+            tensor1.Gpu(shader);
+
+            int[] data2 = {3, 2, 6, 9, 10, 1, 4, 8, 5, 7};
+            int[] shape2 = {2, 5};
+            var tensor2 = ctrl.intTensorFactory.Create(_data: data2, _shape: shape2);
+            tensor2.Gpu(shader);
+
+            int[] data3 = {-2,  0, -3, -5, -5,  5,  3,  0,  4,  3};
+            int[] shape3 = {2, 5};
+            var expectedTensor = ctrl.intTensorFactory.Create(_data: data3, _shape: shape3);
+            expectedTensor.Gpu(shader);
+
+            tensor1.Sub(tensor2, inline: true);
+
+            AssertEqualTensorsData(expectedTensor, tensor1);
+        }
+
+		[Test]
+		public void Neg()
+		{
+			int[] shape1 = { 2, 5 };
+			int[] data1 = { -1, -2, -3, -4, 5, 6, 7, 8, -999, 10 };
+			var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape1);
+			tensor1.Gpu(shader);
+
+			int[] expectedData1 = { 1, 2, 3, 4, -5, -6, -7, -8, 999, -10 };
+			int[] shape2 = { 2, 5 };
+			var expectedTensor1 = ctrl.intTensorFactory.Create(_data: expectedData1, _shape: shape2);
+			expectedTensor1.Gpu(shader);
+
+			var actualTensorNeg1 = tensor1.Neg();
+
+			AssertEqualTensorsData(expectedTensor1, actualTensorNeg1);
+		}
+
+		[Test]
+		public void Neg_()
+		{
+			int[] shape1 = { 2, 5 };
+			int[] data1 = { -1, -2, -3, -4, 5, 6, 7, 8, -999, 10 };
+			var tensor1 = ctrl.intTensorFactory.Create(_data: data1, _shape: shape1);
+			tensor1.Gpu(shader);
+
+			int[] expectedData1 = { 1, 2, 3, 4, -5, -6, -7, -8, 999, -10 };
+			int[] shape2 = { 2, 5 };
+			var expectedTensor1 = ctrl.intTensorFactory.Create(_data: expectedData1, _shape: shape2);
+			expectedTensor1.Gpu(shader);
+
+			tensor1.Neg(inline: true);
+
+			AssertEqualTensorsData(expectedTensor1, tensor1);
+		}
+
 /* closes class and namespace */
     }
 }

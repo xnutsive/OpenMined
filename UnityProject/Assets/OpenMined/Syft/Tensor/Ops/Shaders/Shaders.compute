@@ -506,6 +506,23 @@ void Negate_ (uint3 id: SV_DispatchThreadID) {
 	NegateData_[id.x] = -NegateData_[id.x];
 }
 
+#pragma kernel NegateInt
+
+StructuredBuffer<int> NegateIntData;
+RWStructuredBuffer<int> NegateIntResult;
+[numthreads(4,1,1)]
+void NegateInt (uint3 id: SV_DispatchThreadID) {
+	NegateIntResult[id.x] = -NegateIntData[id.x];
+}
+
+#pragma kernel NegateInt_
+
+RWStructuredBuffer<int> NegateIntData_;
+[numthreads(4,1,1)]
+void NegateInt_ (uint3 id: SV_DispatchThreadID) {
+	NegateIntData_[id.x] = -NegateIntData_[id.x];
+}
+
 #pragma kernel Reduce1DSum
 #define REDUCE1D_NUMTHREADS 8
 
@@ -734,6 +751,16 @@ void SubElem_ (uint3 id: SV_DispatchThreadID) {
 	SubElemDataA_[id.x] = SubElemDataA_[id.x] - SubElemDataB_[id.x];
 }
 
+#pragma kernel SubElemInt_
+
+RWStructuredBuffer<int> SubElemIntDataA_;
+StructuredBuffer<int> SubElemIntDataB_;
+
+[numthreads(4,1,1)]
+void SubElemInt_ (uint3 id: SV_DispatchThreadID) {
+	SubElemIntDataA_[id.x] -= SubElemIntDataB_[id.x];
+}
+
 #pragma kernel SubScalar
 
 StructuredBuffer<float> SubScalarData;
@@ -754,6 +781,18 @@ RWStructuredBuffer<float> SubElemDataResult;
 [numthreads(4,1,1)]
 void SubElem (uint3 id: SV_DispatchThreadID) {
 	SubElemDataResult[id.x] = SubElemDataA[id.x] - SubElemDataB[id.x];
+}
+
+#pragma kernel SubElemInt
+
+StructuredBuffer<int> SubElemIntDataA;
+StructuredBuffer<int> SubElemIntDataB;
+RWStructuredBuffer<int> SubElemIntDataResult;
+
+[numthreads(4,1,1)]
+void SubElemInt (uint3 id: SV_DispatchThreadID) {
+
+	SubElemIntDataResult[id.x] = SubElemIntDataA[id.x] - SubElemIntDataB[id.x];
 }
 
 #pragma kernel Tan
