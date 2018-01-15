@@ -17,10 +17,16 @@ namespace OpenMined.Syft.Tensor
         private int sibling;
 
         private IntTensorFactory factory;
-        
+
         // kernel pointers
-        [SerializeField] 
+        [SerializeField]
         private static int AddElemIntKernel;
+        [SerializeField]
+        private static int SubElemIntKernel;
+        [SerializeField]
+        private static int SubElemIntKernel_;
+        [SerializeField]
+        private static int NegateKernel;
 
 
         public IntTensor()
@@ -41,11 +47,11 @@ namespace OpenMined.Syft.Tensor
             bool _keepgrads = false,
             string _creation_op = null)
         {
-            
+
             factory = _factory;
             dataOnGpu = _dataOnGpu;
             creation_op = _creation_op;
-            
+
             // First: check that shape is valid.
             if (_shape == null || _shape.Length == 0)
             {
@@ -141,6 +147,7 @@ namespace OpenMined.Syft.Tensor
         public void initShaderKernels()
         {
             //AddElemIntKernel = this.shader.FindKernel("AddElemInt");
+            //NegateKernel = this.shader.FindKernel("NegateInt");
         }
 
         public IntTensor Copy()
@@ -150,7 +157,10 @@ namespace OpenMined.Syft.Tensor
 
         public IntTensor Abs(bool inline = false)
         {
-            if (dataOnGpu) {
+            IntTensor result = factory.Create(this.shape);
+
+            if (dataOnGpu)
+            {
                 if (inline)
                 {
                     int kernel_id = shader.FindKernel("AbsElemInt_");
@@ -163,7 +173,6 @@ namespace OpenMined.Syft.Tensor
                 }
                 else
                 {
-                    IntTensor result = factory.Create(this.shape);
                     result.Gpu(shader);
 
                     int kernel_id = shader.FindKernel("AbsElemInt");
@@ -177,17 +186,42 @@ namespace OpenMined.Syft.Tensor
                 }
             }
 
-            if(inline) {
+            if (inline) {
                 this.Data = data.AsParallel().Select(x => Math.Abs(x)).ToArray();
                 return this;
             }
             else
             {
-                IntTensor result = factory.Create(this.shape);
                 result.Data = data.AsParallel().Select(x => Math.Abs(x)).ToArray();
                 return result;
             }
+        }
 
+        public IntTensor Lt(IntTensor other, bool inline = false)
+        {
+            // Run argument checks on CPU anyway just to make sure
+            if (!this.shape.SequenceEqual(other.shape))
+                throw new ArgumentException("Tensor dimensions must match");
+
+            if (other == null)
+                throw new ArgumentNullException();
+
+            if (dataOnGpu) {
+                throw new NotImplementedException();
+            }
+            else {
+                if (inline) {
+                    this.Data = data.AsParallel().Zip(other.Data.AsParallel(),
+                                                        (a, b) => a < b ? 1 : 0).ToArray();
+                    return this;
+                }
+                else {
+                    IntTensor result = factory.Create(this.shape);
+                    result.Data = data.AsParallel().Zip( other.Data.AsParallel(),
+                                                        (a, b) => a < b ? 1 : 0 ).ToArray();
+                    return result;
+                }
+            }
         }
 
         public IntTensor Add(IntTensor x, bool inline = false)
@@ -216,14 +250,14 @@ namespace OpenMined.Syft.Tensor
                 else
                 {
                     result = this;
-                    
+
                     int kernel_id = shader.FindKernel("AddElemInt_");
 
                     shader.SetBuffer(kernel_id, "AddElemIntDataA_", this.DataBuffer);
                     shader.SetBuffer(kernel_id, "AddElemIntDataB_", x.DataBuffer);
 
                     shader.Dispatch(kernel_id, this.size, 1, 1);
-       
+
                     return result;
                 }
             }
@@ -235,7 +269,7 @@ namespace OpenMined.Syft.Tensor
 
                 return result;
             }
-              
+
         }
 
         public IntTensor Add(int value, bool inline = false)
@@ -247,6 +281,127 @@ namespace OpenMined.Syft.Tensor
 
             IntTensor result = factory.Create(this.shape);
             result.Data = data.AsParallel().Select(x => x + value).ToArray();
+
+            return result;
+        }
+
+        public IntTensor Sqrt(bool inline = false)
+        {
+
+            if (dataOnGpu)
+            {
+                return this;
+            }
+
+            IntTensor result = factory.Create(this.shape);
+            result.Data = data.AsParallel().Select(x => (int) Math.Sqrt(x)).ToArray();
+
+            return result;
+        }
+
+		public IntTensor Neg(bool inline = false, IntTensor result = null)
+		{
+			if (dataOnGpu)
+			{
+
+				if (!inline) {
+					result = factory.Create(this.shape);
+
+					result.Gpu(shader);
+
+					int kernel_id = shader.FindKernel("NegateInt");
+
+					shader.SetBuffer(kernel_id, "NegateIntData", this.DataBuffer);
+					shader.SetBuffer(kernel_id, "NegateIntResult", result.DataBuffer);
+
+					shader.Dispatch(kernel_id, this.size, 1, 1);
+
+					return result;
+				} else {
+					result = this;
+
+					int kernel_id = shader.FindKernel("NegateInt_");
+
+					shader.SetBuffer(kernel_id, "NegateIntData_", result.DataBuffer);
+
+					shader.Dispatch(kernel_id, this.size, 1, 1);
+
+					return result;
+				}
+			}
+			result = this;
+			if (!inline) result = factory.Create(this.shape);
+			result.Data = data.AsParallel().Select(x => -x).ToArray();
+			return result;
+		}
+
+        public bool Equal(IntTensor x, bool inline = false)
+        {
+            if (dataOnGpu)
+            {
+                throw new NotImplementedException();
+            }
+
+            return this.Shape.SequenceEqual(x.Shape) && data.AsParallel().SequenceEqual(x.Data.AsParallel());
+        }
+
+public IntTensor Sub(IntTensor x, bool inline = false)
+        {
+
+            IntTensor result;
+
+            if (dataOnGpu)
+            {
+                if (!inline)
+                {
+                    result = factory.Create(this.shape);
+
+                    result.Gpu(shader);
+
+                    int kernel_id = shader.FindKernel("SubElemInt");
+
+                    shader.SetBuffer(kernel_id, "SubElemIntDataA", this.DataBuffer);
+                    shader.SetBuffer(kernel_id, "SubElemIntDataB", x.DataBuffer);
+                    shader.SetBuffer(kernel_id, "SubElemIntDataResult", result.DataBuffer);
+
+                    shader.Dispatch(kernel_id, this.size, 1, 1);
+
+                    return result;
+                }
+                else
+                {
+                    result = this;
+
+                    int kernel_id = shader.FindKernel("SubElemInt_");
+
+                    shader.SetBuffer(kernel_id, "SubElemIntDataA_", this.DataBuffer);
+                    shader.SetBuffer(kernel_id, "SubElemIntDataB_", x.DataBuffer);
+
+                    shader.Dispatch(kernel_id, this.size, 1, 1);
+
+                    return result;
+                }
+            }
+            else
+            {
+                result = inline ? this : factory.Create(this.shape);
+                // run Subtraction on the CPU
+                result.Data = data.AsParallel().Zip(x.Data.AsParallel(), (a, b) => a - b).ToArray();
+
+                return result;
+            }
+
+        }
+
+        public IntTensor Sub(int value, bool inline = false)
+        {
+            if (dataOnGpu)
+            {
+                throw new NotImplementedException();
+            }
+
+            IntTensor result = inline ? this : factory.Create(this.shape);
+            result.Data = data.AsParallel().Select(x => x - value).ToArray();
 
             return result;
         }
@@ -265,6 +420,17 @@ namespace OpenMined.Syft.Tensor
             return Enumerable.Range(0, shape.Min()).AsParallel().Select(i => this[i * stride]).Sum();
         }
 
+        public IntTensor Reciprocal(bool inline = false)
+        {
+            if (dataOnGpu)
+            {
+                throw new NotImplementedException();
+            }
+            IntTensor result = factory.Create(this.shape);
+            result.Data = data.AsParallel().Select(x => (int)(1/x)).ToArray();
+            return result;
+        }
+
         public IntTensor View(int[] new_shape, bool inline = true, FloatTensor result = null)
         {
             if (!IsContiguous()) {
@@ -272,7 +438,7 @@ namespace OpenMined.Syft.Tensor
             }
             if (inline == true)
             {
-                
+
                 this.Shape = new_shape;
 
                 if (dataOnGpu)
@@ -280,9 +446,9 @@ namespace OpenMined.Syft.Tensor
                     shapeBuffer.Release();
                     shapeBuffer = new ComputeBuffer(shape.Length, sizeof(int));
                     shapeBuffer.SetData(shape);
-                    
+
                 }
-                
+
                 setStridesAndCheckShape();
 
                 return this;
@@ -292,9 +458,9 @@ namespace OpenMined.Syft.Tensor
             {
                 throw new NotImplementedException();
             }
-            
+
         }
-        
+
         public override string ProcessMessage(Command msgObj, SyftController ctrl)
         {
             switch (msgObj.functionCall)
@@ -308,6 +474,18 @@ namespace OpenMined.Syft.Tensor
                 {
                     var result = this.Abs(inline:true);
                     return result.id + "";
+                }
+                case "lt":
+                {
+                    var compareToTensor = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+                    var result = this.Lt(compareToTensor);
+                    return result.id + "";
+                }
+                case "lt_":
+                {
+                    var compareToTensor = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+                    this.Lt(compareToTensor, inline: true);
+                    return this.id + "";
                 }
                 case "add_elem":
                 {
@@ -334,6 +512,11 @@ namespace OpenMined.Syft.Tensor
                     Debug.LogFormat("add_scalar_");
                     this.Add(int.Parse(msgObj.tensorIndexParams[0]), inline: true);
                     return this.id + "";
+                }
+                case "equal":
+                {
+                    var tensor_1 = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+                    return Convert.ToString(this.Equal(tensor_1));
                 }
                 case "get":
                 {
@@ -397,7 +580,55 @@ namespace OpenMined.Syft.Tensor
                     }
                     return "param not found or not configured with a getter";
                 }
-                    
+                case "sub_elem":
+                {
+                    Debug.LogFormat("sub_elem");
+                    var tensor_1 = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+                    var result = this.Sub(tensor_1);
+                    return result.id + "";
+                }
+                case "sub_elem_":
+                {
+                    Debug.LogFormat("sub_elem_");
+                    var tensor_1 = factory.Get(int.Parse(msgObj.tensorIndexParams[0]));
+                    this.Sub(tensor_1, inline: true);
+                    return this.id + "";
+                }
+                case "sub_scalar":
+                {
+                    Debug.LogFormat("sub_scalar");
+                    IntTensor result = this.Sub(int.Parse(msgObj.tensorIndexParams[0]));
+                    return result.Id + "";
+                }
+                case "sub_scalar_":
+                {
+                    Debug.LogFormat("sub_scalar_");
+                    this.Sub(int.Parse(msgObj.tensorIndexParams[0]), inline: true);
+                    return this.id + "";
+                }
+                case "reciprocal":
+                {
+                    var result = Reciprocal();
+                    return result.id.ToString();
+                }
+                case "sqrt":
+                {
+                    var result = Sqrt();
+                    return result.Id + "";
+                }
+				case "neg":
+				{
+					Debug.LogFormat("neg");
+					var result = Neg();
+					return result.Id.ToString();
+				}
+
+				case "neg_":
+				{
+					Debug.LogFormat("neg_");
+					Neg(inline: true);
+					return Id.ToString();
+				}
                 case "to_numpy":
                 {
                     if (DataOnGpu)
@@ -412,13 +643,11 @@ namespace OpenMined.Syft.Tensor
 
                     }
                 }
-
                 case "trace":
                 {
                     var result = this.Trace();
                     return result.ToString();
                 }
-
             }
             return "IntTensor.processMessage: Command not found:" + msgObj.functionCall;
         }
